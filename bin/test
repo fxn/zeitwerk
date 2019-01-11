@@ -1,0 +1,7 @@
+#!/bin/bash
+
+if [[ -z $1 ]]; then
+    bundle exec rake
+else
+    bundle exec rake TEST="$1"
+fi

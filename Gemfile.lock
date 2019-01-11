@@ -1,0 +1,33 @@
+PATH
+  remote: .
+  specs:
+    zeitwerk (1.0.0.beta)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    ansi (1.5.0)
+    builder (3.2.3)
+    minitest (5.11.3)
+    minitest-focus (1.1.2)
+      minitest (>= 4, < 6)
+    minitest-reporters (1.3.5)
+      ansi
+      builder
+      minitest (>= 5.0)
+      ruby-progressbar
+    rake (12.3.2)
+    ruby-progressbar (1.10.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  minitest
+  minitest-focus
+  minitest-reporters
+  rake
+  zeitwerk!
+
+BUNDLED WITH
+   1.17.3
