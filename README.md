@@ -128,7 +128,16 @@ app/models/hotel.rb         -> Hotel
 app/models/hotel/pricing.rb -> Hotel::Pricing
 ```
 
-Zeitwerk does not autovivify a `Hotel` module in that case. The file `app/models/hotel.rb` explicitly defines `Hotel` and Zeitwerk loads it as needed before going for `Hotel::Pricing`.
+There, `app/models/hotel.rb` defines `Hotel`, and thus Zeitwerk does not autovivify a module.
+
+The classes and modules from the namespace are already available in the body of the class or module defining it:
+
+```ruby
+class Hotel < ApplicationRecord
+  include Pricing # works
+  ...
+end
+```
 
 ### Nested root directories
 
