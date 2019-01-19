@@ -33,7 +33,7 @@ module Zeitwerk
     # Absolute paths of files or directories to be totally ignored.
     #
     # @private
-    # @return [String]
+    # @return [Set<String>]
     attr_reader :ignored
 
     # Maps real absolute paths for which an autoload has been set to their
@@ -66,7 +66,7 @@ module Zeitwerk
     attr_reader :lazy_subdirs
 
     # @private
-    # @return [Set]
+    # @return [Set<String>]
     attr_reader :eager_load_exclusions
 
     # @private
