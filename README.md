@@ -1,5 +1,6 @@
 # Zeitwerk
 
+[![Gem Version](https://badge.fury.io/rb/zeitwerk.svg)](https://badge.fury.io/rb/zeitwerk)
 [![Build Status](https://travis-ci.com/fxn/zeitwerk.svg?branch=master)](https://travis-ci.com/fxn/zeitwerk)
 
 <!-- TOC -->
