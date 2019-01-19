@@ -117,7 +117,7 @@ module Zeitwerk
       # @param cpath [String]
       # @return [String, nil]
       def inception?(cpath)
-        if pair = inceptions[cpath]
+        if (pair = inceptions[cpath])
           pair.first
         end
       end

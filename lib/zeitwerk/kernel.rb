@@ -11,7 +11,7 @@ module Kernel
   # @param path [String]
   # @return [Boolean]
   def require(path)
-    if loader = Zeitwerk::Registry.loader_for(path)
+    if (loader = Zeitwerk::Registry.loader_for(path))
       if path.end_with?(".rb")
         zeitwerk_original_require(path).tap do |required|
           loader.on_file_loaded(path) if required
@@ -23,7 +23,7 @@ module Kernel
       zeitwerk_original_require(path).tap do |required|
         if required
           realpath = $LOADED_FEATURES.last
-          if loader = Zeitwerk::Registry.loader_for(realpath)
+          if (loader = Zeitwerk::Registry.loader_for(realpath))
             loader.on_file_loaded(realpath)
           end
         end

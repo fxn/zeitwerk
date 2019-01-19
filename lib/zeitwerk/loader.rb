@@ -97,7 +97,7 @@ module Zeitwerk
 
       @tracer = TracePoint.trace(:class) do |tp|
         unless lazy_subdirs.empty? # do not even compute the hash key if not needed
-          if subdirs = lazy_subdirs.delete(tp.self.name)
+          if (subdirs = lazy_subdirs.delete(tp.self.name))
             subdirs.each { |subdir| set_autoloads_in_dir(subdir, tp.self) }
           end
         end
@@ -284,7 +284,7 @@ module Zeitwerk
       autovivified = parent.const_set(cname, Module.new)
       logger.call("module #{cpath(parent, cname)} autovivified from directory #{dir}") if logger
 
-      if subdirs = lazy_subdirs[cpath(parent, cname)]
+      if (subdirs = lazy_subdirs[cpath(parent, cname)])
         subdirs.each { |subdir| set_autoloads_in_dir(subdir, autovivified) }
       end
     end
@@ -343,7 +343,7 @@ module Zeitwerk
     # @param file [String]
     # @return [void]
     def autoload_file(parent, cname, file)
-      if autoload_path = autoload_for?(parent, cname)
+      if (autoload_path = autoload_for?(parent, cname))
         # First autoload for a Ruby file wins, just ignore subsequent ones.
         return if ruby?(autoload_path)
 
