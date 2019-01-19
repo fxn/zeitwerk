@@ -221,13 +221,11 @@ loader.preload("app/models/videogame.rb")
 loader.preload("app/models/book.rb")
 ```
 
-The example above depicts several calls are supported, but `preload` accepts multiple arguments and arrays of strings as well.
-
-The call can happen after `setup` (preloads on the spot), or before `setup` (executes during setup).
-
-If you're using reloading, preloads run on each reload too.
+The call can happen before `setup` (preloads during setup), or after `setup` (preloads on the spot). Each reload preloads too.
 
 This is a feature specifically thought for STIs in Rails, preloading the leafs of a STI tree ensures all classes are known when doing a query.
+
+The example above depicts several calls are supported, but `preload` accepts multiple arguments and arrays of strings as well.
 
 ### Inflection
 
@@ -258,7 +256,7 @@ The inflectors that ship with Zeitwerk are deterministic and simple. But you can
 ```ruby
 # frozen_string_literal: true
 
-class MyInflector < Zeitwerk::Inflector # or Zeitwerk::GemInflector
+class MyInflector < Zeitwerk::Inflector
   def camelize(basename, _abspath)
     case basename
     when "api"
@@ -276,13 +274,13 @@ The first argument, `basename`, is a string with the basename of the file or dir
 
 The second argument, `abspath`, is a string with the absolute path to the file or directory in case you need it to decide how to inflect the basename.
 
-Then, assign the inflector before calling `setup`:
+Then, assign the inflector:
 
 ```
 loader.inflector = MyInflector.new
 ```
 
-This needs to be assigned before the call to `setup`.
+This needs to be done before calling `setup`.
 
 ### Logging
 
