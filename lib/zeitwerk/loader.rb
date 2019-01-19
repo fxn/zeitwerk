@@ -293,7 +293,7 @@ module Zeitwerk
 
     # @return [<String>]
     def actual_dirs
-      dirs.each_key.reject { |dir| ignored.member?(dir) }
+      dirs.keys.delete_if { |dir| ignored.member?(dir) }
     end
 
     # @param dir [String]
