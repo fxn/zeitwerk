@@ -81,7 +81,7 @@ loader.eager_load
 
 It is also possible to broadcast `eager_load` to all instances:
 
-```
+```ruby
 Zeitwerk::Loader.eager_load_all
 ```
 
@@ -286,7 +286,7 @@ The second argument, `abspath`, is a string with the absolute path to the file o
 
 Then, assign the inflector:
 
-```
+```ruby
 loader.inflector = MyInflector.new
 ```
 
