@@ -186,6 +186,8 @@ It is important to highlight that this is and instance method. Therefore, reload
 
 In order for reloading to be thread-safe, you need to implement some coordination. For example, a web framework that serves each request with its own thread may have a globally accessible RW lock. When a request comes in, the framework acquires the lock for reading at the beginning, and the code in the framework that calls `loader.reload` needs to acquire the lock for writing.
 
+On reloading, client code has to update anything that would otherwise be storing a stale object. For example, if the routing layer of a web framework stores controller class objects or instances in internal structures, on reload it has to refresh them somehow, possibly reevaluating routes.
+
 ### Eager loading
 
 Zeitwerk instances are able to eager load their managed files:
