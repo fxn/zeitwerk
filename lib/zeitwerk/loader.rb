@@ -178,7 +178,7 @@ module Zeitwerk
             # If the constant was loaded, we unload it. Otherwise, this removes
             # the autoload, which is something we want to do anyway.
             parent.send(:remove_const, cname)
-            logger.call("#{cpath(parent, cname)} unloaded") if logger
+            log("#{cpath(parent, cname)} unloaded") if logger
           rescue NameError
             # The user removed the constant, that is fine.
           end
@@ -275,7 +275,7 @@ module Zeitwerk
     def on_file_loaded(file)
       if logger
         parent, cname = autoloads[file]
-        logger.call("constant #{cpath(parent, cname)} loaded from file #{file}")
+        log("constant #{cpath(parent, cname)} loaded from file #{file}")
       end
     end
 
@@ -287,7 +287,7 @@ module Zeitwerk
     def on_dir_loaded(dir)
       parent, cname = autoloads[dir]
       autovivified = parent.const_set(cname, Module.new)
-      logger.call("module #{cpath(parent, cname)} autovivified from directory #{dir}") if logger
+      log("module #{cpath(parent, cname)} autovivified from directory #{dir}") if logger
 
       if subdirs = lazy_subdirs[cpath(parent, cname)]
         subdirs.each { |subdir| set_autoloads_in_dir(subdir, autovivified) }
@@ -374,9 +374,9 @@ module Zeitwerk
       parent.autoload(cname, realpath)
       if logger
         if ruby?(realpath)
-          logger.call("autoload set for #{cpath(parent, cname)}, to be loaded from #{realpath}")
+          log("autoload set for #{cpath(parent, cname)}, to be loaded from #{realpath}")
         else
-          logger.call("autoload set for #{cpath(parent, cname)}, to be autovivified from #{realpath}")
+          log("autoload set for #{cpath(parent, cname)}, to be autovivified from #{realpath}")
         end
       end
 
@@ -439,7 +439,7 @@ module Zeitwerk
     # @param file [String]
     # @return [Boolean]
     def do_preload_file(file)
-      logger.call("preloading #{file}") if logger
+      log("preloading #{file}") if logger
       require file
     end
 
@@ -477,6 +477,12 @@ module Zeitwerk
     # @return [<String>]
     def expand_paths(paths)
       Array(paths).flatten.map { |path| File.expand_path(path) }
+    end
+
+    # @param message [String]
+    # @return [void]
+    def log(message)
+      logger.call("[Zeitwerk] #{message}")
     end
   end
 end
