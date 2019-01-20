@@ -183,7 +183,7 @@ loader.reload
 
 Generally speaking, reloading is useful for services, servers, web applications, etc. Gems that implement regular libraries, so to speak, won't normally have a use case for reloading.
 
-It is important to highlight that this is and instance method. Therefore, reloading the code of a project managed by a particular loader does _not_ reload the code of other gems using Zeitwerk at all.
+It is important to highlight that this is an instance method. Therefore, reloading the code of a project managed by a particular loader does _not_ reload the code of other gems using Zeitwerk at all.
 
 In order for reloading to be thread-safe, you need to implement some coordination. For example, a web framework that serves each request with its own thread may have a globally accessible RW lock. When a request comes in, the framework acquires the lock for reading at the beginning, and the code in the framework that calls `loader.reload` needs to acquire the lock for writing.
 
