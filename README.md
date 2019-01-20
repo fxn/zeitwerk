@@ -23,6 +23,7 @@
             - [Custom inflector](#custom-inflector)
         - [Logging](#logging)
         - [Ignoring parts of the project](#ignoring-parts-of-the-project)
+    - [Pronunciation](#pronunciation)
     - [Supported Ruby versions](#supported-ruby-versions)
     - [Motivation](#motivation)
     - [Thanks](#thanks)
@@ -327,6 +328,10 @@ loader.setup
 ```
 
 You can pass several arguments to this method, also an array of strings. And you can call `ignore` multiple times too.
+
+## Pronunciation
+
+"Zeitwerk" is pronounced [this way](https://raw.githubusercontent.com/fxn/zeitwerk/master/extras/zeitwerk_pronunciation.mp3).
 
 ## Supported Ruby versions
 
