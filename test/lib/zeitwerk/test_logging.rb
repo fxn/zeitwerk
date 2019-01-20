@@ -97,7 +97,7 @@ class TestLogging < LoaderTest
   test "logs unloads for autoloads" do
     files = [["x.rb", "X = true"]]
     with_files(files) do
-      assert_logged(/X unloaded/) do
+      assert_logged(/autoload for X removed/) do
         loader.push_dir(".")
         loader.setup
         loader.reload

@@ -174,13 +174,12 @@ module Zeitwerk
     def unload
       mutex.synchronize do
         autoloads.each do |path, (parent, cname)|
-          begin
-            # If the constant was loaded, we unload it. Otherwise, this removes
-            # the autoload, which is something we want to do anyway.
+          if parent.autoload?(cname)
+            parent.send(:remove_const, cname)
+            log("autoload for #{cpath(parent, cname)} removed") if logger
+          elsif parent.const_defined?(cname, false)
             parent.send(:remove_const, cname)
             log("#{cpath(parent, cname)} unloaded") if logger
-          rescue NameError
-            # The user removed the constant, that is fine.
           end
 
           # Let Kernel#require load the same path later again by removing it
