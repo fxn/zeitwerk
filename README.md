@@ -300,7 +300,7 @@ Zeitwerk is silent by default, but you can configure a callable as logger:
 loader.logger = method(:puts)
 ```
 
-If there is a logger configured, the loader is going to print traces when autoloads are set, files loaded, modules autovivified, and objects unloaded on reload.
+If there is a logger configured, the loader is going to print traces when autoloads are set, files loaded, and modules autovivified. While reloading, removed autoloads and unloaded objects are also traced.
 
 If your project has namespaces, you'll notice in the traces Zeitwerk sets autoloads for _directories_. That's a technique used to be able to descend into subdirectories on demand, avoiding that way unnecessary tree walks.
 
