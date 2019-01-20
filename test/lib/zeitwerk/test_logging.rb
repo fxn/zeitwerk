@@ -6,6 +6,11 @@ class TestLogging < LoaderTest
     loader.logger = method(:print)
   end
 
+  def teardown
+    loader.logger = nil
+    super
+  end
+
   test "logs loaded files" do
     files = [["x.rb", "X = true"]]
     with_files(files) do
@@ -76,6 +81,29 @@ class TestLogging < LoaderTest
 
       assert_output(/preloading #{File.realpath("x.rb")}/) do
         loader.setup
+      end
+    end
+  end
+
+  test "logs unloads for autoloads" do
+    files = [["x.rb", "X = true"]]
+    with_files(files) do
+      assert_output(/X unloaded/) do
+        loader.push_dir(".")
+        loader.setup
+        loader.reload
+      end
+    end
+  end
+
+  test "logs unloads for loaded objects" do
+    files = [["x.rb", "X = true"]]
+    with_files(files) do
+      assert_output(/X unloaded/) do
+        loader.push_dir(".")
+        loader.setup
+        assert X
+        loader.reload
       end
     end
   end
