@@ -14,9 +14,9 @@ class TestLogging < LoaderTest
   def assert_logged(expected)
     case expected
     when String
-      assert_output("[Zeitwerk] #{expected}") { yield }
+      assert_output("Zeitwerk: #{expected}") { yield }
     when Regexp
-      assert_output(/\[Zeitwerk\] #{expected}/) { yield }
+      assert_output(/Zeitwerk: #{expected}/) { yield }
     end
   end
 

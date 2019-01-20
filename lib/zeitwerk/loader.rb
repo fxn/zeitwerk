@@ -481,7 +481,7 @@ module Zeitwerk
     # @param message [String]
     # @return [void]
     def log(message)
-      logger.call("[Zeitwerk] #{message}")
+      logger.call("Zeitwerk: #{message}")
     end
   end
 end
