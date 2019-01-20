@@ -197,23 +197,22 @@ Zeitwerk instances are able to eager load their managed files:
 loader.eager_load
 ```
 
-You can opt-out of eager loading individual files or directories:
+You can tell Zeitwerk not to eager load certain files or directories. For example, let's imagine your project talks to databases and implements an adapter pattern. Maybe adapters have top-level `require` calls that load their respective drivers, but you don't want your users to install them all, only the one they are going to use. Solution: do not eager load those files:
 
 ```ruby
 db_adapters = File.expand_path("my_gem/db_adapters", __dir__)
-cache_adapters = File.expand_path("my_gem/cache_adapters", __dir__)
-loader.do_not_eager_load(db_adapters, cache_adapters)
+loader.do_not_eager_load(db_adapters)
 loader.setup
-loader.eager_load # won't go into the directories with db/cache adapters
+loader.eager_load # won't eager load the database adapters
 ```
 
-Files and directories excluded from eager loading can still be loaded on demand, so an idiom like this is possible:
+Files and directories excluded from eager loading can still be loaded on demand, so an idiom like this is still possible:
 
 ```ruby
 db_adapter = Object.const_get("MyGem::DbAdapters::#{config[:db_adapter]}")
 ```
 
-Please check `Zeitwerk::Loader#ignore` if you want files or directories to not be even autoloadable.
+Please check `Zeitwerk::Loader#ignore` if you want those files or directories to not be even autoloadable.
 
 If you want to eager load yourself and all dependencies using Zeitwerk, you can broadcast the `eager_load` call to all instances:
 
