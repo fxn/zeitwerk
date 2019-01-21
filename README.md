@@ -66,7 +66,7 @@ loader.push_dir(...)
 loader.setup # ready!
 ```
 
-The `loader` variable can go out of scope. Zeitwerk keeps a registry with all of them, and so the object won't be garbage collected and remain active.
+The `loader` variable can go out of scope. Zeitwerk keeps a registry with all of them, and so the object won't be garbage collected.
 
 Later, you can reload if you want to:
 
