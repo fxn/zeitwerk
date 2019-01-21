@@ -183,7 +183,9 @@ In order to reload code:
 loader.reload
 ```
 
-Generally speaking, reloading is useful for services, servers, web applications, etc. Gems that implement regular libraries, so to speak, won't normally have a use case for reloading.
+Generally speaking, reloading is useful while developing running services like web applications. Gems that implement regular libraries, so to speak, won't normally have a use case for reloading.
+
+Reloading removes the currently loaded classes and modules, resets the loader so that it will pick whatever is in the file system now, and runs preloads if there are any.
 
 It is important to highlight that this is an instance method. Therefore, reloading the code of a project managed by a particular loader does _not_ reload the code of other gems using Zeitwerk at all.
 
