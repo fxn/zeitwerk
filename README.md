@@ -187,7 +187,7 @@ Generally speaking, reloading is useful while developing running services like w
 
 Reloading removes the currently loaded classes and modules, resets the loader so that it will pick whatever is in the file system now, and runs preloads if there are any.
 
-It is important to highlight that this is an instance method. Therefore, reloading the code of a project managed by a particular loader does _not_ reload the code of other gems using Zeitwerk at all.
+It is important to highlight that this is an instance method. Don't worry about the project dependencies, their loaders are independent.
 
 In order for reloading to be thread-safe, you need to implement some coordination. For example, a web framework that serves each request with its own thread may have a globally accessible RW lock. When a request comes in, the framework acquires the lock for reading at the beginning, and the code in the framework that calls `loader.reload` needs to acquire the lock for writing.
 
