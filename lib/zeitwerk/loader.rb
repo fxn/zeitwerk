@@ -90,7 +90,7 @@ module Zeitwerk
       @setup        = false
       @eager_loaded = false
 
-      @tracer = TracePoint.trace(:class) do |tp|
+      @tracer = TracePoint.new(:class) do |tp|
         unless lazy_subdirs.empty? # do not even compute the hash key if not needed
           if subdirs = lazy_subdirs.delete(tp.self.name)
             subdirs.each { |subdir| set_autoloads_in_dir(subdir, tp.self) }
@@ -150,7 +150,6 @@ module Zeitwerk
       mutex.synchronize do
         unless @setup
           actual_dirs.each { |dir| set_autoloads_in_dir(dir, Object) }
-          tracer.enable
           do_preload
           @setup = true
         end
@@ -187,7 +186,7 @@ module Zeitwerk
 
         Registry.on_unload(self)
 
-        tracer.disable
+        disable_tracer
         @setup = false
       end
     end
@@ -213,7 +212,7 @@ module Zeitwerk
       mutex.synchronize do
         unless @eager_loaded
           actual_dirs.each { |dir| eager_load_dir(dir) }
-          tracer.disable
+          disable_tracer
           @eager_loaded = true
         end
       end
@@ -308,11 +307,11 @@ module Zeitwerk
     # @param subdir [String]
     # @return [void]
     def autoload_subdir(parent, cname, subdir)
-      if autoload_for?(parent, cname)
-        # If there is already an autoload for this cname, maybe there are
-        # multiple directories defining the namespace, or the cname is going to
-        # be defined in a file (explicit namespace). In either case, we do not
-        # need to issue another autoload, the existing one is fine.
+      if autoload = autoload_for?(parent, cname)
+        enable_tracer if ruby?(autoload)
+        # We do not need to issue another autoload, the existing one is enough
+        # no matter if it is for a file or a directory. Just remember the
+        # subdirectory has to be visited if the namespace is used.
         (lazy_subdirs[cpath(parent, cname)] ||= []) << subdir
       elsif !parent.const_defined?(cname, false)
         # First time we find this namespace, set an autoload for it.
@@ -338,7 +337,9 @@ module Zeitwerk
         # class/module defined in this file.
         autoloads.delete(autoload_path)
         Registry.unregister_autoload(autoload_path)
+
         set_autoload(parent, cname, file)
+        enable_tracer
       elsif !parent.const_defined?(cname, false)
         set_autoload(parent, cname, file)
       end
@@ -463,6 +464,16 @@ module Zeitwerk
     # @return [void]
     def log(message)
       logger.call("Zeitwerk: #{message}")
+    end
+
+    def enable_tracer
+      # We check enabled? because, looking at the C source code, enabling an
+      # enabled tracer does not seem to be a simple no-op.
+      tracer.enable if !tracer.enabled?
+    end
+
+    def disable_tracer
+      tracer.disable if tracer.enabled?
     end
   end
 end

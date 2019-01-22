@@ -48,15 +48,6 @@ class TestUnload < LoaderTest
     end
   end
 
-  test "unload disables the tracer" do
-    files = [["x.rb", "X = true"]]
-    with_setup(files) do
-      assert loader.tracer.enabled?
-      loader.unload
-      assert !loader.tracer.enabled?
-    end
-  end
-
   test "unload does not assume autoloaded constants are still there" do
     files = [["x.rb", "X = true"]]
     with_setup(files) do
