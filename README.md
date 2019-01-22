@@ -202,30 +202,13 @@ Zeitwerk instances are able to eager load their managed files:
 loader.eager_load
 ```
 
-You can tell Zeitwerk not to eager load certain files or directories. For example, let's imagine your project talks to databases and implements an adapter pattern. Maybe adapters have top-level `require` calls that load their respective drivers, but you don't want your users to install them all, only the one they are going to use. Solution: do not eager load those files:
-
-```ruby
-db_adapters = File.expand_path("my_gem/db_adapters", __dir__)
-loader.do_not_eager_load(db_adapters)
-loader.setup
-loader.eager_load # won't eager load the database adapters
-```
-
-Files and directories excluded from eager loading can still be loaded on demand, so an idiom like this is still possible:
-
-```ruby
-db_adapter = Object.const_get("MyGem::DbAdapters::#{config[:db_adapter]}")
-```
-
-Please check `Zeitwerk::Loader#ignore` if you want those files or directories to not be even autoloadable.
+That skips ignored files and directories.
 
 If you want to eager load yourself and all dependencies using Zeitwerk, you can broadcast the `eager_load` call to all instances:
 
 ```ruby
 Zeitwerk::Loader.eager_load_all
 ```
-
-In that case, exclusions are per autoloader, and so will apply to each of them accordingly.
 
 This may be handy in top-level services, like web applications.
 
@@ -332,6 +315,20 @@ loader.setup
 ```
 
 You can pass several arguments to this method, also an array of strings. And you can call `ignore` multiple times too.
+
+Another use case for ignoring files is the adapter pattern. Let's imagine your project talks to databases, supports several, and has adapters for each one of them. Those adapters may have top-level `require` calls that load their respective drivers, but you don't want your users to install them all, only the one they are going to use. On the other hand, if your code is eager loaded by you or a parent project (with `Zeitwerk::Loader.eager_load_all`), those `require` calls are going to be executed. Ignoring the adapters prevents that:
+
+```ruby
+db_adapters = File.expand_path("my_gem/db_adapters", __dir__)
+loader.ignore(db_adapters)
+loader.setup
+```
+
+The chosen adapter, then, has to be loaded by hand somehow:
+
+```ruby
+require "my_gem/db_adapters/#{config[:db_adapter]}"
+```
 
 ### Edge cases
 

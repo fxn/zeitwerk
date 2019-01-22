@@ -1,7 +1,7 @@
 require "test_helper"
 
 class TestEagerLoad < LoaderTest
-  test "eager loads indepent files" do
+  test "eager loads independent files" do
     loaders = [loader, Zeitwerk::Loader.new]
 
     $tel0 = $tel1 = false
@@ -64,54 +64,6 @@ class TestEagerLoad < LoaderTest
 
       assert $tel0
       assert $tel1
-    end
-  end
-
-  test "we can opt-out of entire root directories, and still autoload" do
-    $test_eager_load_eager_loaded_p = false
-    files = [["foo.rb", "Foo = true; $test_eager_load_eager_loaded_p = true"]]
-    with_setup(files) do
-      loader.do_not_eager_load(".")
-      loader.eager_load
-
-      assert !$test_eager_load_eager_loaded_p
-      assert Foo
-    end
-  end
-
-  test "we can opt-out of sudirectories, and still autoload" do
-    $test_eager_load_eager_loaded_p = false
-    files = [
-      ["db_adapters/mysql_adapter.rb", <<-EOS],
-        module DbAdapters::MysqlAdapter
-        end
-        $test_eager_load_eager_loaded_p = true
-      EOS
-      ["foo.rb", "Foo = true"]
-    ]
-    with_setup(files) do
-      loader.do_not_eager_load("db_adapters")
-      loader.eager_load
-
-      assert Foo
-      assert !$test_eager_load_eager_loaded_p
-      assert DbAdapters::MysqlAdapter
-    end
-  end
-
-  test "we can opt-out of files, and still autoload" do
-    $test_eager_load_eager_loaded_p = false
-    files = [
-      ["foo.rb", "Foo = true"],
-      ["bar.rb", "Bar = true; $test_eager_load_eager_loaded_p = true"]
-    ]
-    with_setup(files) do
-      loader.do_not_eager_load("bar.rb")
-      loader.eager_load
-
-      assert Foo
-      assert !$test_eager_load_eager_loaded_p
-      assert Bar
     end
   end
 end

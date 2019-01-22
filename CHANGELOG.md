@@ -2,6 +2,7 @@
 
 ## 1.0.0 (Unreleased)
 
+* `do_not_eager_load` has been removed, please use `ignore` to opt-out.
 * Documentation improvements.
 * Pronunciation section in the README, linking to sample audio file.
 * All logged messages have a "Zeitwerk:" prefix for easy grepping.

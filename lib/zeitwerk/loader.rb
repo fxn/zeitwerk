@@ -66,10 +66,6 @@ module Zeitwerk
     attr_reader :lazy_subdirs
 
     # @private
-    # @return [Set<String>]
-    attr_reader :eager_load_exclusions
-
-    # @private
     # @return [Mutex]
     attr_reader :mutex
 
@@ -84,12 +80,11 @@ module Zeitwerk
     def initialize
       self.inflector = Inflector.new
 
-      @dirs                  = {}
-      @preloads              = []
-      @ignored               = Set.new
-      @autoloads             = {}
-      @lazy_subdirs          = {}
-      @eager_load_exclusions = Set.new
+      @dirs         = {}
+      @preloads     = []
+      @ignored      = Set.new
+      @autoloads    = {}
+      @lazy_subdirs = {}
 
       @mutex        = Mutex.new
       @setup        = false
@@ -211,29 +206,17 @@ module Zeitwerk
 
     # Eager loads all files in the root directories, recursively. Files do not
     # need to be in `$LOAD_PATH`, absolute file names are used. Ignored files
-    # are not eager loaded. You can opt-out specifically in specific files and
-    # directories with `do_not_eager_load`.
+    # are not eager loaded.
     #
     # @return [void]
     def eager_load
       mutex.synchronize do
         unless @eager_loaded
-          actual_dirs.each do |dir|
-            eager_load_dir(dir) unless eager_load_exclusions.member?(dir)
-          end
-          tracer.disable if eager_load_exclusions.empty?
+          actual_dirs.each { |dir| eager_load_dir(dir) }
+          tracer.disable
           @eager_loaded = true
         end
       end
-    end
-
-    # Let eager load ignore the given files or directories. The constants
-    # defined in those files are still autoloadable.
-    #
-    # @param paths [<String, Pathname, <String, Pathname>>]
-    # @return [void]
-    def do_not_eager_load(*paths)
-      mutex.synchronize { eager_load_exclusions.merge(expand_paths(paths)) }
     end
 
     # --- Class methods ---------------------------------------------------------------------------
@@ -399,8 +382,6 @@ module Zeitwerk
     # @return [void]
     def eager_load_dir(dir)
       each_abspath(dir) do |abspath|
-        next if eager_load_exclusions.member?(abspath)
-
         if ruby?(abspath)
           require abspath
         elsif dir?(abspath)
