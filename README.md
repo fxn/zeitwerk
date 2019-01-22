@@ -23,6 +23,7 @@
             - [Custom inflector](#custom-inflector)
         - [Logging](#logging)
         - [Ignoring parts of the project](#ignoring-parts-of-the-project)
+        - [Edge cases](#edge-cases)
     - [Pronunciation](#pronunciation)
     - [Supported Ruby versions](#supported-ruby-versions)
     - [Motivation](#motivation)
@@ -331,6 +332,34 @@ loader.setup
 ```
 
 You can pass several arguments to this method, also an array of strings. And you can call `ignore` multiple times too.
+
+### Edge cases
+
+A class or module that acts as a namespace:
+
+```ruby
+# trip.rb
+class Trip
+  include Geolocation
+end
+
+# trip/geolocation.rb
+module Trip::Geolocation
+  ...
+end
+```
+
+has to be defined with the `class` or `module` keywords, as in the example above.
+
+For technical reasons, raw constant assignment is not supported:
+
+```ruby
+# trip.rb
+Trip = Class.new { ... }  # NOT SUPPORTED
+Trip = Struct.new { ... } # NOT SUPPORTED
+```
+
+This only affects explicit namespaces, those idioms work well for any other ordinary class or module.
 
 ## Pronunciation
 
