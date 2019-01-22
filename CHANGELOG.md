@@ -2,6 +2,8 @@
 
 ## 1.0.0 (Unreleased)
 
+## 1.0.0.beta2 (22 January 2019)
+
 * `do_not_eager_load` has been removed, please use `ignore` to opt-out.
 * Documentation improvements.
 * Pronunciation section in the README, linking to sample audio file.
