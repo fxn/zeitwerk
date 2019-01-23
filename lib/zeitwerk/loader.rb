@@ -382,11 +382,14 @@ module Zeitwerk
     # @param dir [String]
     # @return [void]
     def eager_load_dir(dir)
-      each_abspath(dir) do |abspath|
-        if ruby?(abspath)
-          require abspath
-        elsif dir?(abspath)
-          eager_load_dir(abspath)
+      queue = [dir]
+      while dir = queue.shift
+        each_abspath(dir) do |abspath|
+          if ruby?(abspath)
+            require abspath
+          elsif dir?(abspath)
+            queue << abspath
+          end
         end
       end
     end
