@@ -156,6 +156,18 @@ module Zeitwerk
       end
     end
 
+    # Returns the constant paths loaded so far in no particular order.
+    #
+    # @private
+    # @return [<String>]
+    def loaded
+      out = []
+      autoloads.each do |_path, (parent, cname)|
+        out << cpath(parent, cname) unless parent.autoload?(cname)
+      end
+      out
+    end
+
     # Removes loaded constants and configured autoloads.
     #
     # The objects the constants stored are no longer reachable through them. In
