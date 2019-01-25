@@ -39,11 +39,13 @@ class TestUnload < LoaderTest
       assert Admin::Root
 
       assert !loader.autoloads.empty?
+      assert !loader.loaded.empty?
       assert !loader.lazy_subdirs.empty?
 
       loader.unload
 
       assert loader.autoloads.empty?
+      assert loader.loaded.empty?
       assert loader.lazy_subdirs.empty?
     end
   end

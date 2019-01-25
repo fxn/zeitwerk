@@ -1,4 +1,5 @@
 require "test_helper"
+require "set"
 
 class TestLoaded < LoaderTest
   test "a new loader has loaded nothing" do
@@ -9,6 +10,7 @@ class TestLoaded < LoaderTest
     files = [["x.rb", "X = true"]]
     with_setup(files) do
       assert_empty loader.loaded
+      assert !loader.loaded?("X")
     end
   end
 
@@ -20,7 +22,13 @@ class TestLoaded < LoaderTest
     ]
     with_setup(files) do
       assert M::X
-      assert_equal %w(M M::X).sort, loader.loaded.sort
+      assert_equal %w(M M::X).to_set, loader.loaded
+
+      assert loader.loaded?("M")
+      assert loader.loaded?("M::X")
+
+      assert !loader.loaded?("M::Y")
+      assert !loader.loaded?("Z")
     end
   end
 end

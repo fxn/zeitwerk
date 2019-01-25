@@ -47,6 +47,12 @@ module Zeitwerk
     # @return [{String => (Module, String)}]
     attr_reader :autoloads
 
+    # Constant paths loaded so far.
+    #
+    # @private
+    # @return [Set<String>]
+    attr_reader :loaded
+
     # Maps constant paths of namespaces to arrays of corresponding directories.
     #
     # For example, given this mapping:
@@ -84,6 +90,7 @@ module Zeitwerk
       @preloads     = []
       @ignored      = Set.new
       @autoloads    = {}
+      @loaded       = Set.new
       @lazy_subdirs = {}
 
       @mutex        = Mutex.new
@@ -156,18 +163,6 @@ module Zeitwerk
       end
     end
 
-    # Returns the constant paths loaded so far in no particular order.
-    #
-    # @private
-    # @return [<String>]
-    def loaded
-      out = []
-      autoloads.each do |_path, (parent, cname)|
-        out << cpath(parent, cname) unless parent.autoload?(cname)
-      end
-      out
-    end
-
     # Removes loaded constants and configured autoloads.
     #
     # The objects the constants stored are no longer reachable through them. In
@@ -194,6 +189,7 @@ module Zeitwerk
           $LOADED_FEATURES.delete(path) if ruby?(path)
         end
         autoloads.clear
+        loaded.clear
         lazy_subdirs.clear
 
         Registry.on_unload(self)
@@ -228,6 +224,14 @@ module Zeitwerk
           @eager_loaded = true
         end
       end
+    end
+
+    # Says if the given constant path as been loaded.
+    #
+    # @param cpath [String]
+    # @return [Boolean]
+    def loaded?(cpath)
+      loaded.member?(cpath)
     end
 
     # --- Class methods ---------------------------------------------------------------------------
@@ -266,10 +270,9 @@ module Zeitwerk
     # @param file [String]
     # @return [void]
     def on_file_loaded(file)
-      if logger
-        parent, cname = autoloads[file]
-        log("constant #{cpath(parent, cname)} loaded from file #{file}")
-      end
+      parent, cname = autoloads[file]
+      loaded.add(cpath(parent, cname))
+      log("constant #{cpath(parent, cname)} loaded from file #{file}") if logger
     end
 
     # Callback invoked from Kernel when a managed directory is loaded.
@@ -279,6 +282,7 @@ module Zeitwerk
     # @return [void]
     def on_dir_loaded(dir)
       parent, cname = autoloads[dir]
+      loaded.add(cpath(parent, cname))
       autovivified = parent.const_set(cname, Module.new)
       log("module #{cpath(parent, cname)} autovivified from directory #{dir}") if logger
 
