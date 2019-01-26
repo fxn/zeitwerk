@@ -360,7 +360,7 @@ This only affects explicit namespaces, those idioms work well for any other ordi
 
 ## Pronunciation
 
-"Zeitwerk" is pronounced [this way](https://raw.githubusercontent.com/fxn/zeitwerk/master/extras/zeitwerk_pronunciation.mp3).
+"Zeitwerk" is pronounced [this way](http://share.hashref.com/zeitwerk/zeitwerk_pronunciation.mp3).
 
 ## Supported Ruby versions
 
@@ -378,7 +378,7 @@ I'd like to thank [@matthewd](https://github.com/matthewd) for the discussions w
 
 Also, would like to thank [@Shopify](https://github.com/Shopify), [@rafaelfranca](https://github.com/rafaelfranca), and [@dylanahsmith](https://github.com/dylanahsmith), for sharing [this PoC](https://github.com/Shopify/autoload_reloader). The technique Zeitwerk uses to support explicit namespaces was copied from that project.
 
-Finally, many thanks to [@schurig](https://github.com/schurig) for recording an [audio file](https://raw.githubusercontent.com/fxn/zeitwerk/master/extras/zeitwerk_pronunciation.mp3) with the pronunciation of "Zeitwerk" in perfect German. 💯
+Finally, many thanks to [@schurig](https://github.com/schurig) for recording an [audio file](http://share.hashref.com/zeitwerk/zeitwerk_pronunciation.mp3) with the pronunciation of "Zeitwerk" in perfect German. 💯
 
 ## License
 
