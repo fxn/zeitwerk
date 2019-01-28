@@ -165,7 +165,7 @@ module Zeitwerk
     def setup
       mutex.synchronize do
         unless @setup
-          actual_root_dirs.each { |dir| set_autoloads_in_dir(dir, Object) }
+          non_ignored_root_dirs.each { |dir| set_autoloads_in_dir(dir, Object) }
           do_preload
           @setup = true
         end
@@ -228,7 +228,7 @@ module Zeitwerk
     def eager_load
       mutex.synchronize do
         unless @eager_loaded
-          actual_root_dirs.each { |dir| eager_load_dir(dir) }
+          non_ignored_root_dirs.each { |dir| eager_load_dir(dir) }
           disable_tracer
           @eager_loaded = true
         end
@@ -303,7 +303,7 @@ module Zeitwerk
     private # -------------------------------------------------------------------------------------
 
     # @return [<String>]
-    def actual_root_dirs
+    def non_ignored_root_dirs
       root_dirs.keys.delete_if { |dir| ignored.member?(dir) }
     end
 
