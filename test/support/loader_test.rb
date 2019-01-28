@@ -35,7 +35,7 @@ class LoaderTest < Minitest::Test
     end
   end
 
-  def with_load_path(dirs = loader.dirs.keys)
+  def with_load_path(dirs = loader.dirs)
     Array(dirs).each { |dir| $LOAD_PATH.push(dir) }
     yield
   ensure

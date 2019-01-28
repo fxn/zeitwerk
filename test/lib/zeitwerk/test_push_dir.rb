@@ -4,12 +4,14 @@ require "pathname"
 class TesPushDir < LoaderTest
   test "accepts dirs as strings and stores their absolute paths" do
     loader.push_dir(".")
-    assert loader.dirs == { Dir.pwd => true }
+    assert loader.root_dirs == { Dir.pwd => true }
+    assert loader.dirs.include?(Dir.pwd)
   end
 
   test "accepts dirs as pathnames and stores their absolute paths" do
     loader.push_dir(Pathname.new("."))
-    assert loader.dirs == { Dir.pwd => true }
+    assert loader.root_dirs == { Dir.pwd => true }
+    assert loader.dirs.include?(Dir.pwd)
   end
 
   test "raises on non-existing directories" do

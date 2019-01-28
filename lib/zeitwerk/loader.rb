@@ -10,19 +10,20 @@ module Zeitwerk
     # @return [#call, nil]
     attr_accessor :logger
 
-    # Absolute paths of directories from which you want to load constants. This
-    # is a private attribute, client code should use `push_dir`.
-    #
-    # Stored in a hash to preserve order, easily handle duplicates, and also be
-    # able to have a fast lookup, needed for detecting nested paths.
+    # Absolute paths of the root directories. Stored in a hash to preserve
+    # order, easily handle duplicates, and also be able to have a fast lookup,
+    # needed for detecting nested paths.
     #
     #   "/Users/fxn/blog/app/assets"   => true,
     #   "/Users/fxn/blog/app/channels" => true,
     #   ...
     #
+    # This is a private collection maintained by the loader. The public
+    # interface for it is `push_dir` and `dirs`.
+    #
     # @private
     # @return [{String => true}]
-    attr_reader :dirs
+    attr_reader :root_dirs
 
     # Absolute paths of files or directories that have to be preloaded.
     #
@@ -86,7 +87,7 @@ module Zeitwerk
     def initialize
       self.inflector = Inflector.new
 
-      @dirs         = {}
+      @root_dirs    = {}
       @preloads     = []
       @ignored      = Set.new
       @autoloads    = {}
@@ -108,6 +109,14 @@ module Zeitwerk
       Registry.register_loader(self)
     end
 
+    # Absolute paths of the root directories. This is a read-only collection,
+    # please push here via `push_dir`.
+    #
+    # @return [<String>]
+    def dirs
+      root_dirs.keys.freeze
+    end
+
     # Pushes `paths` to the list of root directories.
     #
     # @param path [<String, Pathname>]
@@ -116,7 +125,7 @@ module Zeitwerk
       abspath = File.expand_path(path)
       mutex.synchronize do
         if dir?(abspath)
-          dirs[abspath] = true
+          root_dirs[abspath] = true
         else
           raise ArgumentError, "the root directory #{abspath} does not exist"
         end
@@ -156,7 +165,7 @@ module Zeitwerk
     def setup
       mutex.synchronize do
         unless @setup
-          actual_dirs.each { |dir| set_autoloads_in_dir(dir, Object) }
+          actual_root_dirs.each { |dir| set_autoloads_in_dir(dir, Object) }
           do_preload
           @setup = true
         end
@@ -219,7 +228,7 @@ module Zeitwerk
     def eager_load
       mutex.synchronize do
         unless @eager_loaded
-          actual_dirs.each { |dir| eager_load_dir(dir) }
+          actual_root_dirs.each { |dir| eager_load_dir(dir) }
           disable_tracer
           @eager_loaded = true
         end
@@ -294,8 +303,8 @@ module Zeitwerk
     private # -------------------------------------------------------------------------------------
 
     # @return [<String>]
-    def actual_dirs
-      dirs.keys.delete_if { |dir| ignored.member?(dir) }
+    def actual_root_dirs
+      root_dirs.keys.delete_if { |dir| ignored.member?(dir) }
     end
 
     # @param dir [String]
@@ -313,7 +322,7 @@ module Zeitwerk
           # To resolve the ambiguity file name -> constant path this introduces,
           # the `app/models/concerns` directory is totally ignored as a namespace,
           # it counts only as root. The guard checks that.
-          autoload_subdir(parent, cname, abspath) unless dirs.key?(abspath)
+          autoload_subdir(parent, cname, abspath) unless root_dirs.key?(abspath)
         end
       end
     end
