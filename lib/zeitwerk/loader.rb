@@ -271,6 +271,14 @@ module Zeitwerk
       Registry.loaders.each(&:eager_load)
     end
 
+    # Returns an array with the absolute paths of the root directories of all
+    # registered loaders. This is a read-only collection.
+    #
+    # @return [<String>]
+    def self.all_dirs
+      Registry.loaders.flat_map(&:dirs).freeze
+    end
+
     # --- Callbacks -------------------------------------------------------------------------------
 
     # Callback invoked from Kernel when a managed file is loaded.
