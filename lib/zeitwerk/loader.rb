@@ -156,7 +156,15 @@ module Zeitwerk
     # @param paths [<String, Pathname, <String, Pathname>>]
     # @return [void]
     def ignore(*paths)
-      mutex.synchronize { ignored.merge(expand_paths(paths)) }
+      paths.flatten.each do |path|
+        expanded_path = expand_paths(path)
+
+        if Dir[expanded_path.first].empty?
+          mutex.synchronize { ignored.merge(expanded_path) }
+        else
+          mutex.synchronize { ignored.merge(Dir[*expanded_path]) }
+        end
+      end
     end
 
     # Sets autoloads in the root namespace and preloads files, if any.

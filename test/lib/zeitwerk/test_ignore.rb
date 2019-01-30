@@ -68,20 +68,25 @@ class TestIgnore < LoaderTest
   test "ignored directories are not eager loaded" do
     files = [
       ["x.rb", "X = true"],
-      ["m/a.rb", "M::A = true"],
-      ["m/b.rb", "M::B = true"],
-      ["m/c.rb", "M::C = true"]
+      ["a/s/a.rb", "A::S::A = true"],
+      ["b/n/z.rb", "B::N::Z = true"],
+      ["b/n/x.h", "B::N::X = true"],
+      ["b/n/s/b.rb", "B::N::S::B = true"],
+      ["c/c.rb", "C::C = true"]
     ]
 
     with_files(files) do
       loader.push_dir(".")
-      loader.ignore("m")
+      loader.ignore("**/s", "*.h")
       loader.setup
       loader.eager_load
 
-      assert_equal 1, loader.autoloads.size
+      assert_equal 7, loader.autoloads.size
       assert ::X
-      assert_raises(NameError) { ::M }
+      assert C::C
+      assert B::N::Z
+      assert_raises(NameError) { A::S::A }
+      assert_raises(NameError) { B::N::X }
     end
   end
 
