@@ -296,7 +296,7 @@ If your project has namespaces, you'll notice in the traces Zeitwerk sets autolo
 
 ### Ignoring parts of the project
 
-Zeitwerk ignores automatically any file or directory whose names starts with a dot, and any files that do not have extension ".rb".
+Zeitwerk ignores automatically any file or directory whose name starts with a dot, and any files that do not have extension ".rb".
 
 However, sometimes it might still be convenient to tell Zeitwerk to completely ignore some particular Ruby file or directory. For example, let's suppose that your gem decorates something in `Kernel`:
 
