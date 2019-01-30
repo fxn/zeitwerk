@@ -296,7 +296,9 @@ If your project has namespaces, you'll notice in the traces Zeitwerk sets autolo
 
 ### Ignoring parts of the project
 
-Sometimes it might be convenient to tell Zeitwerk to completely ignore some particular file or directory. For example, let's suppose that your gem decorates something in `Kernel`:
+Zeitwerk ignores automatically any file or directory whose names starts with a dot, and any files that do not have extension ".rb".
+
+However, sometimes it might still be convenient to tell Zeitwerk to completely ignore some particular Ruby file or directory. For example, let's suppose that your gem decorates something in `Kernel`:
 
 ```ruby
 # lib/my_gem/core_ext/kernel.rb
