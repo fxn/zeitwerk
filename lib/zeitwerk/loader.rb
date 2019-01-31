@@ -337,8 +337,8 @@ module Zeitwerk
     # @param subdir [String]
     # @return [void]
     def autoload_subdir(parent, cname, subdir)
-      if autoload = autoload_for?(parent, cname)
-        enable_tracer if ruby?(autoload)
+      if autoload_path = autoload_for?(parent, cname)
+        enable_tracer if ruby?(autoload_path)
         # We do not need to issue another autoload, the existing one is enough
         # no matter if it is for a file or a directory. Just remember the
         # subdirectory has to be visited if the namespace is used.
