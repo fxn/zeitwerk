@@ -187,7 +187,7 @@ module Zeitwerk
           if parent.autoload?(cname)
             parent.send(:remove_const, cname)
             log("autoload for #{cpath(parent, cname)} removed") if logger
-          elsif parent.const_defined?(cname, false)
+          elsif cdef?(parent, cname)
             parent.send(:remove_const, cname)
             log("#{cpath(parent, cname)} unloaded") if logger
           end
@@ -343,7 +343,7 @@ module Zeitwerk
         # no matter if it is for a file or a directory. Just remember the
         # subdirectory has to be visited if the namespace is used.
         (lazy_subdirs[cpath(parent, cname)] ||= []) << subdir
-      elsif !parent.const_defined?(cname, false)
+      elsif !cdef?(parent, cname)
         # First time we find this namespace, set an autoload for it.
         (lazy_subdirs[cpath(parent, cname)] ||= []) << subdir
         set_autoload(parent, cname, subdir)
@@ -370,7 +370,7 @@ module Zeitwerk
 
         set_autoload(parent, cname, file)
         enable_tracer
-      elsif !parent.const_defined?(cname, false)
+      elsif !cdef?(parent, cname)
         set_autoload(parent, cname, file)
       end
     end
@@ -507,6 +507,10 @@ module Zeitwerk
 
     def disable_tracer
       tracer.disable if tracer.enabled?
+    end
+
+    def cdef?(parent, cname)
+      parent.const_defined?(cname, false)
     end
   end
 end
