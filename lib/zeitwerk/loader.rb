@@ -255,9 +255,6 @@ module Zeitwerk
     # except that this method returns the same object in subsequent calls from
     # the same file, in the unlikely case the gem wants to be able to reload.
     #
-    # `Zeitwerk::GemInflector` is a subclass of `Zeitwerk::Inflector` that
-    # camelizes "lib/my_gem/version.rb" as "MyGem::VERSION".
-    #
     # @return [Zeitwerk::Loader]
     def self.for_gem
       called_from = caller[0].split(':')[0]
