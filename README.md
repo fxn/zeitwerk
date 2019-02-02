@@ -25,7 +25,7 @@
         - [Ignoring parts of the project](#ignoring-parts-of-the-project)
             - [Files that do not follow the conventions](#files-that-do-not-follow-the-conventions)
             - [The adapter pattern](#the-adapter-pattern)
-            - [Tests files mixed with implementation files](#tests-files-mixed-with-implementation-files)
+            - [Test files mixed with implementation files](#test-files-mixed-with-implementation-files)
         - [Edge cases](#edge-cases)
     - [Pronunciation](#pronunciation)
     - [Supported Ruby versions](#supported-ruby-versions)
@@ -343,7 +343,7 @@ The chosen adapter, then, has to be loaded by hand somehow:
 require "my_gem/db_adapters/#{config[:db_adapter]}"
 ```
 
-#### Tests files mixed with implementation files
+#### Test files mixed with implementation files
 
 There are project layouts that put implementation files and test files together. To ignore the test files, you can use a glob pattern like this:
 
