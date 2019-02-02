@@ -31,11 +31,20 @@ module Zeitwerk
     # @return [<String>]
     attr_reader :preloads
 
-    # Absolute paths of files or directories to be totally ignored.
+    # Absolute paths of files, directories, of glob patterns to be totally
+    # ignored.
     #
     # @private
     # @return [Set<String>]
     attr_reader :ignored
+
+    # The actual collection of absolute file and directory names at the time the
+    # ignored glob patterns were expanded. Computed on setup, and recomputed on
+    # reload.
+    #
+    # @private
+    # @return [Set<String>]
+    attr_reader :ignored_paths
 
     # Maps real absolute paths for which an autoload has been set to their
     # corresponding parent class or module and constant name.
@@ -87,12 +96,13 @@ module Zeitwerk
     def initialize
       self.inflector = Inflector.new
 
-      @root_dirs    = {}
-      @preloads     = []
-      @ignored      = Set.new
-      @autoloads    = {}
-      @loaded       = Set.new
-      @lazy_subdirs = {}
+      @root_dirs     = {}
+      @preloads      = []
+      @ignored       = Set.new
+      @ignored_paths = Set.new
+      @autoloads     = {}
+      @loaded        = Set.new
+      @lazy_subdirs  = {}
 
       @mutex        = Mutex.new
       @setup        = false
@@ -151,12 +161,20 @@ module Zeitwerk
       end
     end
 
-    # Files or directories to be totally ignored.
+    # Configure files, directories, or glob patterns to be totally ignored.
     #
     # @param paths [<String, Pathname, <String, Pathname>>]
     # @return [void]
     def ignore(*paths)
       mutex.synchronize { ignored.merge(expand_paths(paths)) }
+    end
+
+    # @private
+    # @return [void]
+    def expand_ignored_glob_patterns
+      # Note that Dir.glob works with regular file names just fine. That is,
+      # glob patterns technically need no wildcards.
+      ignored_paths.replace(ignored.flat_map { |path| Dir.glob(path) })
     end
 
     # Sets autoloads in the root namespace and preloads files, if any.
@@ -165,6 +183,7 @@ module Zeitwerk
     def setup
       mutex.synchronize do
         unless @setup
+          expand_ignored_glob_patterns
           non_ignored_root_dirs.each { |dir| set_autoloads_in_dir(dir, Object) }
           do_preload
           @setup = true
@@ -309,7 +328,7 @@ module Zeitwerk
 
     # @return [<String>]
     def non_ignored_root_dirs
-      root_dirs.keys.delete_if { |dir| ignored.member?(dir) }
+      root_dirs.keys.delete_if { |dir| ignored_paths.member?(dir) }
     end
 
     # @param dir [String]
@@ -471,7 +490,7 @@ module Zeitwerk
       Dir.foreach(dir) do |entry|
         next if entry.start_with?(".")
         abspath = File.join(dir, entry)
-        yield abspath unless ignored.member?(abspath)
+        yield abspath unless ignored_paths.member?(abspath)
       end
     end
 

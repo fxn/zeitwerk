@@ -23,6 +23,9 @@
             - [Custom inflector](#custom-inflector)
         - [Logging](#logging)
         - [Ignoring parts of the project](#ignoring-parts-of-the-project)
+            - [Files that do not follow the conventions](#files-that-do-not-follow-the-conventions)
+            - [The adapter pattern](#the-adapter-pattern)
+            - [Tests files mixed with implementation files](#tests-files-mixed-with-implementation-files)
         - [Edge cases](#edge-cases)
     - [Pronunciation](#pronunciation)
     - [Supported Ruby versions](#supported-ruby-versions)
@@ -298,7 +301,15 @@ If your project has namespaces, you'll notice in the traces Zeitwerk sets autolo
 
 Zeitwerk ignores automatically any file or directory whose name starts with a dot, and any files that do not have extension ".rb".
 
-However, sometimes it might still be convenient to tell Zeitwerk to completely ignore some particular Ruby file or directory. For example, let's suppose that your gem decorates something in `Kernel`:
+However, sometimes it might still be convenient to tell Zeitwerk to completely ignore some particular Ruby file or directory. That is possible with `ignore`, which accepts an arbitrary number of strings or `Pathname` objects, and also an array of them.
+
+You can ignore file names, directory names, and glob patterns. Glob patterns are expanded on setup and on reload.
+
+Let's see some use cases.
+
+#### Files that do not follow the conventions
+
+Let's suppose that your gem decorates something in `Kernel`:
 
 ```ruby
 # lib/my_gem/core_ext/kernel.rb
@@ -308,7 +319,7 @@ Kernel.module_eval do
 end
 ```
 
-That file does not follow the conventions and you need to tell Zeitwerk:
+That file does not define a constant path after the path name and you need to tell Zeitwerk:
 
 ```ruby
 kernel_ext = File.expand_path("my_gem/core_ext/kernel.rb", __dir__)
@@ -316,7 +327,7 @@ loader.ignore(kernel_ext)
 loader.setup
 ```
 
-You can pass several arguments to this method, also an array of strings. And you can call `ignore` multiple times too.
+#### The adapter pattern
 
 Another use case for ignoring files is the adapter pattern. Let's imagine your project talks to databases, supports several, and has adapters for each one of them. Those adapters may have top-level `require` calls that load their respective drivers, but you don't want your users to install them all, only the one they are going to use. On the other hand, if your code is eager loaded by you or a parent project (with `Zeitwerk::Loader.eager_load_all`), those `require` calls are going to be executed. Ignoring the adapters prevents that:
 
@@ -330,6 +341,16 @@ The chosen adapter, then, has to be loaded by hand somehow:
 
 ```ruby
 require "my_gem/db_adapters/#{config[:db_adapter]}"
+```
+
+#### Tests files mixed with implementation files
+
+There are project layouts that put implementation files and test files together. To ignore the test files, you can use a glob pattern like this:
+
+```ruby
+tests = File.expand_path("**/*_test.rb", __dir__)
+loader.ignore(tests)
+loader.setup
 ```
 
 ### Edge cases

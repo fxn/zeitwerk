@@ -98,4 +98,42 @@ class TestIgnore < LoaderTest
     loader.ignore([a, b])
     assert_equal [a, b].to_set, loader.ignored
   end
+
+  test "supports glob patterns" do
+    files = [
+      ["admin/user.rb", "class Admin::User; end"],
+      ["admin/user_test.rb", "class Admin::UserTest < Minitest::Test; end"]
+    ]
+    with_files(files) do
+      loader.push_dir(".")
+      loader.ignore("**/*_test.rb")
+      loader.setup
+
+      assert Admin::User
+      assert_raises(NameError) { Admin::UserTest }
+    end
+  end
+
+  test "ignored paths are recomputed on reload" do
+    files = [
+      ["user.rb", "class User; end"],
+      ["user_test.rb", "class UserTest < Minitest::Test; end"],
+    ]
+    with_files(files) do
+      loader.push_dir(".")
+      loader.ignore("*_test.rb")
+      loader.setup
+
+      assert User
+      assert_raises(NameError) { UserTest }
+
+      File.write("post.rb", "class Post; end")
+      File.write("post_test.rb", "class PostTest < Minitest::Test; end")
+
+      loader.reload
+
+      assert Post
+      assert_raises(NameError) { PostTest }
+    end
+  end
 end
