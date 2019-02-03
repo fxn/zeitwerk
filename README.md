@@ -322,7 +322,7 @@ end
 That file does not define a constant path after the path name and you need to tell Zeitwerk:
 
 ```ruby
-kernel_ext = File.expand_path("my_gem/core_ext/kernel.rb", __dir__)
+kernel_ext = "#{__dir__}/my_gem/core_ext/kernel.rb"
 loader.ignore(kernel_ext)
 loader.setup
 ```
@@ -332,7 +332,7 @@ loader.setup
 Another use case for ignoring files is the adapter pattern. Let's imagine your project talks to databases, supports several, and has adapters for each one of them. Those adapters may have top-level `require` calls that load their respective drivers, but you don't want your users to install them all, only the one they are going to use. On the other hand, if your code is eager loaded by you or a parent project (with `Zeitwerk::Loader.eager_load_all`), those `require` calls are going to be executed. Ignoring the adapters prevents that:
 
 ```ruby
-db_adapters = File.expand_path("my_gem/db_adapters", __dir__)
+db_adapters = "#{__dir__}/my_gem/db_adapters"
 loader.ignore(db_adapters)
 loader.setup
 ```
@@ -348,7 +348,7 @@ require "my_gem/db_adapters/#{config[:db_adapter]}"
 There are project layouts that put implementation files and test files together. To ignore the test files, you can use a glob pattern like this:
 
 ```ruby
-tests = File.expand_path("**/*_test.rb", __dir__)
+tests = "#{__dir__}/**/*_test.rb"
 loader.ignore(tests)
 loader.setup
 ```
