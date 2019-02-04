@@ -2,6 +2,14 @@
 
 ## 1.0.0 (Unreleased)
 
+## 1.0.0.beta3 (4 February 2019)
+
+* Documentation improvements.
+* `Zeitwerk::Loader#ignore` accepts glob patterns.
+* New read-only introspection method `Zeitwerk::Loader.all_dirs`.
+* New read-only introspection method `Zeitwerk::Loader#dirs`.
+* New introspection predicate `Zeitwerk::Loader#loaded?(cpath)`.
+
 ## 1.0.0.beta2 (22 January 2019)
 
 * `do_not_eager_load` has been removed, please use `ignore` to opt-out.
