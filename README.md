@@ -39,7 +39,9 @@
 
 Zeitwerk is an efficient and thread-safe code loader for Ruby.
 
-Given a conventional file structure, Zeitwerk loads your project's classes and modules on demand. You don't need to write `require` calls for your own files, rather, you can streamline your programming knowing that your classes and modules are available everywhere. This feature is efficient, thread-safe, and matches Ruby's semantics for constants. Also, by design Zeitwerk issues `require` calls exclusively using absolute file names, so there are no file system lookups in `$LOAD_PATH`.
+Given a conventional file structure, Zeitwerk loads your project's classes and modules on demand. You don't need to write `require` calls for your own files, rather, you can streamline your programming knowing that your classes and modules are available everywhere. This feature is efficient, thread-safe, and matches Ruby's semantics for constants.
+
+Zeitwerk issues `require` calls exclusively using absolute file names, so there are no costly file system lookups in `$LOAD_PATH`. Technically, the directories managed by Zeitwerk do not even need to be in `$LOAD_PATH`. Furthermore, by design, Zeitwerk does only one single scan of the project tree, and it descends into subdirectories lazily, only if their namespaces are used.
 
 The library is designed so that each gem and application can have their own loader, independent of each other. Each loader has its own configuration, inflector, and optional logger.
 
