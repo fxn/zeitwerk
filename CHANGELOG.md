@@ -1,6 +1,8 @@
 # CHANGELOG
 
-## 1.0.0 (Unreleased)
+## 1.0.0 (12 February 2019)
+
+* Documentation improvements.
 
 ## 1.0.0.beta3 (4 February 2019)
 
