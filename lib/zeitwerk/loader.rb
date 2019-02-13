@@ -150,13 +150,7 @@ module Zeitwerk
       mutex.synchronize do
         expand_paths(paths).each do |abspath|
           preloads << abspath
-          if @setup
-            if ruby?(abspath)
-              do_preload_file(abspath)
-            elsif dir?(abspath)
-              do_preload_dir(abspath)
-            end
-          end
+          do_preload_abspath(abspath) if @setup
         end
       end
     end
@@ -352,7 +346,7 @@ module Zeitwerk
     end
 
     # @param parent [Module]
-    # @paran cname [String]
+    # @param cname [String]
     # @param subdir [String]
     # @return [void]
     def autoload_subdir(parent, cname, subdir)
@@ -374,7 +368,7 @@ module Zeitwerk
     end
 
     # @param parent [Module]
-    # @paran cname [String]
+    # @param cname [String]
     # @param file [String]
     # @return [void]
     def autoload_file(parent, cname, file)
@@ -449,11 +443,17 @@ module Zeitwerk
     # @return [void]
     def do_preload
       preloads.each do |abspath|
-        if ruby?(abspath)
-          do_preload_file(abspath)
-        elsif dir?(abspath)
-          do_preload_dir(abspath)
-        end
+        do_preload_abspath(abspath)
+      end
+    end
+
+    # @param abspath [String]
+    # @return [void]
+    def do_preload_abspath(abspath)
+      if ruby?(abspath)
+        do_preload_file(abspath)
+      elsif dir?(abspath)
+        do_preload_dir(abspath)
       end
     end
 
@@ -461,11 +461,7 @@ module Zeitwerk
     # @return [void]
     def do_preload_dir(dir)
       each_abspath(dir) do |abspath|
-        if ruby?(abspath)
-          do_preload_file(abspath)
-        elsif dir?(abspath)
-          do_preload_dir(abspath)
-        end
+        do_preload_abspath(abspath)
       end
     end
 
