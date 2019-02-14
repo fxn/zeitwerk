@@ -15,9 +15,9 @@ class TestLogging < LoaderTest
   def assert_logged(expected)
     case expected
     when String
-      assert_output("Zeitwerk##{loader.object_id}: #{expected}") { yield }
+      assert_output("Zeitwerk@#{loader.tag}: #{expected}") { yield }
     when Regexp
-      assert_output(/Zeitwerk##{loader.object_id}: #{expected}/) { yield }
+      assert_output(/Zeitwerk@#{loader.tag}: #{expected}/) { yield }
     end
   end
 

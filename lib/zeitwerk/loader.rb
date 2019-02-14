@@ -1,9 +1,13 @@
 # frozen_string_literal: true
 
 require "set"
+require "securerandom"
 
 module Zeitwerk
   class Loader
+    # @return [String]
+    attr_reader :tag
+
     # @return [#camelize]
     attr_accessor :inflector
 
@@ -94,7 +98,9 @@ module Zeitwerk
     attr_reader :tracer
 
     def initialize
-      self.inflector = Inflector.new
+      @tag       = SecureRandom.hex(3)
+      @inflector = Inflector.new
+      @logger    = self.class.default_logger
 
       @root_dirs     = {}
       @preloads      = []
@@ -116,9 +122,14 @@ module Zeitwerk
         end
       end
 
-      @logger = self.class.default_logger
-
       Registry.register_loader(self)
+    end
+
+    # Sets a tag for the loader, useful for logging.
+    #
+    # @return [void]
+    def tag=(tag)
+      @tag = tag.to_s
     end
 
     # Absolute paths of the root directories. This is a read-only collection,
@@ -518,7 +529,7 @@ module Zeitwerk
     # @param message [String]
     # @return [void]
     def log(message)
-      logger.call("Zeitwerk##{object_id}: #{message}")
+      logger.call("Zeitwerk@#{tag}: #{message}")
     end
 
     def enable_tracer

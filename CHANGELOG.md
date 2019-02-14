@@ -3,7 +3,8 @@
 ## 1.1.0 (Unreleased)
 
 * New class attribute `Zeitwerk::Loader.default_logger`, inherited by newly instantiated loaders. Default is `nil`.
-* Traces now include the object ID of the loader.
+* Traces include the loader tag in the prefix to easily distinguish them.
+* Loaders now have a tag.
 
 ## 1.0.0 (12 February 2019)
 

@@ -74,4 +74,23 @@ class TestForGem < LoaderTest
       end
     end
   end
+
+  test "configures the basename of the root file as loader name" do
+    files = [
+      ["my_gem.rb", <<-EOS],
+        $for_gem_test_loader = Zeitwerk::Loader.for_gem
+        $for_gem_test_loader.setup
+
+        class MyGem
+        end
+      EOS
+      ["my_gem/foo.rb", "class MyGem::Foo; end"]
+    ]
+    with_files(files) do
+      with_load_path(".") do
+        require "my_gem"
+        assert_equal "my_gem", $for_gem_test_loader.tag
+      end
+    end
+  end
 end

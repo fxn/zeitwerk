@@ -83,6 +83,7 @@ module Zeitwerk
       def loader_for_gem(root_file)
         loaders_managing_gems[root_file] ||= begin
           Loader.new.tap do |loader|
+            loader.tag = File.basename(root_file, ".rb")
             loader.inflector = GemInflector.new(root_file)
             loader.push_dir(File.dirname(root_file))
           end

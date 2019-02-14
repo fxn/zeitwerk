@@ -22,6 +22,7 @@
             - [Zeitwerk::GemInflector](#zeitwerkgeminflector)
             - [Custom inflector](#custom-inflector)
         - [Logging](#logging)
+        - [Loader tag](#loader-tag)
         - [Ignoring parts of the project](#ignoring-parts-of-the-project)
             - [Files that do not follow the conventions](#files-that-do-not-follow-the-conventions)
             - [The adapter pattern](#the-adapter-pattern)
@@ -304,6 +305,26 @@ Zeitwerk::Loader.default_logger = method(:puts)
 ```
 
 If your project has namespaces, you'll notice in the traces Zeitwerk sets autoloads for _directories_. That's a technique used to be able to descend into subdirectories on demand, avoiding that way unnecessary tree walks.
+
+### Loader tag
+
+Loaders have a tag that is printed in traces in order to be able to distinguish them in globally logged activity:
+
+```
+Zeitwerk@9fa54b: autoload set for User, to be loaded from ...
+```
+
+By default, a random tag like the one above is assigned, but you can change it:
+
+```
+loader.tag = "grep_me"
+```
+
+The tag of a loader returned by `for_gem` is the basename of the root file without extension:
+
+```
+Zeitwerk@my_gem: constant MyGem::Foo loaded from ...
+```
 
 ### Ignoring parts of the project
 
