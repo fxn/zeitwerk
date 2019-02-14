@@ -511,7 +511,7 @@ module Zeitwerk
     # @param message [String]
     # @return [void]
     def log(message)
-      logger.call("Zeitwerk: #{message}")
+      logger.call("Zeitwerk##{object_id}: #{message}")
     end
 
     def enable_tracer

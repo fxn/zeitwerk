@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.1.0 (Unreleased)
+
+* Traces now include the object ID of the loader.
+
 ## 1.0.0 (12 February 2019)
 
 * Documentation improvements.
