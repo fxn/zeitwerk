@@ -116,6 +116,8 @@ module Zeitwerk
         end
       end
 
+      @logger = self.class.default_logger
+
       Registry.register_loader(self)
     end
 
@@ -258,35 +260,40 @@ module Zeitwerk
 
     # --- Class methods ---------------------------------------------------------------------------
 
-    # This is a shortcut for
-    #
-    #   require "zeitwerk"
-    #   loader = Zeitwerk::Loader.new
-    #   loader.inflector = Zeitwerk::GemInflector.new
-    #   loader.push_dir(__dir__)
-    #
-    # except that this method returns the same object in subsequent calls from
-    # the same file, in the unlikely case the gem wants to be able to reload.
-    #
-    # @return [Zeitwerk::Loader]
-    def self.for_gem
-      called_from = caller[0].split(':')[0]
-      Registry.loader_for_gem(called_from)
-    end
+    class << self
+      # @return [#call, nil]
+      attr_accessor :default_logger
 
-    # Broadcasts `eager_load` to all loaders.
-    #
-    # @return [void]
-    def self.eager_load_all
-      Registry.loaders.each(&:eager_load)
-    end
+      # This is a shortcut for
+      #
+      #   require "zeitwerk"
+      #   loader = Zeitwerk::Loader.new
+      #   loader.inflector = Zeitwerk::GemInflector.new
+      #   loader.push_dir(__dir__)
+      #
+      # except that this method returns the same object in subsequent calls from
+      # the same file, in the unlikely case the gem wants to be able to reload.
+      #
+      # @return [Zeitwerk::Loader]
+      def for_gem
+        called_from = caller[0].split(':')[0]
+        Registry.loader_for_gem(called_from)
+      end
 
-    # Returns an array with the absolute paths of the root directories of all
-    # registered loaders. This is a read-only collection.
-    #
-    # @return [<String>]
-    def self.all_dirs
-      Registry.loaders.flat_map(&:dirs).freeze
+      # Broadcasts `eager_load` to all loaders.
+      #
+      # @return [void]
+      def eager_load_all
+        Registry.loaders.each(&:eager_load)
+      end
+
+      # Returns an array with the absolute paths of the root directories of all
+      # registered loaders. This is a read-only collection.
+      #
+      # @return [<String>]
+      def all_dirs
+        Registry.loaders.flat_map(&:dirs).freeze
+      end
     end
 
     # --- Callbacks -------------------------------------------------------------------------------

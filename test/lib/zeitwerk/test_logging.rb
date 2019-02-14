@@ -7,6 +7,7 @@ class TestLogging < LoaderTest
   end
 
   def teardown
+    Zeitwerk::Loader.default_logger = nil
     loader.logger = nil
     super
   end
@@ -18,6 +19,13 @@ class TestLogging < LoaderTest
     when Regexp
       assert_output(/Zeitwerk##{loader.object_id}: #{expected}/) { yield }
     end
+  end
+
+  test "new loaders get assigned the default global logger" do
+    assert_nil Zeitwerk::Loader.new.logger
+
+    Zeitwerk::Loader.default_logger = Object.new
+    assert_same Zeitwerk::Loader.default_logger, Zeitwerk::Loader.new.logger
   end
 
   test "logs loaded files" do
