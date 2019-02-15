@@ -44,7 +44,7 @@ class LoaderTest < Minitest::Test
 
   def with_setup(files, dirs: ".", load_path: nil, rm: true)
     with_files(files, rm: rm) do
-      Array(dirs).each { |dir| loader.push_dir(dir) }
+      Array(dirs).each { |dir| loader.push_dir(*Array(dir)) }
       loader.setup
       if load_path
         with_load_path(load_path) { yield }

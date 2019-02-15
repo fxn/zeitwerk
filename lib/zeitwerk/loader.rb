@@ -18,15 +18,15 @@ module Zeitwerk
     # order, easily handle duplicates, and also be able to have a fast lookup,
     # needed for detecting nested paths.
     #
-    #   "/Users/fxn/blog/app/assets"   => true,
-    #   "/Users/fxn/blog/app/channels" => true,
+    #   "/Users/fxn/blog/app/assets"   => Object,
+    #   "/Users/fxn/blog/app/channels" => MyNamespace,
     #   ...
     #
     # This is a private collection maintained by the loader. The public
     # interface for it is `push_dir` and `dirs`.
     #
     # @private
-    # @return [{String => true}]
+    # @return [{String => Module}]
     attr_reader :root_dirs
 
     # Absolute paths of files or directories that have to be preloaded.
@@ -144,11 +144,11 @@ module Zeitwerk
     #
     # @param path [<String, Pathname>]
     # @return [void]
-    def push_dir(path)
+    def push_dir(path, namespace: Object)
       abspath = File.expand_path(path)
       mutex.synchronize do
         if dir?(abspath)
-          root_dirs[abspath] = true
+          root_dirs[abspath] = namespace
         else
           raise ArgumentError, "the root directory #{abspath} does not exist"
         end
@@ -191,7 +191,7 @@ module Zeitwerk
       mutex.synchronize do
         unless @setup
           expand_ignored_glob_patterns
-          non_ignored_root_dirs.each { |dir| set_autoloads_in_dir(dir, Object) }
+          non_ignored_root_dirs.each { |dir, namespace| set_autoloads_in_dir(dir, namespace) }
           do_preload
           @setup = true
         end
@@ -254,7 +254,7 @@ module Zeitwerk
     def eager_load
       mutex.synchronize do
         unless @eager_loaded
-          non_ignored_root_dirs.each { |dir| eager_load_dir(dir) }
+          non_ignored_root_dirs.each { |dir, _namespace| eager_load_dir(dir) }
           disable_tracer
           @eager_loaded = true
         end
@@ -340,7 +340,7 @@ module Zeitwerk
 
     # @return [<String>]
     def non_ignored_root_dirs
-      root_dirs.keys.delete_if { |dir| ignored_paths.member?(dir) }
+      root_dirs.reject { |dir, _namespace| ignored_paths.member?(dir) }
     end
 
     # @param dir [String]
