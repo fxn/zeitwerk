@@ -24,9 +24,9 @@
         - [Logging](#logging)
             - [Loader tag](#loader-tag)
         - [Ignoring parts of the project](#ignoring-parts-of-the-project)
-            - [Files that do not follow the conventions](#files-that-do-not-follow-the-conventions)
-            - [The adapter pattern](#the-adapter-pattern)
-            - [Test files mixed with implementation files](#test-files-mixed-with-implementation-files)
+            - [Use case: Files that do not follow the conventions](#use-case-files-that-do-not-follow-the-conventions)
+            - [Use case: The adapter pattern](#use-case-the-adapter-pattern)
+            - [Use case: Test files mixed with implementation files](#use-case-test-files-mixed-with-implementation-files)
         - [Edge cases](#edge-cases)
     - [Pronunciation](#pronunciation)
     - [Supported Ruby versions](#supported-ruby-versions)
@@ -336,7 +336,7 @@ You can ignore file names, directory names, and glob patterns. Glob patterns are
 
 Let's see some use cases.
 
-#### Files that do not follow the conventions
+#### Use case: Files that do not follow the conventions
 
 Let's suppose that your gem decorates something in `Kernel`:
 
@@ -356,9 +356,28 @@ loader.ignore(kernel_ext)
 loader.setup
 ```
 
-#### The adapter pattern
+You can also ignore the whole directory:
 
-Another use case for ignoring files is the adapter pattern. Let's imagine your project talks to databases, supports several, and has adapters for each one of them. Those adapters may have top-level `require` calls that load their respective drivers, but you don't want your users to install them all, only the one they are going to use. On the other hand, if your code is eager loaded by you or a parent project (with `Zeitwerk::Loader.eager_load_all`), those `require` calls are going to be executed. Ignoring the adapters prevents that:
+```ruby
+core_ext = "#{__dir__}/my_gem/core_ext"
+loader.ignore(core_ext)
+loader.setup
+```
+
+#### Use case: The adapter pattern
+
+Another use case for ignoring files is the adapter pattern.
+
+Let's imagine your project talks to databases, supports several, and has adapters for each one of them. Those adapters may have top-level `require` calls that load their respective drivers:
+
+```ruby
+# my_gem/db_adapters/postgresql.rb
+require "pg"
+```
+
+but you don't want your users to install them all, only the one they are going to use.
+
+On the other hand, if your code is eager loaded by you or a parent project (with `Zeitwerk::Loader.eager_load_all`), those `require` calls are going to be executed. Ignoring the adapters prevents that:
 
 ```ruby
 db_adapters = "#{__dir__}/my_gem/db_adapters"
@@ -372,7 +391,7 @@ The chosen adapter, then, has to be loaded by hand somehow:
 require "my_gem/db_adapters/#{config[:db_adapter]}"
 ```
 
-#### Test files mixed with implementation files
+#### Use case: Test files mixed with implementation files
 
 There are project layouts that put implementation files and test files together. To ignore the test files, you can use a glob pattern like this:
 
