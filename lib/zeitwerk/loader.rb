@@ -336,12 +336,14 @@ module Zeitwerk
     # @return [void]
     def on_dir_loaded(dir)
       parent, cname = autoloads[dir]
-      loaded.add(cpath(parent, cname))
-      autovivified = parent.const_set(cname, Module.new)
-      log("module #{cpath(parent, cname)} autovivified from directory #{dir}") if logger
 
-      if subdirs = lazy_subdirs[cpath(parent, cname)]
-        subdirs.each { |subdir| set_autoloads_in_dir(subdir, autovivified) }
+      autovivified_module = parent.const_set(cname, Module.new)
+      log("module #{autovivified_module.name} autovivified from directory #{dir}") if logger
+
+      loaded.add(autovivified_module.name)
+
+      if subdirs = lazy_subdirs[autovivified_module.name]
+        subdirs.each { |subdir| set_autoloads_in_dir(subdir, autovivified_module) }
       end
     end
 
