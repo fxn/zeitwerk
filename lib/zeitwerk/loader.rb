@@ -191,7 +191,7 @@ module Zeitwerk
       mutex.synchronize do
         unless @setup
           expand_ignored_glob_patterns
-          non_ignored_root_dirs.each { |dir| set_autoloads_in_dir(dir, Object) }
+          non_ignored_root_dirs.each { |root_dir| set_autoloads_in_dir(root_dir, Object) }
           do_preload
           @setup = true
         end
@@ -254,7 +254,7 @@ module Zeitwerk
     def eager_load
       mutex.synchronize do
         unless @eager_loaded
-          non_ignored_root_dirs.each { |dir| eager_load_dir(dir) }
+          non_ignored_root_dirs.each { |root_dir| eager_load_root_dir(root_dir) }
           disable_tracer
           @eager_loaded = true
         end
@@ -340,7 +340,7 @@ module Zeitwerk
 
     # @return [<String>]
     def non_ignored_root_dirs
-      root_dirs.keys.delete_if { |dir| ignored_paths.member?(dir) }
+      root_dirs.keys.delete_if { |root_dir| ignored_paths.member?(root_dir) }
     end
 
     # @param dir [String]
@@ -440,10 +440,12 @@ module Zeitwerk
       parent.autoload?(cname) || Registry.inception?(cpath(parent, cname))
     end
 
-    # @param dir [String]
+    # Eager loads the root directory using breadth-first traversal.
+    #
+    # @param root_dir [String]
     # @return [void]
-    def eager_load_dir(dir)
-      queue = [dir]
+    def eager_load_root_dir(root_dir)
+      queue = [root_dir]
       while dir = queue.shift
         each_abspath(dir) do |abspath|
           if ruby?(abspath)
