@@ -254,7 +254,16 @@ module Zeitwerk
     def eager_load
       mutex.synchronize do
         unless @eager_loaded
-          non_ignored_root_dirs.each { |root_dir| eager_load_root_dir(root_dir) }
+          queue = non_ignored_root_dirs
+          while dir = queue.shift
+            each_abspath(dir) do |abspath|
+              if ruby?(abspath)
+                require abspath
+              elsif dir?(abspath)
+                queue << abspath
+              end
+            end
+          end
           disable_tracer
           @eager_loaded = true
         end
@@ -438,23 +447,6 @@ module Zeitwerk
     # @return [String, nil]
     def autoload_for?(parent, cname)
       parent.autoload?(cname) || Registry.inception?(cpath(parent, cname))
-    end
-
-    # Eager loads the root directory using breadth-first traversal.
-    #
-    # @param root_dir [String]
-    # @return [void]
-    def eager_load_root_dir(root_dir)
-      queue = [root_dir]
-      while dir = queue.shift
-        each_abspath(dir) do |abspath|
-          if ruby?(abspath)
-            require abspath
-          elsif dir?(abspath)
-            queue << abspath
-          end
-        end
-      end
     end
 
     # This method is called this way because I prefer `preload` to be the method
