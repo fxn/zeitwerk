@@ -254,20 +254,21 @@ module Zeitwerk
     # @return [void]
     def eager_load
       mutex.synchronize do
-        unless @eager_loaded
-          queue = non_ignored_root_dirs
-          while dir = queue.shift
-            each_abspath(dir) do |abspath|
-              if ruby?(abspath)
-                require abspath
-              elsif dir?(abspath)
-                queue << abspath
-              end
+        break if @eager_loaded
+
+        queue = non_ignored_root_dirs
+        while dir = queue.shift
+          each_abspath(dir) do |abspath|
+            if ruby?(abspath)
+              require abspath
+            elsif dir?(abspath)
+              queue << abspath
             end
           end
-          disable_tracer
-          @eager_loaded = true
         end
+
+        disable_tracer
+        @eager_loaded = true
       end
     end
 
