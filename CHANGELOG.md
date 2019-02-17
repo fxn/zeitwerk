@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.2.0 (14 February 2019)
+
+* Use `pretty_print` in the exception message for conflicting directories.
+
 ## 1.2.0.beta (14 February 2019)
 
 * Two different loaders cannot be managing the same files. Now, `Zeitwerk::Loader#push_dir` raises `Zeitwerk::ConflictingDirectory` if it detects a conflict.

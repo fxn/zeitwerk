@@ -18,8 +18,9 @@ class TestConflictingDirectory < LoaderTest
   end
 
   def conflicting_directory_message(dir)
-    "loader\n\n\t#{loader.inspect}\n\nwants to manage directory #{dir}," \
-    " which is already managed by\n\n\t#{existing_loader.inspect}"
+    require "pp"
+    "loader\n\n#{loader.pretty_inspect}\n\nwants to manage directory #{dir}," \
+    " which is already managed by\n\n#{existing_loader.pretty_inspect}\n"
   end
 
   test "raises if an existing loader manages the same root dir" do

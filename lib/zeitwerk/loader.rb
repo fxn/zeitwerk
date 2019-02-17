@@ -556,9 +556,10 @@ module Zeitwerk
 
         loader.dirs.each do |already_managed_dir|
           if dir.start_with?(already_managed_dir) || already_managed_dir.start_with?(dir)
+            require "pp"
             raise ConflictingDirectory,
-              "loader\n\n\t#{inspect}\n\nwants to manage directory #{dir}," \
-              " which is already managed by\n\n\t#{loader.inspect}"
+              "loader\n\n#{pretty_inspect}\n\nwants to manage directory #{dir}," \
+              " which is already managed by\n\n#{loader.pretty_inspect}\n"
             EOS
           end
         end
