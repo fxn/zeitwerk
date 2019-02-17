@@ -9,9 +9,7 @@ class TestGemInflector < LoaderTest
       ["lib/my_gem/ns/version.rb", "MyGem::Ns::Version = true"]
     ]
     with_files(files) do
-      loader.push_dir("lib")
-      loader.setup
-
+      require "./lib/my_gem"
       yield
     end
   end

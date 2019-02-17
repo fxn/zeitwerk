@@ -145,9 +145,10 @@ module Zeitwerk
     # @param path [<String, Pathname>]
     # @return [void]
     def push_dir(path)
-      abspath = File.expand_path(path)
-      mutex.synchronize do
+      self.class.mutex.synchronize do
+        abspath = File.expand_path(path)
         if dir?(abspath)
+          raise_if_conflicting_directory(abspath)
           root_dirs[abspath] = true
         else
           raise ArgumentError, "the root directory #{abspath} does not exist"
@@ -284,6 +285,10 @@ module Zeitwerk
       # @return [#call, nil]
       attr_accessor :default_logger
 
+      # @private
+      # @return [Mutex]
+      attr_accessor :mutex
+
       # This is a shortcut for
       #
       #   require "zeitwerk"
@@ -315,6 +320,8 @@ module Zeitwerk
         Registry.loaders.flat_map(&:dirs).freeze
       end
     end
+
+    self.mutex = Mutex.new
 
     # --- Callbacks -------------------------------------------------------------------------------
 
@@ -540,6 +547,21 @@ module Zeitwerk
 
     def cdef?(parent, cname)
       parent.const_defined?(cname, false)
+    end
+
+    def raise_if_conflicting_directory(dir)
+      Registry.loaders.each do |loader|
+        next if loader == self
+
+        loader.dirs.each do |already_managed_dir|
+          if dir.start_with?(already_managed_dir) || already_managed_dir.start_with?(dir)
+            raise ConflictingDirectory,
+              "loader\n\n\t#{inspect}\n\nwants to manage directory #{dir}," \
+              " which is already managed by\n\n\t#{loader.inspect}"
+            EOS
+          end
+        end
+      end
     end
   end
 end
