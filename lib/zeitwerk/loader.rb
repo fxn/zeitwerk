@@ -98,6 +98,8 @@ module Zeitwerk
     attr_reader :tracer
 
     def initialize
+      @initialized_at = Time.now
+
       @tag       = SecureRandom.hex(3)
       @inflector = Inflector.new
       @logger    = self.class.default_logger
