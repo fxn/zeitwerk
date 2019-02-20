@@ -1,7 +1,9 @@
 # Zeitwerk
 
-[![Gem Version](https://badge.fury.io/rb/zeitwerk.svg)](https://badge.fury.io/rb/zeitwerk)
-[![Build Status](https://travis-ci.com/fxn/zeitwerk.svg?branch=master)](https://travis-ci.com/fxn/zeitwerk)
+
+
+[![Gem Version](https://img.shields.io/gem/v/zeitwerk.svg?style=for-the-badge)](https://img.shields.io/gem/v/zeitwerk.svg?style=for-the-badge)
+[![Build Status](https://img.shields.io/travis/com/fxn/zeitwerk.svg?style=for-the-badge)](https://img.shields.io/travis/com/fxn/zeitwerk.svg?style=for-the-badge)
 
 <!-- TOC -->
 
