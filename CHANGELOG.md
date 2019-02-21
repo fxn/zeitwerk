@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.3.0 (Unreleased)
+
+* In addition to callables, loggers can now also be any object that responds to
+  `debug`, which accepts one string argument.
+
 ## 1.2.0 (14 February 2019)
 
 * Use `pretty_print` in the exception message for conflicting directories.

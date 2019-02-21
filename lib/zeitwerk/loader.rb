@@ -11,7 +11,7 @@ module Zeitwerk
     # @return [#camelize]
     attr_accessor :inflector
 
-    # @return [#call, nil]
+    # @return [#call, #debug, nil]
     attr_accessor :logger
 
     # Absolute paths of the root directories. Stored in a hash to preserve
@@ -535,7 +535,8 @@ module Zeitwerk
     # @param message [String]
     # @return [void]
     def log(message)
-      logger.call("Zeitwerk@#{tag}: #{message}")
+      method_name = logger.respond_to?(:debug) ? :debug : :call
+      logger.send(method_name, "Zeitwerk@#{tag}: #{message}")
     end
 
     def enable_tracer

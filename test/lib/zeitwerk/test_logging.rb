@@ -12,13 +12,41 @@ class TestLogging < LoaderTest
     super
   end
 
+  def tagged_message(message)
+    "Zeitwerk@#{loader.tag}: #{message}"
+  end
+
   def assert_logged(expected)
     case expected
     when String
-      assert_output("Zeitwerk@#{loader.tag}: #{expected}") { yield }
+      assert_output(tagged_message(expected)) { yield }
     when Regexp
-      assert_output(/Zeitwerk@#{loader.tag}: #{expected}/) { yield }
+      assert_output(/#{tagged_message(expected)}/) { yield }
     end
+  end
+
+  test "accepts objects that respond to :call" do
+    logger = Object.new
+    def logger.call(message)
+      print message
+    end
+
+    loader.logger = logger
+
+    message = "test messag :call"
+    assert_logged(message) { loader.send(:log, message) }
+  end
+
+  test "accepts objects that respond to :debug" do
+    logger = Object.new
+    def logger.debug(message)
+      print message
+    end
+
+    loader.logger = logger
+
+    message = "test message :debug"
+    assert_logged(message) { loader.send(:log, message) }
   end
 
   test "new loaders get assigned the default global logger" do

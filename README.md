@@ -296,17 +296,27 @@ Zeitwerk is silent by default, but you can configure a callable as logger:
 
 ```ruby
 loader.logger = method(:puts)
+loader.logger = ->(msg) { ... }
 ```
 
-If there is a logger configured, the loader is going to print traces when autoloads are set, files loaded, and modules autovivified. While reloading, removed autoloads and unloaded objects are also traced.
+as well as anything that responds to `debug`:
 
-It is possible to set a global default this way:
+```ruby
+loader.logger = Logger.new($stderr)
+loader.logger = Rails.logger
+```
+
+In both cases, the corresponding methods are going to be passed exactly one argument with the message to be logged.
+
+It is also possible to set a global default this way:
 
 ```ruby
 Zeitwerk::Loader.default_logger = method(:puts)
 ```
 
-If your project has namespaces, you'll notice in the traces Zeitwerk sets autoloads for _directories_. That's a technique used to be able to descend into subdirectories on demand, avoiding that way unnecessary tree walks.
+If there is a logger configured, you'll see traces when autoloads are set, files loaded, and modules autovivified. While reloading, removed autoloads and unloaded objects are also traced.
+
+As a curiosity, if your project has namespaces you'll notice in the traces Zeitwerk sets autoloads for _directories_. That's a technique used to be able to descend into subdirectories on demand, avoiding that way unnecessary tree walks.
 
 #### Loader tag
 
