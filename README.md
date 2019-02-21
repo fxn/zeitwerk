@@ -2,8 +2,8 @@
 
 
 
-[![Gem Version](https://img.shields.io/gem/v/zeitwerk.svg?style=for-the-badge)](https://img.shields.io/gem/v/zeitwerk.svg?style=for-the-badge)
-[![Build Status](https://img.shields.io/travis/com/fxn/zeitwerk.svg?style=for-the-badge)](https://img.shields.io/travis/com/fxn/zeitwerk.svg?style=for-the-badge)
+[![Gem Version](https://img.shields.io/gem/v/zeitwerk.svg?style=for-the-badge)](https://rubygems.org/gems/zeitwerk)
+[![Build Status](https://img.shields.io/travis/com/fxn/zeitwerk.svg?style=for-the-badge)](https://travis-ci.com/fxn/zeitwerk)
 
 <!-- TOC -->
 
