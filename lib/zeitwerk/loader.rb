@@ -276,7 +276,7 @@ module Zeitwerk
       end
     end
 
-    # Says if the given constant path as been loaded.
+    # Says if the given constant path has been loaded.
     #
     # @param cpath [String]
     # @return [Boolean]
