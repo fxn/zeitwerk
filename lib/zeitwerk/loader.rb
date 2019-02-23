@@ -143,14 +143,12 @@ module Zeitwerk
     # @param path [<String, Pathname>]
     # @return [void]
     def push_dir(path)
-      self.class.mutex.synchronize do
-        abspath = File.expand_path(path)
-        if dir?(abspath)
-          raise_if_conflicting_directory(abspath)
-          root_dirs[abspath] = true
-        else
-          raise ArgumentError, "the root directory #{abspath} does not exist"
-        end
+      abspath = File.expand_path(path)
+      if dir?(abspath)
+        raise_if_conflicting_directory(abspath)
+        root_dirs[abspath] = true
+      else
+        raise ArgumentError, "the root directory #{abspath} does not exist"
       end
     end
 
@@ -566,16 +564,18 @@ module Zeitwerk
     end
 
     def raise_if_conflicting_directory(dir)
-      Registry.loaders.each do |loader|
-        next if loader == self
+      self.class.mutex.synchronize do
+        Registry.loaders.each do |loader|
+          next if loader == self
 
-        loader.dirs.each do |already_managed_dir|
-          if dir.start_with?(already_managed_dir) || already_managed_dir.start_with?(dir)
-            require "pp"
-            raise ConflictingDirectory,
-              "loader\n\n#{pretty_inspect}\n\nwants to manage directory #{dir}," \
-              " which is already managed by\n\n#{loader.pretty_inspect}\n"
-            EOS
+          loader.dirs.each do |already_managed_dir|
+            if dir.start_with?(already_managed_dir) || already_managed_dir.start_with?(dir)
+              require "pp"
+              raise ConflictingDirectory,
+                "loader\n\n#{pretty_inspect}\n\nwants to manage directory #{dir}," \
+                " which is already managed by\n\n#{loader.pretty_inspect}\n"
+              EOS
+            end
           end
         end
       end
