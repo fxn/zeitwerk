@@ -36,7 +36,6 @@ class TestUnload < LoaderTest
     ]
     with_setup(files) do
       assert User
-      assert Admin::Root
 
       assert !loader.autoloads.empty?
       assert !loader.loaded.empty?

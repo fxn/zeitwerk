@@ -5,6 +5,9 @@ require "securerandom"
 
 module Zeitwerk
   class Loader
+    require_relative "loader/callbacks"
+    include Callbacks
+
     # @return [String]
     attr_reader :tag
 
@@ -322,50 +325,6 @@ module Zeitwerk
     end
 
     self.mutex = Mutex.new
-
-    # --- Callbacks -------------------------------------------------------------------------------
-
-    # Callback invoked from our decorated Kernel#require when a managed file is
-    # loaded.
-    #
-    # @private
-    # @param file [String]
-    # @return [void]
-    def on_file_loaded(file)
-      parent, cname = autoloads[file]
-      loaded.add(cpath(parent, cname))
-      log("constant #{cpath(parent, cname)} loaded from file #{file}") if logger
-    end
-
-    # Callback invoked from our decorated Kernel#require when a managed
-    # directory is loaded.
-    #
-    # @private
-    # @param dir [String]
-    # @return [void]
-    def on_dir_loaded(dir)
-      parent, cname = autoloads[dir]
-
-      autovivified_module = parent.const_set(cname, Module.new)
-      log("module #{autovivified_module.name} autovivified from directory #{dir}") if logger
-
-      loaded.add(autovivified_module.name)
-      on_namespace_loaded(autovivified_module)
-    end
-
-    # Callback invoked when a class or module is defined, either from the tracer
-    # or from module autovivification. If the namespace has matching
-    # subdirectories, we descend into them now.
-    #
-    # @param namespace [Module]
-    # @return [void]
-    def on_namespace_loaded(namespace)
-      if namespace_subdirs = lazy_subdirs[namespace.name]
-        namespace_subdirs.each do |subdir|
-          set_autoloads_in_dir(subdir, namespace)
-        end
-      end
-    end
 
     private # -------------------------------------------------------------------------------------
 
