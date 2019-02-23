@@ -226,6 +226,7 @@ module Zeitwerk
           # array lookups, since directories are not stored in $LOADED_FEATURES.
           $LOADED_FEATURES.delete(path) if ruby?(path)
         end
+
         autoloads.clear
         loaded.clear
         lazy_subdirs.clear
