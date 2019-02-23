@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.3.1 (23 February 2019)
+
+* After module vivification, the tracer could trigger one unnecessary autoload walk.
+
 ## 1.3.0 (21 February 2019)
 
 * In addition to callables, loggers can now also be any object that responds to `debug`, which accepts one string argument.
