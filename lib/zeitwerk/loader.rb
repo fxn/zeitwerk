@@ -331,7 +331,8 @@ module Zeitwerk
 
     # --- Callbacks -------------------------------------------------------------------------------
 
-    # Callback invoked from Kernel when a managed file is loaded.
+    # Callback invoked from our decorated Kernel#require when a managed file is
+    # loaded.
     #
     # @private
     # @param file [String]
@@ -342,7 +343,8 @@ module Zeitwerk
       log("constant #{cpath(parent, cname)} loaded from file #{file}") if logger
     end
 
-    # Callback invoked from Kernel when a managed directory is loaded.
+    # Callback invoked from our decorated Kernel#require when a managed
+    # directory is loaded.
     #
     # @private
     # @param dir [String]
