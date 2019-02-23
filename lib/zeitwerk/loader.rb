@@ -117,11 +117,7 @@ module Zeitwerk
       @eager_loaded = false
 
       @tracer = TracePoint.new(:class) do |tp|
-        unless lazy_subdirs.empty? # do not even compute the hash key if not needed
-          if subdirs = lazy_subdirs.delete(tp.self.name)
-            subdirs.each { |subdir| set_autoloads_in_dir(subdir, tp.self) }
-          end
-        end
+        set_autoloads_in_namespace(tp.self)
       end
 
       Registry.register_loader(self)
@@ -356,10 +352,7 @@ module Zeitwerk
       log("module #{autovivified_module.name} autovivified from directory #{dir}") if logger
 
       loaded.add(autovivified_module.name)
-
-      if subdirs = lazy_subdirs[autovivified_module.name]
-        subdirs.each { |subdir| set_autoloads_in_dir(subdir, autovivified_module) }
-      end
+      set_autoloads_in_namespace(autovivified_module)
     end
 
     private # -------------------------------------------------------------------------------------
@@ -385,6 +378,20 @@ module Zeitwerk
           # the `app/models/concerns` directory is totally ignored as a namespace,
           # it counts only as root. The guard checks that.
           autoload_subdir(parent, cname, abspath) unless root_dirs.key?(abspath)
+        end
+      end
+    end
+
+    # Called when a class or module is defined, either from the tracer or from
+    # module autovivification. If the namespace has matching subdirectories, we
+    # descend into them now.
+    #
+    # @param namespace [Module]
+    # @return [void]
+    def set_autoloads_in_namespace(namespace)
+      if namespace_subdirs = lazy_subdirs[namespace.name]
+        namespace_subdirs.each do |subdir|
+          set_autoloads_in_dir(subdir, namespace)
         end
       end
     end
