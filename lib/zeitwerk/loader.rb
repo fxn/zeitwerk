@@ -192,12 +192,13 @@ module Zeitwerk
     # @return [void]
     def setup
       mutex.synchronize do
-        unless @setup
-          expand_ignored_glob_patterns
-          non_ignored_root_dirs.each { |root_dir| set_autoloads_in_dir(root_dir, Object) }
-          do_preload
-          @setup = true
-        end
+        break if @setup
+
+        expand_ignored_glob_patterns
+        non_ignored_root_dirs.each { |root_dir| set_autoloads_in_dir(root_dir, Object) }
+        do_preload
+
+        @setup = true
       end
     end
 
