@@ -287,7 +287,7 @@ module Zeitwerk
     # --- Class methods ---------------------------------------------------------------------------
 
     class << self
-      # @return [#call, nil]
+      # @return [#call, #debug, nil]
       attr_accessor :default_logger
 
       # @private
