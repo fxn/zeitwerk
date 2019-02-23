@@ -298,6 +298,7 @@ module Zeitwerk
       #
       #   require "zeitwerk"
       #   loader = Zeitwerk::Loader.new
+      #   loader.tag = File.basename(__FILE__, ".rb")
       #   loader.inflector = Zeitwerk::GemInflector.new
       #   loader.push_dir(__dir__)
       #
