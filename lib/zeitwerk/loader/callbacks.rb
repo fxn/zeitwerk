@@ -4,7 +4,7 @@ module Zeitwerk::Loader::Callbacks
   # @private
   # @param file [String]
   # @return [void]
-  def on_file_loaded(file)
+  def on_file_autoloaded(file)
     parent, cname = autoloads[file]
     loaded.add(cpath(parent, cname))
     log("constant #{cpath(parent, cname)} loaded from file #{file}") if logger
@@ -16,7 +16,7 @@ module Zeitwerk::Loader::Callbacks
   # @private
   # @param dir [String]
   # @return [void]
-  def on_dir_loaded(dir)
+  def on_dir_autoloaded(dir)
     parent, cname = autoloads[dir]
 
     autovivified_module = parent.const_set(cname, Module.new)

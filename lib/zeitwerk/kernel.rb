@@ -14,17 +14,17 @@ module Kernel
     if loader = Zeitwerk::Registry.loader_for(path)
       if path.end_with?(".rb")
         zeitwerk_original_require(path).tap do |required|
-          loader.on_file_loaded(path) if required
+          loader.on_file_autoloaded(path) if required
         end
       else
-        loader.on_dir_loaded(path)
+        loader.on_dir_autoloaded(path)
       end
     else
       zeitwerk_original_require(path).tap do |required|
         if required
           realpath = $LOADED_FEATURES.last
           if loader = Zeitwerk::Registry.loader_for(realpath)
-            loader.on_file_loaded(realpath)
+            loader.on_file_autoloaded(realpath)
           end
         end
       end
