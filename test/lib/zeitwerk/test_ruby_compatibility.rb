@@ -33,6 +33,26 @@ class TestRubyCompatibility < LoaderTest
     end
   end
 
+  # Zeitwerk has to be called as soon as explicit namespaces are defined, to be
+  # able to configure autoloads for their children before the class or module
+  # body is interpreted. If explicit namespaces are found, Zeitwerk sets a trace
+  # point on the :class event with that purpose.
+  #
+  # This is key because the body could reference child constants at the
+  # top-level, mixins are a common use case.
+  test "TracePoint emits :class events" do
+    called = false
+
+    tp = TracePoint.new(:class) { called = true }
+    tp.enable
+
+    class C; end
+    assert called
+
+    tp.disable
+    self.class.send(:remove_const, :C)
+  end
+
   # While unloading constants we leverage this property to avoid lookups in
   # $LOADED_FEATURES for strings that we know are not going to be there.
   test "directories are not included in $LOADED_FEATURES" do
