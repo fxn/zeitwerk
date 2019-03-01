@@ -84,7 +84,7 @@ class TestRubyCompatibility < LoaderTest
   # just set the autoload again, and change the target file.
   #
   # This way, we do not need to keep state or do an a posteriori pass, can set
-  # autoloads lineraly as scanning progresses.
+  # autoloads linearly as scanning progresses.
   test "an autoload can be overridden" do
     files = [
       ["x0/x.rb", "X = 0"],
