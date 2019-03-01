@@ -53,6 +53,16 @@ class TestRubyCompatibility < LoaderTest
     self.class.send(:remove_const, :C)
   end
 
+  # We configure autoloads on directories to autovivify modules on demand, and
+  # lazily descend to set autoloads for their children. This is more efficient,
+  # specially for large code bases.
+  test "you can set autoloads on directories" do
+    files = ["admin/users_controller.rb", "class UsersController; end"]
+    with_setup(files) do
+      assert_equal "#{Dir.pwd}/admin", Object.autoload?(:Admin)
+    end
+  end
+
   # While unloading constants we leverage this property to avoid lookups in
   # $LOADED_FEATURES for strings that we know are not going to be there.
   test "directories are not included in $LOADED_FEATURES" do
