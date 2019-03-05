@@ -92,14 +92,6 @@ module Zeitwerk
     # @return [Mutex]
     attr_reader :mutex
 
-    # This tracer listens to `:class` events, and it is used to support explicit
-    # namespaces. Benchmarks have shown the tracer does not impact performance
-    # in any measurable way.
-    #
-    # @private
-    # @return [TracePoint]
-    attr_reader :tracer
-
     def initialize
       @initialized_at = Time.now
 
@@ -118,10 +110,6 @@ module Zeitwerk
       @mutex        = Mutex.new
       @setup        = false
       @eager_loaded = false
-
-      @tracer = TracePoint.new(:class) do |tp|
-        on_namespace_loaded(tp.self)
-      end
 
       Registry.register_loader(self)
     end
@@ -230,8 +218,8 @@ module Zeitwerk
         lazy_subdirs.clear
 
         Registry.on_unload(self)
+        ExplicitNamespace.unregister(self)
 
-        disable_tracer
         @setup = false
       end
     end
@@ -268,7 +256,6 @@ module Zeitwerk
           end
         end
 
-        disable_tracer
         @eager_loaded = true
       end
     end
@@ -359,11 +346,12 @@ module Zeitwerk
     # @return [void]
     def autoload_subdir(parent, cname, subdir)
       if autoload_path = autoload_for?(parent, cname)
-        enable_tracer if ruby?(autoload_path)
+        cpath = cpath(parent, cname)
+        register_explicit_namespace(cpath) if ruby?(autoload_path)
         # We do not need to issue another autoload, the existing one is enough
         # no matter if it is for a file or a directory. Just remember the
         # subdirectory has to be visited if the namespace is used.
-        (lazy_subdirs[cpath(parent, cname)] ||= []) << subdir
+        (lazy_subdirs[cpath] ||= []) << subdir
       elsif !cdef?(parent, cname)
         # First time we find this namespace, set an autoload for it.
         (lazy_subdirs[cpath(parent, cname)] ||= []) << subdir
@@ -390,7 +378,7 @@ module Zeitwerk
         Registry.unregister_autoload(autoload_path)
 
         set_autoload(parent, cname, file)
-        enable_tracer
+        register_explicit_namespace(cpath(parent, cname))
       elsif !cdef?(parent, cname)
         set_autoload(parent, cname, file)
       end
@@ -508,18 +496,12 @@ module Zeitwerk
       logger.send(method_name, "Zeitwerk@#{tag}: #{message}")
     end
 
-    def enable_tracer
-      # We check enabled? because, looking at the C source code, enabling an
-      # enabled tracer does not seem to be a simple no-op.
-      tracer.enable if !tracer.enabled?
-    end
-
-    def disable_tracer
-      tracer.disable if tracer.enabled?
-    end
-
     def cdef?(parent, cname)
       parent.const_defined?(cname, false)
+    end
+
+    def register_explicit_namespace(cpath)
+      ExplicitNamespace.register(cpath, self)
     end
 
     def raise_if_conflicting_directory(dir)

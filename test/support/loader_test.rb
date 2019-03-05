@@ -8,9 +8,8 @@ class LoaderTest < Minitest::Test
   end
 
   def teardown
-    Zeitwerk::Registry.loaders.each(&:unload)
-    Zeitwerk::Registry.loaders.clear
-    Zeitwerk::Registry.loaders_managing_gems.clear
+    Zeitwerk::Registry.teardown
+    Zeitwerk::ExplicitNamespace.teardown
   end
 
   def mkdir_test

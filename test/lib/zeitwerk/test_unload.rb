@@ -57,4 +57,50 @@ class TestUnload < LoaderTest
       loader.unload # should not raise
     end
   end
+
+  test "already existing namespaces are not reset" do
+    files = [
+      ["lib/active_storage.rb", "module ActiveStorage; end"],
+      ["app/models/active_storage/blob.rb", "class ActiveStorage::Blob; end"]
+    ]
+    with_files(files) do
+      with_load_path("lib") do
+        begin
+          require "active_storage"
+
+          loader.push_dir("app/models")
+          loader.setup
+
+          assert ActiveStorage::Blob
+          loader.unload
+          assert ActiveStorage
+        ensure
+          delete_loaded_feature("lib/active_storage.rb")
+          Object.send(:remove_const, :ActiveStorage)
+        end
+      end
+    end
+  end
+
+  test "unload clears explicit namespaces associated" do
+    files = [
+      ["a/m.rb", "module M; end"], ["a/m/n.rb", "M::N = true"],
+      ["b/x.rb", "module X; end"], ["b/x/y.rb", "X::Y = true"],
+    ]
+    with_files(files) do
+      la = Zeitwerk::Loader.new
+      la.push_dir("a")
+      la.setup
+      assert Zeitwerk::ExplicitNamespace.cpaths["M"] == la
+
+      lb = Zeitwerk::Loader.new
+      lb.push_dir("b")
+      lb.setup
+      assert Zeitwerk::ExplicitNamespace.cpaths["X"] == lb
+
+      la.unload
+      assert_nil Zeitwerk::ExplicitNamespace.cpaths["M"]
+      assert Zeitwerk::ExplicitNamespace.cpaths["X"] == lb
+    end
+  end
 end

@@ -150,6 +150,8 @@ class Hotel < ApplicationRecord
 end
 ```
 
+An explicit namespace must be managed by one single loader. Loaders that reopen namespaces owned by other projects are responsible for loading their constants before setup.
+
 ### Nested root directories
 
 Root directories should not be ideally nested, but Zeitwerk supports them because in Rails, for example, both `app/models` and `app/models/concerns` belong to the autoload paths.

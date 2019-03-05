@@ -137,6 +137,16 @@ module Zeitwerk
         autoloads.delete_if { |_path, object| object == loader }
         inceptions.delete_if { |_cpath, (_path, object)| object == loader }
       end
+
+      # Utility for the test suite
+      #
+      # @private
+      # @return [void]
+      def teardown
+        loaders.each(&:unload)
+        loaders.clear
+        loaders_managing_gems.clear
+      end
     end
 
     @loaders               = []

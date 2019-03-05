@@ -4,6 +4,7 @@ class TestAutovivification < LoaderTest
   test "autoloads a simple constant in an autovivified module" do
     files = [["admin/x.rb", "Admin::X = true"]]
     with_setup(files) do
+      assert_kind_of Module, Admin
       assert Admin::X
     end
   end
