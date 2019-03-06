@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 1.3.2 (Unreleased)
+## 1.3.2 (6 March 2019)
 
 * Improved documentation.
 
