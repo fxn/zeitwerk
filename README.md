@@ -60,7 +60,9 @@ Main interface for gems:
 # lib/my_gem.rb (main file)
 
 require "zeitwerk"
-Zeitwerk::Loader.for_gem.setup # ready!
+loader = Zeitwerk::Loader.for_gem
+loader.setup # ready!
+# loader.eager_load, optionally
 
 module MyGem
   # ...
@@ -174,6 +176,8 @@ Loaders are ready to load code right after calling `setup` on them:
 loader.setup
 ```
 
+This method is synchronized and idempotent.
+
 Customization should generally be done before that call. In particular, in the generic interface you may set the root directories from which you want to load files:
 
 ```ruby
@@ -214,6 +218,8 @@ loader.eager_load
 
 That skips ignored files and directories.
 
+Eager loading is synchronized and idempotent.
+
 If you want to eager load yourself and all dependencies using Zeitwerk, you can broadcast the `eager_load` call to all instances:
 
 ```ruby
@@ -221,6 +227,8 @@ Zeitwerk::Loader.eager_load_all
 ```
 
 This may be handy in top-level services, like web applications.
+
+Note that thanks to idempotence `Zeitwerk::Loader.eager_load_all` won't eager load twice if any of the instances already eager loaded.
 
 ### Preloading
 

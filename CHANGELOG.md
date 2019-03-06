@@ -2,6 +2,8 @@
 
 ## 1.3.2 (Unreleased)
 
+* Improved documentation.
+
 * Zeitwerk creates at most one trace point per process, instead of one per loader. This is more performant when there are multiple gems managed by Zeitwerk.
 
 ## 1.3.1 (23 February 2019)
