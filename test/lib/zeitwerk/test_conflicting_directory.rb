@@ -13,10 +13,6 @@ class TestConflictingDirectory < LoaderTest
     @existing_loader ||= Zeitwerk::Loader.new
   end
 
-  def loader
-    @loader ||= Zeitwerk::Loader.new
-  end
-
   def conflicting_directory_message(dir)
     require "pp"
     "loader\n\n#{loader.pretty_inspect}\n\nwants to manage directory #{dir}," \

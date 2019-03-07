@@ -42,7 +42,6 @@ class TestTopLevel < LoaderTest
       assert_equal 1, ::X
       loader.reload
       assert_equal 1, ::X
-      Object.send(:remove_const, :X)
     end
   end
 

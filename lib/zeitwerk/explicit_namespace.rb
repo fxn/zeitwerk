@@ -47,15 +47,6 @@ module Zeitwerk
         disable_tracer_if_unneeded
       end
 
-      # Utility for the test suite
-      #
-      # @private
-      # @return [void]
-      def teardown
-        cpaths.clear
-        tracer.disable
-      end
-
       def disable_tracer_if_unneeded
         mutex.synchronize do
           tracer.disable if cpaths.empty?
