@@ -47,15 +47,6 @@ module Zeitwerk
         disable_tracer_if_unneeded
       end
 
-      # Utility for the test suite
-      #
-      # @private
-      # @return [void]
-      def teardown
-        cpaths.clear
-        tracer.disable
-      end
-
       def disable_tracer_if_unneeded
         mutex.synchronize do
           tracer.disable if cpaths.empty?
@@ -67,7 +58,7 @@ module Zeitwerk
     @mutex  = Mutex.new
     @tracer = TracePoint.new(:class) do |event|
       # Note that it makes sense to compute the hash code unconditionally,
-      # because if cpaths was empty the trace point would be disabled.
+      # because the trace point is disabled if cpaths is empty.
       if loader = cpaths.delete(event.self.name)
         loader.on_namespace_loaded(event.self)
         disable_tracer_if_unneeded

@@ -7,9 +7,24 @@ class LoaderTest < Minitest::Test
     @loader = Zeitwerk::Loader.new
   end
 
+  def reset_constants
+    Zeitwerk::Registry.loaders.each(&:unload)
+  end
+
+  def reset_registry
+    Zeitwerk::Registry.loaders.clear
+    Zeitwerk::Registry.loaders_managing_gems.clear
+  end
+
+  def reset_explicit_namespace
+    Zeitwerk::ExplicitNamespace.cpaths.clear
+    Zeitwerk::ExplicitNamespace.tracer.disable
+  end
+
   def teardown
-    Zeitwerk::Registry.teardown
-    Zeitwerk::ExplicitNamespace.teardown
+    reset_constants
+    reset_registry
+    reset_explicit_namespace
   end
 
   def mkdir_test
