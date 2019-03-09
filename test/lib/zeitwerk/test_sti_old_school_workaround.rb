@@ -31,11 +31,16 @@ class TestOldSchoolWorkaroundSTI < LoaderTest
   end
 
   def with_setup
+    original_verbose = $VERBOSE
     $VERBOSE = nil # To avoid circular require warnings.
+
     $test_sti_loaded = []
+
     super(files, load_path: ".") do
       yield
     end
+  ensure
+    $VERBOSE = original_verbose
   end
 
   def assert_all_loaded

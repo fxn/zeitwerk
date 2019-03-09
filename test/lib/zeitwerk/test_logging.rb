@@ -6,6 +6,12 @@ class TestLogging < LoaderTest
     loader.logger = method(:print)
   end
 
+  def teardown
+    Zeitwerk::Loader.default_logger = nil
+    loader.logger = nil
+    super
+  end
+
   def tagged_message(message)
     "Zeitwerk@#{loader.tag}: #{message}"
   end

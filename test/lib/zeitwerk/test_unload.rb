@@ -65,14 +65,19 @@ class TestUnload < LoaderTest
     ]
     with_files(files) do
       with_load_path("lib") do
-        require "active_storage"
+        begin
+          require "active_storage"
 
-        loader.push_dir("app/models")
-        loader.setup
+          loader.push_dir("app/models")
+          loader.setup
 
-        assert ActiveStorage::Blob
-        loader.unload
-        assert ActiveStorage
+          assert ActiveStorage::Blob
+          loader.unload
+          assert ActiveStorage
+        ensure
+          delete_loaded_feature("lib/active_storage.rb")
+          Object.send(:remove_const, :ActiveStorage)
+        end
       end
     end
   end

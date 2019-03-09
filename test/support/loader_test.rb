@@ -1,5 +1,5 @@
 class LoaderTest < Minitest::Test
-  TMP_DIR = File.expand_path("../tmp", __dir__).freeze
+  TMP_DIR = File.expand_path("../tmp", __dir__)
 
   attr_reader :loader
 
@@ -7,9 +7,18 @@ class LoaderTest < Minitest::Test
     @loader = Zeitwerk::Loader.new
   end
 
-  def with_files(files, rm: true)
+  def teardown
+    Zeitwerk::Registry.teardown
+    Zeitwerk::ExplicitNamespace.teardown
+  end
+
+  def mkdir_test
     FileUtils.rm_rf(TMP_DIR)
     FileUtils.mkdir_p(TMP_DIR)
+  end
+
+  def with_files(files, rm: true)
+    mkdir_test
 
     Dir.chdir(TMP_DIR) do
       files.each do |fname, contents|
@@ -20,7 +29,7 @@ class LoaderTest < Minitest::Test
       begin
         yield
       ensure
-        FileUtils.rm_rf(TMP_DIR) if rm
+        mkdir_test if rm
       end
     end
   end

@@ -15,6 +15,8 @@ class TestRequireInteraction < LoaderTest
       with_load_path(".") do
         assert_required "user"
         assert_not_required "user"
+        delete_loaded_feature("user.rb")
+        Object.send(:remove_const, :User)
       end
     end
   end

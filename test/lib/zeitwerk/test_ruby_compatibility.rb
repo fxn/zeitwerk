@@ -12,16 +12,24 @@ class TestRubyCompatibility < LoaderTest
       $trc_require_has_been_called = false
       $trc_autoload_path = File.expand_path("x.rb")
 
-      Kernel.module_eval do
-        alias_method :trc_original_require, :require
-        def require(path)
-          $trc_require_has_been_called = true if path == $trc_autoload_path
-          trc_original_require(path)
+      begin
+        Kernel.module_eval do
+          alias_method :trc_original_require, :require
+          def require(path)
+            $trc_require_has_been_called = true if path == $trc_autoload_path
+            trc_original_require(path)
+          end
+        end
+
+        assert X
+        assert $trc_require_has_been_called
+      ensure
+        Kernel.module_eval do
+          remove_method :require
+          define_method :require, instance_method(:trc_original_require)
+          remove_method :trc_original_require
         end
       end
-
-      assert X
-      assert $trc_require_has_been_called
     end
   end
 
@@ -40,6 +48,9 @@ class TestRubyCompatibility < LoaderTest
 
     class C; end
     assert called
+
+    tp.disable
+    self.class.send(:remove_const, :C)
   end
 
   # We configure autoloads on directories to autovivify modules on demand, and
@@ -85,6 +96,7 @@ class TestRubyCompatibility < LoaderTest
 
       assert_equal 1, X
     end
+    Object.send(:remove_const, :X)
   end
 
   # I believe Zeitwerk does not exploit this one now. Let's leave it here to
@@ -126,6 +138,8 @@ class TestRubyCompatibility < LoaderTest
       assert Object.autoload?(:X)
       assert X
       assert !Object.autoload?(:X)
+      assert Object.send(:remove_const, :X)
+      assert delete_loaded_feature("x.rb")
     end
   end
 
@@ -148,9 +162,13 @@ class TestRubyCompatibility < LoaderTest
     files = [["foo.rb", "NOT_FOO = 1"]]
     with_files(files) do
       with_load_path(Dir.pwd) do
-        Object.autoload(:Foo, "foo")
-        assert_raises(NameError) { Foo }
-        assert_nil Object.send(:remove_const, :Foo)
+        begin
+          Object.autoload(:Foo, "foo")
+          assert_raises(NameError) { Foo }
+          Object.send(:remove_const, :Foo)
+          Object.send(:remove_const, :NOT_FOO)
+          delete_loaded_feature("foo.rb")
+        end
       end
     end
   end
@@ -216,5 +234,9 @@ class TestRubyCompatibility < LoaderTest
     end
 
     assert_equal [C, M, C, M], traced
+
+    tracer.disable
+    self.class.send(:remove_const, :C)
+    self.class.send(:remove_const, :M)
   end
 end

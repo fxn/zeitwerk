@@ -11,8 +11,6 @@ GEM
     minitest (5.11.3)
     minitest-focus (1.1.2)
       minitest (>= 4, < 6)
-    minitest-fork_executor (1.0.1)
-      minitest
     minitest-reporters (1.3.5)
       ansi
       builder
@@ -27,7 +25,6 @@ PLATFORMS
 DEPENDENCIES
   minitest
   minitest-focus
-  minitest-fork_executor
   minitest-reporters
   rake
   zeitwerk!
