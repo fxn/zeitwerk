@@ -10,13 +10,16 @@ class TestRequireInteraction < LoaderTest
   end
 
   test "our decorated require returns true or false as expected" do
+    on_teardown do
+      remove_const :User
+      delete_loaded_feature "user.rb"
+    end
+
     files = [["user.rb", "class User; end"]]
     with_files(files) do
       with_load_path(".") do
         assert_required "user"
         assert_not_required "user"
-        delete_loaded_feature("user.rb")
-        Object.send(:remove_const, :User)
       end
     end
   end

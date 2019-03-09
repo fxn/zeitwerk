@@ -41,16 +41,18 @@ class TestRubyCompatibility < LoaderTest
   # This is key because the body could reference child constants at the
   # top-level, mixins are a common use case.
   test "TracePoint emits :class events" do
+    on_teardown do
+      @tp.disable
+      remove_const :C, from: self.class
+    end
+
     called = false
 
-    tp = TracePoint.new(:class) { called = true }
-    tp.enable
+    @tp = TracePoint.new(:class) { called = true }
+    @tp.enable
 
     class C; end
     assert called
-
-    tp.disable
-    self.class.send(:remove_const, :C)
   end
 
   # We configure autoloads on directories to autovivify modules on demand, and
@@ -86,6 +88,8 @@ class TestRubyCompatibility < LoaderTest
   # This way, we do not need to keep state or do an a posteriori pass, can set
   # autoloads linearly as scanning progresses.
   test "an autoload can be overridden" do
+    on_teardown { remove_const :X }
+
     files = [
       ["x0/x.rb", "X = 0"],
       ["x1/x.rb", "X = 1"]
@@ -96,12 +100,13 @@ class TestRubyCompatibility < LoaderTest
 
       assert_equal 1, X
     end
-    Object.send(:remove_const, :X)
   end
 
   # I believe Zeitwerk does not exploit this one now. Let's leave it here to
   # keep track of undocumented corner cases anyway.
   test "const_defined? is true for autoloads and does not load the file, if the file exists" do
+    on_teardown { remove_const :X }
+
     files = [["x.rb", "$const_defined_does_not_trigger_autoload = false; X = true"]]
     with_files(files) do
       $const_defined_does_not_trigger_autoload = true
@@ -109,20 +114,19 @@ class TestRubyCompatibility < LoaderTest
 
       assert Object.const_defined?(:X, false)
       assert $const_defined_does_not_trigger_autoload
-      assert_nil Object.send(:remove_const, :X)
     end
   end
 
   # Unloading removes autoloads by calling remove_const. It is convenient that
   # remove_const does not execute the autoload because it would be surprising,
-  # and slower, those unused files got loaded precisely while unloading.
+  # and slower, that those unused files got loaded precisely while unloading.
   test "remove_const does not trigger an autoload" do
     files = [["x.rb", "$remove_const_does_not_trigger_autoload = false; X = 1"]]
     with_files(files) do
       $remove_const_does_not_trigger_autoload = true
       Object.autoload(:X, File.expand_path("x.rb"))
 
-      Object.send(:remove_const, :X)
+      remove_const :X
       assert $remove_const_does_not_trigger_autoload
     end
   end
@@ -131,6 +135,11 @@ class TestRubyCompatibility < LoaderTest
   # it is removing and autoload, and when it is unloading an actual loaded
   # object.
   test "autoloading removes the autoload configuration in the parent" do
+    on_teardown do
+      remove_const :X
+      delete_loaded_feature "x.rb"
+    end
+
     files = [["x.rb", "X = true"]]
     with_files(files) do
       Object.autoload(:X, File.expand_path("x.rb"))
@@ -138,8 +147,6 @@ class TestRubyCompatibility < LoaderTest
       assert Object.autoload?(:X)
       assert X
       assert !Object.autoload?(:X)
-      assert Object.send(:remove_const, :X)
-      assert delete_loaded_feature("x.rb")
     end
   end
 
@@ -151,7 +158,7 @@ class TestRubyCompatibility < LoaderTest
       Object.autoload(:X, File.expand_path("x.rb"))
 
       assert Object.autoload?(:X)
-      Object.send(:remove_const, :X)
+      remove_const :X
       assert !Object.autoload?(:X)
     end
   end
@@ -159,15 +166,18 @@ class TestRubyCompatibility < LoaderTest
   # Thanks to this the code that unloads can just blindly issue remove_const
   # calls without catching exceptions.
   test "remove_const works on constants with an autoload even if the file did not define them" do
+    on_teardown do
+      remove_const :Foo
+      remove_const :NOT_FOO
+      delete_loaded_feature "foo.rb"
+    end
+
     files = [["foo.rb", "NOT_FOO = 1"]]
     with_files(files) do
       with_load_path(Dir.pwd) do
         begin
           Object.autoload(:Foo, "foo")
           assert_raises(NameError) { Foo }
-          Object.send(:remove_const, :Foo)
-          Object.send(:remove_const, :NOT_FOO)
-          delete_loaded_feature("foo.rb")
         end
       end
     end
@@ -223,8 +233,14 @@ class TestRubyCompatibility < LoaderTest
   # This is why we issue a lazy_subdirs.delete call in the tracer block, to
   # ignore events triggered by reopenings.
   test "tracing :class calls you back on creation and on reopening" do
+    on_teardown do
+      @tracer.disable
+      remove_const :C, from: self.class
+      remove_const :M, from: self.class
+    end
+
     traced = []
-    tracer = TracePoint.trace(:class) do |tp|
+    @tracer = TracePoint.trace(:class) do |tp|
       traced << tp.self
     end
 
@@ -234,9 +250,5 @@ class TestRubyCompatibility < LoaderTest
     end
 
     assert_equal [C, M, C, M], traced
-
-    tracer.disable
-    self.class.send(:remove_const, :C)
-    self.class.send(:remove_const, :M)
   end
 end

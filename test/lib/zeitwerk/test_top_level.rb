@@ -36,13 +36,14 @@ class TestTopLevel < LoaderTest
   end
 
   test "does not autoload if the constant is already defined" do
+    on_teardown { remove_const :X }
+
     ::X = 1
     files = [["x.rb", "X = 2"]]
     with_setup(files) do
       assert_equal 1, ::X
       loader.reload
       assert_equal 1, ::X
-      Object.send(:remove_const, :X)
     end
   end
 

@@ -53,31 +53,31 @@ class TestUnload < LoaderTest
     files = [["x.rb", "X = true"]]
     with_setup(files) do
       assert X
-      assert Object.send(:remove_const, :X) # user removed by hand
+      assert remove_const(:X) # user removed the constant by hand
       loader.unload # should not raise
     end
   end
 
   test "already existing namespaces are not reset" do
+    on_teardown do
+      remove_const :ActiveStorage
+      delete_loaded_feature "active_storage.rb"
+    end
+
     files = [
       ["lib/active_storage.rb", "module ActiveStorage; end"],
       ["app/models/active_storage/blob.rb", "class ActiveStorage::Blob; end"]
     ]
     with_files(files) do
       with_load_path("lib") do
-        begin
-          require "active_storage"
+        require "active_storage"
 
-          loader.push_dir("app/models")
-          loader.setup
+        loader.push_dir("app/models")
+        loader.setup
 
-          assert ActiveStorage::Blob
-          loader.unload
-          assert ActiveStorage
-        ensure
-          delete_loaded_feature("lib/active_storage.rb")
-          Object.send(:remove_const, :ActiveStorage)
-        end
+        assert ActiveStorage::Blob
+        loader.unload
+        assert ActiveStorage
       end
     end
   end
