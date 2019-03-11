@@ -32,6 +32,22 @@ class TestExplicitNamespace < LoaderTest
     end
   end
 
+  test "similar name in a namespace and it's parent namespace, with the child name being reference first" do
+    files = [
+      ["app/models/pricing.rb", "class Pricing; X = 1; end"],
+      ["app/models/hotel.rb", "class Hotel; X = 1; end"],
+      ["app/models/hotel/pricing.rb", "class Hotel::Pricing; X = 2; end"],
+    ]
+    # Load order is very important here, if `::Pricing` is referenced before `::Hotel::Pricing`, the bug won't manifest
+    with_setup(files, dirs: %w(app/models)) do
+      assert_kind_of Class, Hotel
+      assert_kind_of Class, Hotel::Pricing
+      assert_kind_of Class, Pricing
+      assert_equal 1, Pricing::X
+      assert_equal 2, Hotel::Pricing::X
+    end
+  end
+
   # As of this writing, a tracer on the :class event does not seem to have any
   # performance penalty in an ordinary code base. But I prefer to precisely
   # control that we use a tracer only if needed in case this issue

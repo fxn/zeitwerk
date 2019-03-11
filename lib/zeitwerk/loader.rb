@@ -415,7 +415,15 @@ module Zeitwerk
     # @param cname [String]
     # @return [String, nil]
     def autoload_for?(parent, cname)
-      parent.autoload?(cname) || Registry.inception?(cpath(parent, cname))
+      if autoload_path = parent.autoload?(cname)
+        if parent.is_a?(Class)
+          autoload_path if parent.superclass.autoload?(cname) != autoload_path
+        else
+          autoload_path
+        end
+      else
+        Registry.inception?(cpath(parent, cname))
+      end
     end
 
     # This method is called this way because I prefer `preload` to be the method
