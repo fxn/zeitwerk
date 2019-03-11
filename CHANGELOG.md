@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.3.3 (12 March 2019)
+
+* Bug fix by @casperisfine: If the superclass or one of the ancestors of an explicit namespace `N` has an autoload set for constant `C`, and `n/c.rb` exists, the autoload for `N::C` proper could be missed.
+
 ## 1.3.2 (6 March 2019)
 
 * Improved documentation.
