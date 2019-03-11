@@ -32,19 +32,31 @@ class TestExplicitNamespace < LoaderTest
     end
   end
 
-  test "similar name in a namespace and it's parent namespace, with the child name being reference first" do
+  test "autoloads are set correctly, even if there are autoloads for the same cname in the superclass" do
     files = [
-      ["app/models/pricing.rb", "class Pricing; X = 1; end"],
-      ["app/models/hotel.rb", "class Hotel; X = 1; end"],
-      ["app/models/hotel/pricing.rb", "class Hotel::Pricing; X = 2; end"],
+      ["a.rb", "class A; end"],
+      ["a/x.rb", "A::X = :A"],
+      ["b.rb", "class B < A; end"],
+      ["b/x.rb", "B::X = :B"]
     ]
-    # Load order is very important here, if `::Pricing` is referenced before `::Hotel::Pricing`, the bug won't manifest
-    with_setup(files, dirs: %w(app/models)) do
-      assert_kind_of Class, Hotel
-      assert_kind_of Class, Hotel::Pricing
-      assert_kind_of Class, Pricing
-      assert_equal 1, Pricing::X
-      assert_equal 2, Hotel::Pricing::X
+    with_setup(files) do
+      assert_kind_of Class, A
+      assert_kind_of Class, B
+      assert_equal :B, B::X
+    end
+  end
+
+  test "autoloads are set correctly, even if there are autoloads for the same cname in other ancestors" do
+    files = [
+      ["m/x.rb", "M::X = :M"],
+      ["a.rb", "class A; include M; end"],
+      ["b.rb", "class B < A; end"],
+      ["b/x.rb", "B::X = :B"]
+    ]
+    with_setup(files) do
+      assert_kind_of Class, A
+      assert_kind_of Class, B
+      assert_equal :B, B::X
     end
   end
 

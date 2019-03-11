@@ -415,14 +415,36 @@ module Zeitwerk
     # @param cname [String]
     # @return [String, nil]
     def autoload_for?(parent, cname)
+      strict_autoload_path(parent, cname) || Registry.inception?(cpath(parent, cname))
+    end
+
+    # The autoload? predicate takes into account the ancestor chain of the
+    # receiver, like const_defined? and other methods in the constants API do.
+    #
+    # For example, given
+    #
+    #   class A
+    #     autoload :X, "x.rb"
+    #   end
+    #
+    #   class B < A
+    #   end
+    #
+    # B.autoload?(:X) returns "x.rb".
+    #
+    # We need a way to strictly check in parent ignoring ancestors.
+    #
+    # @param parent [Module]
+    # @param cname [String]
+    # @return [String, nil]
+    def strict_autoload_path(parent, cname)
       if autoload_path = parent.autoload?(cname)
-        if parent.is_a?(Class)
-          autoload_path if parent.superclass.autoload?(cname) != autoload_path
-        else
-          autoload_path
-        end
-      else
-        Registry.inception?(cpath(parent, cname))
+        # Due to the use cases we have, we are done if parent is a Module.
+        return autoload_path unless parent.is_a?(Class)
+        # Since file and constant names match, if both parent and one of its
+        # ancestors have an autoload for the same cname, their autoload paths
+        # cannot be equal.
+        return autoload_path unless parent.superclass.autoload?(cname) == autoload_path
       end
     end
 
