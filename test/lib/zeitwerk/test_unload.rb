@@ -91,16 +91,16 @@ class TestUnload < LoaderTest
       la = Zeitwerk::Loader.new
       la.push_dir("a")
       la.setup
-      assert Zeitwerk::ExplicitNamespace.cpaths["M"] == la
+      assert_includes Zeitwerk::ExplicitNamespace.cpaths["M"], la
 
       lb = Zeitwerk::Loader.new
       lb.push_dir("b")
       lb.setup
-      assert Zeitwerk::ExplicitNamespace.cpaths["X"] == lb
+      assert_includes Zeitwerk::ExplicitNamespace.cpaths["X"], lb
 
       la.unload
-      assert_nil Zeitwerk::ExplicitNamespace.cpaths["M"]
-      assert Zeitwerk::ExplicitNamespace.cpaths["X"] == lb
+      refute Zeitwerk::ExplicitNamespace.cpaths.key?("M")
+      assert_includes Zeitwerk::ExplicitNamespace.cpaths["X"], lb
     end
   end
 end

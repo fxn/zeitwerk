@@ -23,7 +23,7 @@ module Zeitwerk::Loader::Callbacks
     log("module #{autovivified_module.name} autovivified from directory #{dir}") if logger
 
     loaded.add(autovivified_module.name)
-    on_namespace_loaded(autovivified_module)
+    Zeitwerk::Registry.loaders.each { |l| l.on_namespace_loaded(autovivified_module) }
   end
 
   # Invoked when a class or module is created or reopened, either from the

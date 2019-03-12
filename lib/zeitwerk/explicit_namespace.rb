@@ -32,7 +32,7 @@ module Zeitwerk
       # @return [void]
       def register(cpath, loader)
         mutex.synchronize do
-          cpaths[cpath] = loader
+          (cpaths[cpath] ||= []) << loader
           # We check enabled? because, looking at the C source code, enabling an
           # enabled tracer does not seem to be a simple no-op.
           tracer.enable unless tracer.enabled?
@@ -43,7 +43,12 @@ module Zeitwerk
       # @param loader [Zeitwerk::Loader]
       # @return [void]
       def unregister(loader)
-        cpaths.delete_if { |_cpath, l| l == loader }
+        cpaths.each do |cpath, loaders|
+          loaders.delete(loader)
+          if loaders.empty?
+            cpaths.delete(cpath)
+          end
+        end
         disable_tracer_if_unneeded
       end
 
@@ -59,8 +64,8 @@ module Zeitwerk
     @tracer = TracePoint.new(:class) do |event|
       # Note that it makes sense to compute the hash code unconditionally,
       # because the trace point is disabled if cpaths is empty.
-      if loader = cpaths.delete(event.self.name)
-        loader.on_namespace_loaded(event.self)
+      if loaders = cpaths.delete(event.self.name)
+        loaders.each { |l| l.on_namespace_loaded(event.self) }
         disable_tracer_if_unneeded
       end
     end

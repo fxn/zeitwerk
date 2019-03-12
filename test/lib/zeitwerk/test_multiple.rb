@@ -54,4 +54,66 @@ class TestMultiple < LoaderTest
       assert App1::Foo::Bar::Baz
     end
   end
+
+  test "multiple loaders sharing an autovivified namespace" do
+    loaders = [loader, Zeitwerk::Loader.new]
+
+    files = [
+      ["lib0/namespace/foo.rb", <<-EOS],
+        module Namespace
+          class Foo
+          end
+        end
+      EOS
+      ["lib1/namespace/bar.rb", <<-EOS]
+        module Namespace
+          class Bar
+          end
+        end
+      EOS
+    ]
+    with_files(files) do
+      loaders[0].push_dir("lib0")
+      loaders[1].push_dir("lib1")
+      loaders.each(&:setup)
+
+      assert ::Namespace
+      assert ::Namespace::Foo
+      assert ::Namespace::Bar
+    end
+  end
+
+  test "multiple loaders sharing an explicit namespace" do
+    loaders = [loader, Zeitwerk::Loader.new]
+
+    files = [
+      ["lib0/namespace.rb", <<-EOS],
+        module Namespace
+        end
+      EOS
+      ["lib0/namespace/foo.rb", <<-EOS],
+        module Namespace
+          class Foo
+          end
+        end
+      EOS
+      ["lib1/namespace/bar.rb", <<-EOS]
+        module Namespace
+          class Bar
+          end
+        end
+      EOS
+    ]
+    with_files(files) do
+      loaders[0].push_dir("lib0")
+      loaders[0].tag = 'lib0'
+      loaders[1].push_dir("lib1")
+      loaders[1].tag = 'lib1'
+      loaders.each(&:setup)
+
+      assert ::Namespace
+      assert ::Namespace::Foo
+      assert ::Namespace::Bar
+    end
+  end
 end
