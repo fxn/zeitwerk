@@ -53,6 +53,21 @@ module Zeitwerk
     # @return [Set<String>]
     attr_reader :ignored_paths
 
+    # Keeps track of shadowed files.
+    #
+    # A shadowed file is a file managed by this autoloader that is skipped
+    # because its matching constant path has already been seen. Think $LOAD_PATH
+    # + require, only the first occurrence of a given relative name is loaded.
+    #
+    # If the existing occurrence is an autoload, we map the file name to the
+    # shadowing autoload path. If the existing occurrence is an already defined
+    # constant, the file name is mapped to the constant path, meaning it was
+    # loaded elsewhere.
+    #
+    # @private
+    # @return [{String => String}]
+    attr_reader :shadowed
+
     # Maps real absolute paths for which an autoload has been set to their
     # corresponding parent class or module and constant name.
     #
@@ -106,6 +121,7 @@ module Zeitwerk
       @autoloads     = {}
       @loaded        = Set.new
       @lazy_subdirs  = {}
+      @shadowed      = {}
 
       @mutex        = Mutex.new
       @setup        = false
@@ -216,6 +232,7 @@ module Zeitwerk
         autoloads.clear
         loaded.clear
         lazy_subdirs.clear
+        shadowed.clear
 
         Registry.on_unload(self)
         ExplicitNamespace.unregister(self)
@@ -249,7 +266,7 @@ module Zeitwerk
         while dir = queue.shift
           each_abspath(dir) do |abspath|
             if ruby?(abspath)
-              require abspath
+              require abspath unless shadowed.key?(abspath)
             elsif dir?(abspath)
               queue << abspath
             end
@@ -370,7 +387,7 @@ module Zeitwerk
     def autoload_file(parent, cname, file)
       if autoload_path = autoload_for?(parent, cname)
         # First autoload for a Ruby file wins, just ignore subsequent ones.
-        return if ruby?(autoload_path)
+        shadowed[file] = autoload_path and return if ruby?(autoload_path)
 
         # Override autovivification, we want the namespace to become the
         # class/module defined in this file.
@@ -379,7 +396,9 @@ module Zeitwerk
 
         set_autoload(parent, cname, file)
         register_explicit_namespace(cpath(parent, cname))
-      elsif !cdef?(parent, cname)
+      elsif cdef?(parent, cname)
+        shadowed[file] = cpath(parent, cname)
+      else
         set_autoload(parent, cname, file)
       end
     end

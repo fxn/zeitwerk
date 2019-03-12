@@ -66,4 +66,37 @@ class TestEagerLoad < LoaderTest
       assert $tel1
     end
   end
+
+  test "eager loading skips repeated files" do
+    $test_eager_loaded_file = nil
+    files = [
+      ["a/foo.rb", "Foo = 1; $test_eager_loaded_file = :a"],
+      ["b/foo.rb", "Foo = 1; $test_eager_loaded_file = :b"]
+    ]
+    with_files(files) do
+      la = Zeitwerk::Loader.new
+      la.push_dir("a")
+      la.setup
+
+      lb = Zeitwerk::Loader.new
+      lb.push_dir("b")
+      lb.setup
+
+      la.eager_load
+      lb.eager_load
+
+      assert_equal :a, $test_eager_loaded_file
+    end
+  end
+
+  test "eager loading skips files that would map to already loaded constants" do
+    $test_eager_loaded_file = false
+    files = [["x.rb", "X = 1; $test_eager_loaded_file = true"]]
+    ::X = 1
+    with_setup(files) do
+      loader.eager_load
+      assert !$test_eager_loaded_file
+    end
+    remove_const :X
+  end
 end
