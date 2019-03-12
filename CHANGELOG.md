@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.3.4 (Unreleased)
+
+* Files shadowed by previous occurrences defining the same constant path were being correctly skipped when autoloading, but not when eager loading. This has been fixed. This mimicks what happens when there are two files in `$LOAD_PATH` with the same relative name, only the first one is loaded by `require`.
+
 ## 1.3.3 (12 March 2019)
 
 * Bug fix by @casperisfine: If the superclass or one of the ancestors of an explicit namespace `N` has an autoload set for constant `C`, and `n/c.rb` exists, the autoload for `N::C` proper could be missed.
