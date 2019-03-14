@@ -135,7 +135,7 @@ class TestEagerLoad < LoaderTest
 
       assert_equal :a, $test_eager_loaded_file
       assert_empty la.shadowed
-      assert_equal File.expand_path("a/foo.rb"), lb.shadowed[File.expand_path("b/foo.rb")]
+      assert_equal Hash[File.expand_path("b/foo.rb") => File.expand_path("a/foo.rb")], lb.shadowed
     end
   end
 
