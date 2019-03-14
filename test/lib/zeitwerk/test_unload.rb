@@ -31,21 +31,24 @@ class TestUnload < LoaderTest
 
   test "unload clears internal caches" do
     files = [
-      ["user.rb", "class User; end"],
-      ["admin/root.rb", "class Admin::Root; end"]
+      ["app/user.rb", "class User; end"],
+      ["app/admin/root.rb", "class Admin::Root; end"],
+      ["lib/user.rb", "class User; end"]
     ]
-    with_setup(files) do
+    with_setup(files, dirs: %w(app lib)) do
       assert User
 
       assert !loader.autoloads.empty?
       assert !loader.loaded.empty?
       assert !loader.lazy_subdirs.empty?
+      assert !loader.shadowed.empty?
 
       loader.unload
 
       assert loader.autoloads.empty?
       assert loader.loaded.empty?
       assert loader.lazy_subdirs.empty?
+      assert loader.shadowed.empty?
     end
   end
 

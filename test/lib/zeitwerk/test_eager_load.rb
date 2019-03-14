@@ -86,6 +86,8 @@ class TestEagerLoad < LoaderTest
       lb.eager_load
 
       assert_equal :a, $test_eager_loaded_file
+      assert_empty la.shadowed
+      assert_equal File.expand_path("a/foo.rb"), lb.shadowed[File.expand_path("b/foo.rb")]
     end
   end
 
@@ -96,6 +98,7 @@ class TestEagerLoad < LoaderTest
     with_setup(files) do
       loader.eager_load
       assert !$test_eager_loaded_file
+      assert_equal "X", loader.shadowed[File.expand_path("x.rb")]
     end
     remove_const :X
   end
