@@ -57,7 +57,7 @@ module Zeitwerk
     #
     # A shadowed file is a file managed by this autoloader that is skipped
     # because its matching constant path has already been seen. Think $LOAD_PATH
-    # + require, only the first occurrence of a given relative name is loaded.
+    # and require, only the first occurrence of a given relative name is loaded.
     #
     # If the existing occurrence is an autoload, we map the file name to the
     # shadowing autoload path. If the existing occurrence is an already defined
