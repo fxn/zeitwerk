@@ -103,6 +103,12 @@ module Zeitwerk
     # @return [{String => <String>}]
     attr_reader :lazy_subdirs
 
+    # Absolute paths of files or directories not to be eager loaded.
+    #
+    # @private
+    # @return [Set<String>]
+    attr_reader :eager_load_exclusions
+
     # @private
     # @return [Mutex]
     attr_reader :mutex
@@ -114,14 +120,15 @@ module Zeitwerk
       @inflector = Inflector.new
       @logger    = self.class.default_logger
 
-      @root_dirs     = {}
-      @preloads      = []
-      @ignored       = Set.new
-      @ignored_paths = Set.new
-      @autoloads     = {}
-      @loaded        = Set.new
-      @lazy_subdirs  = {}
-      @shadowed      = {}
+      @root_dirs             = {}
+      @preloads              = []
+      @ignored               = Set.new
+      @ignored_paths         = Set.new
+      @autoloads             = {}
+      @loaded                = Set.new
+      @lazy_subdirs          = {}
+      @shadowed              = {}
+      @eager_load_exclusions = Set.new
 
       @mutex        = Mutex.new
       @setup        = false
@@ -255,16 +262,19 @@ module Zeitwerk
 
     # Eager loads all files in the root directories, recursively. Files do not
     # need to be in `$LOAD_PATH`, absolute file names are used. Ignored files
-    # are not eager loaded.
+    # are not eager loaded. You can opt-out specifically in specific files and
+    # directories with `do_not_eager_load`.
     #
     # @return [void]
     def eager_load
       mutex.synchronize do
         break if @eager_loaded
 
-        queue = non_ignored_root_dirs
+        queue = non_ignored_root_dirs.reject { |dir| eager_load_exclusions.member?(dir) }
         while dir = queue.shift
           each_abspath(dir) do |abspath|
+            next if eager_load_exclusions.member?(abspath)
+
             if ruby?(abspath)
               require abspath unless shadowed.key?(abspath)
             elsif dir?(abspath)
@@ -275,6 +285,15 @@ module Zeitwerk
 
         @eager_loaded = true
       end
+    end
+
+    # Let eager load ignore the given files or directories. The constants
+    # defined in those files are still autoloadable.
+    #
+    # @param paths [<String, Pathname, <String, Pathname>>]
+    # @return [void]
+    def do_not_eager_load(*paths)
+      mutex.synchronize { eager_load_exclusions.merge(expand_paths(paths)) }
     end
 
     # Says if the given constant path has been loaded.
