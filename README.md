@@ -216,7 +216,14 @@ Zeitwerk instances are able to eager load their managed files:
 loader.eager_load
 ```
 
-That skips ignored files and directories.
+That skips [ignored files and directories](#ignoring-parts-of-the-project), and you can also tell Zeitwerk that certain files or directories are autoloadable, but should not be eager loaded:
+
+```ruby
+db_adapters = "#{__dir__}/my_gem/db_adapters"
+loader.do_not_eager_load(db_adapters)
+loader.setup
+loader.eager_load # won't eager load the database adapters
+```
 
 Eager loading is synchronized and idempotent.
 

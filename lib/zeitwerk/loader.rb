@@ -103,6 +103,8 @@ module Zeitwerk
     # @return [{String => <String>}]
     attr_reader :lazy_subdirs
 
+    # Absolute paths of files or directories not to be eager loaded.
+    #
     # @private
     # @return [Set<String>]
     attr_reader :eager_load_exclusions
@@ -272,6 +274,7 @@ module Zeitwerk
         while dir = queue.shift
           each_abspath(dir) do |abspath|
             next if eager_load_exclusions.member?(abspath)
+
             if ruby?(abspath)
               require abspath unless shadowed.key?(abspath)
             elsif dir?(abspath)
