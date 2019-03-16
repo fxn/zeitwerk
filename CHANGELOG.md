@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## Unreleased
+
+* `Zeitwerk::Loader#do_not_eager_load` provides a way to have autoloadable files and directories that should be skipped when eager loading.
+
 ## 1.3.4 (14 March 2019)
 
 * Files shadowed by previous occurrences defining the same constant path were being correctly skipped when autoloading, but not when eager loading. This has been fixed. This mimicks what happens when there are two files in `$LOAD_PATH` with the same relative name, only the first one is loaded by `require`.
