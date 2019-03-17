@@ -66,7 +66,7 @@ module Zeitwerk
     #
     # @private
     # @return [{String => String}]
-    attr_reader :shadowed
+    attr_reader :shadowed_files
 
     # Maps real absolute paths for which an autoload has been set to their
     # corresponding parent class or module and constant name.
@@ -127,7 +127,7 @@ module Zeitwerk
       @autoloads             = {}
       @loaded                = Set.new
       @lazy_subdirs          = {}
-      @shadowed              = {}
+      @shadowed_files        = {}
       @eager_load_exclusions = Set.new
 
       @mutex        = Mutex.new
@@ -239,7 +239,7 @@ module Zeitwerk
         autoloads.clear
         loaded.clear
         lazy_subdirs.clear
-        shadowed.clear
+        shadowed_files.clear
 
         Registry.on_unload(self)
         ExplicitNamespace.unregister(self)
@@ -276,7 +276,7 @@ module Zeitwerk
             next if eager_load_exclusions.member?(abspath)
 
             if ruby?(abspath)
-              require abspath unless shadowed.key?(abspath)
+              require abspath unless shadowed_files.key?(abspath)
             elsif dir?(abspath)
               queue << abspath
             end
@@ -406,7 +406,7 @@ module Zeitwerk
     def autoload_file(parent, cname, file)
       if autoload_path = autoload_for?(parent, cname)
         # First autoload for a Ruby file wins, just ignore subsequent ones.
-        shadowed[file] = autoload_path and return if ruby?(autoload_path)
+        shadowed_files[file] = autoload_path and return if ruby?(autoload_path)
 
         # Override autovivification, we want the namespace to become the
         # class/module defined in this file.
@@ -416,7 +416,7 @@ module Zeitwerk
         set_autoload(parent, cname, file)
         register_explicit_namespace(cpath(parent, cname))
       elsif cdef?(parent, cname)
-        shadowed[file] = cpath(parent, cname)
+        shadowed_files[file] = cpath(parent, cname)
       else
         set_autoload(parent, cname, file)
       end
