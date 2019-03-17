@@ -83,7 +83,7 @@ module Zeitwerk
     #
     # @private
     # @return [Set<String>]
-    attr_reader :loaded
+    attr_reader :loaded_cpaths
 
     # Maps constant paths of namespaces to arrays of corresponding directories.
     #
@@ -125,7 +125,7 @@ module Zeitwerk
       @ignored               = Set.new
       @ignored_paths         = Set.new
       @autoloads             = {}
-      @loaded                = Set.new
+      @loaded_cpaths         = Set.new
       @lazy_subdirs          = {}
       @shadowed_files        = {}
       @eager_load_exclusions = Set.new
@@ -237,7 +237,7 @@ module Zeitwerk
         end
 
         autoloads.clear
-        loaded.clear
+        loaded_cpaths.clear
         lazy_subdirs.clear
         shadowed_files.clear
 
@@ -301,7 +301,7 @@ module Zeitwerk
     # @param cpath [String]
     # @return [Boolean]
     def loaded?(cpath)
-      loaded.member?(cpath)
+      loaded_cpaths.member?(cpath)
     end
 
     # --- Class methods ---------------------------------------------------------------------------

@@ -6,7 +6,7 @@ module Zeitwerk::Loader::Callbacks
   # @return [void]
   def on_file_autoloaded(file)
     parent, cname = autoloads[file]
-    loaded.add(cpath(parent, cname))
+    loaded_cpaths.add(cpath(parent, cname))
     log("constant #{cpath(parent, cname)} loaded from file #{file}") if logger
   end
 
@@ -22,7 +22,7 @@ module Zeitwerk::Loader::Callbacks
     autovivified_module = parent.const_set(cname, Module.new)
     log("module #{autovivified_module.name} autovivified from directory #{dir}") if logger
 
-    loaded.add(autovivified_module.name)
+    loaded_cpaths.add(autovivified_module.name)
     on_namespace_loaded(autovivified_module)
   end
 

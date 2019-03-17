@@ -39,14 +39,14 @@ class TestUnload < LoaderTest
       assert User
 
       assert !loader.autoloads.empty?
-      assert !loader.loaded.empty?
+      assert !loader.loaded_cpaths.empty?
       assert !loader.lazy_subdirs.empty?
       assert !loader.shadowed_files.empty?
 
       loader.unload
 
       assert loader.autoloads.empty?
-      assert loader.loaded.empty?
+      assert loader.loaded_cpaths.empty?
       assert loader.lazy_subdirs.empty?
       assert loader.shadowed_files.empty?
     end

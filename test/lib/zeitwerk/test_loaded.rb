@@ -3,13 +3,13 @@ require "set"
 
 class TestLoaded < LoaderTest
   test "a new loader has loaded nothing" do
-    assert_empty Zeitwerk::Loader.new.loaded
+    assert_empty Zeitwerk::Loader.new.loaded_cpaths
   end
 
   test "a loader that has loading nothing, has loaded nothing" do
     files = [["x.rb", "X = true"]]
     with_setup(files) do
-      assert_empty loader.loaded
+      assert_empty loader.loaded_cpaths
       assert !loader.loaded?("X")
     end
   end
@@ -22,7 +22,7 @@ class TestLoaded < LoaderTest
     ]
     with_setup(files) do
       assert M::X
-      assert_equal %w(M M::X).to_set, loader.loaded
+      assert_equal %w(M M::X).to_set, loader.loaded_cpaths
 
       assert loader.loaded?("M")
       assert loader.loaded?("M::X")
