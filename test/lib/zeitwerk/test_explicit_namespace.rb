@@ -130,4 +130,18 @@ class TestExplicitNamespace < LoaderTest
       assert !tracer.enabled?
     end
   end
+
+  test "the tracer handle anonymous modules" do
+    files = [
+      ["hotel.rb", "class Hotel; class << self; def x; 1; end; end; end"],
+      ["hotel/pricing.rb", "class Hotel::Pricing; end"],
+      ["car.rb", "class Car; end"],
+      ["car/pricing.rb", "class Car::Pricing; end"],
+    ]
+
+    with_setup(files) do
+      assert tracer.enabled?
+      assert_equal 1, Hotel.x
+    end
+  end
 end

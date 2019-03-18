@@ -59,13 +59,13 @@ module Zeitwerk
     @tracer = TracePoint.new(:class) do |event|
       # If the class is a singleton class, we won't do anything with it so we can bail out immediately.
       # This is several order of magnitude faster than accessing `Module#name`, so we do it first.
-      break if event.self.singleton_class?
+      next if event.self.singleton_class?
 
       # MRI allocates a new string every time Module#name is called, so we hold onto it to save an allocation.
       name = event.self.name
 
       # If the clas is anonymous, we won't do anyhing with it, so we can bail out here as well.
-      break unless name
+      next unless name
 
       # Note that it makes sense to compute the hash code unconditionally,
       # because the trace point is disabled if cpaths is empty.
