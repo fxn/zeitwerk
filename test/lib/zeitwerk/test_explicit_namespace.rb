@@ -131,17 +131,26 @@ class TestExplicitNamespace < LoaderTest
     end
   end
 
-  test "the tracer handle anonymous modules" do
+  # This is a regression test.
+  test "the tracer handles singleton classes" do
     files = [
-      ["hotel.rb", "class Hotel; class << self; def x; 1; end; end; end"],
+      ["hotel.rb", <<-EOS],
+        class Hotel
+          class << self
+            def x
+              1
+            end
+          end
+        end
+      EOS
       ["hotel/pricing.rb", "class Hotel::Pricing; end"],
       ["car.rb", "class Car; end"],
       ["car/pricing.rb", "class Car::Pricing; end"],
     ]
-
     with_setup(files) do
       assert tracer.enabled?
       assert_equal 1, Hotel.x
+      assert tracer.enabled?
     end
   end
 end

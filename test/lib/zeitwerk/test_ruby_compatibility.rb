@@ -251,4 +251,21 @@ class TestRubyCompatibility < LoaderTest
 
     assert_equal [C, M, C, M], traced
   end
+
+  # Computing hash codes is costly and we want the tracer to be as efficient as
+  # possible. The callback doesn't short-circuit anonymous classes and modules
+  # because Class.new and Module.new do not trigger it, but if in the future
+  # they do we could benchmark if we should change event.self.name before the
+  # deletion call.
+  test "trace points on the :class events don't get called on Class.new and Module.new" do
+    on_teardown { @tracer.disable }
+
+    $tracer_for_anonymous_class_and_modules_called = false
+    @tracer = TracePoint.trace(:class) { $tracer_for_anonymous_class_and_modules_called = true }
+
+    Class.new
+    Module.new
+
+    assert !$tracer_for_anonymous_class_and_modules_called
+  end
 end

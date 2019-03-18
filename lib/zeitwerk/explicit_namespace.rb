@@ -61,15 +61,9 @@ module Zeitwerk
       # This is several order of magnitude faster than accessing `Module#name`, so we do it first.
       next if event.self.singleton_class?
 
-      # MRI allocates a new string every time Module#name is called, so we hold onto it to save an allocation.
-      name = event.self.name
-
-      # If the clas is anonymous, we won't do anyhing with it, so we can bail out here as well.
-      next unless name
-
       # Note that it makes sense to compute the hash code unconditionally,
       # because the trace point is disabled if cpaths is empty.
-      if loader = cpaths.delete(name)
+      if loader = cpaths.delete(event.self.name)
         loader.on_namespace_loaded(event.self)
         disable_tracer_if_unneeded
       end
