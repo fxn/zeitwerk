@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+* Trace point optimization for singleton classes by @casperisfine. See the use case, explanation, and patch in [#24](https://github.com/fxn/zeitwerk/pull/24).
+
 * `Zeitwerk::Loader#do_not_eager_load` provides a way to have autoloadable files and directories that should be skipped when eager loading.
 
 ## 1.3.4 (14 March 2019)
