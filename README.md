@@ -282,7 +282,7 @@ The inflectors that ship with Zeitwerk are deterministic and simple. But you can
 # frozen_string_literal: true
 
 class MyInflector < Zeitwerk::Inflector
-  def camelize(basename, _abspath)
+  def camelize(basename, _cpath, _abspath)
     case basename
     when "api"
       "API"
@@ -297,7 +297,9 @@ end
 
 The first argument, `basename`, is a string with the basename of the file or directory to be inflected. In the case of a file, without extension. The inflector needs to return this basename inflected. Therefore, a simple constant name without colons.
 
-The second argument, `abspath`, is a string with the absolute path to the file or directory in case you need it to decide how to inflect the basename.
+The second argument, `cpath`, is a string with the fully qualified name of the parent constant, e.g. `"SomeNanespace::SubNamespace"`.
+
+The third argument, `abspath`, is a string with the absolute path to the file or directory in case you need it to decide how to inflect the basename.
 
 Then, assign the inflector:
 
@@ -478,7 +480,7 @@ I'd like to thank [@matthewd](https://github.com/matthewd) for the discussions w
 
 Also, would like to thank [@Shopify](https://github.com/Shopify), [@rafaelfranca](https://github.com/rafaelfranca), and [@dylanahsmith](https://github.com/dylanahsmith), for sharing [this PoC](https://github.com/Shopify/autoload_reloader). The technique Zeitwerk uses to support explicit namespaces was copied from that project.
 
-Finally, many thanks to [@schurig](https://github.com/schurig) for recording an [audio file](http://share.hashref.com/zeitwerk/zeitwerk_pronunciation.mp3) with the pronunciation of "Zeitwerk" in perfect German. 💯
+Finally, many thanks to [@schurig](https://github.com/schurig) for recording an [audio file](http://share.hashref.com/zeitwerk/zeitwerk_pronunciation.mp3) with the pronunciation of "Zeitwerk" in perfect German. :100:
 
 ## License
 

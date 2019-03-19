@@ -9,9 +9,10 @@ module Zeitwerk
     #   Zeitwerk::Inflector.camelize("api", ...)              # => "Api"
     #
     # @param basename [String]
+    # @param _cpath [String]
     # @param _abspath [String]
     # @return [String]
-    def camelize(basename, _abspath)
+    def camelize(basename, _cpath, _abspath)
       basename.split('_').map!(&:capitalize!).join
     end
   end

@@ -361,7 +361,8 @@ module Zeitwerk
     # @return [void]
     def set_autoloads_in_dir(dir, parent)
       each_abspath(dir) do |abspath|
-        cname = inflector.camelize(File.basename(abspath, ".rb"), abspath)
+        cpath = parent == Object ? nil : parent.name
+        cname = inflector.camelize(File.basename(abspath, ".rb"), cpath, abspath)
         if ruby?(abspath)
           autoload_file(parent, cname, abspath)
         elsif dir?(abspath)

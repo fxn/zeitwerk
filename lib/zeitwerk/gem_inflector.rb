@@ -10,9 +10,10 @@ module Zeitwerk
     end
 
     # @param basename [String]
+    # @param _cpath [String]
     # @param abspath [String]
     # @return [String]
-    def camelize(basename, abspath)
+    def camelize(basename, _cpath, abspath)
       (basename == "version" && abspath == @version_file) ? "VERSION" : super
     end
   end
