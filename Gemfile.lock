@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    zeitwerk (1.3.4)
+    zeitwerk (1.4.0)
 
 GEM
   remote: https://rubygems.org/
