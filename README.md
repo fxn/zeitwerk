@@ -295,9 +295,9 @@ class MyInflector < Zeitwerk::Inflector
 end
 ```
 
-The first argument, `basename`, is a string with the basename of the file or directory to be inflected. In the case of a file, without extension. The inflector needs to return this basename inflected. Therefore, a simple constant name without colons.
+The first argument, `basename`, is a string with the basename of the file or directory to be inflected. In the case of a file, without extension. In the case of a directory, without trailing slash. The inflector needs to return this basename inflected. Therefore, a simple constant name without colons.
 
-The second argument, `abspath`, is a string with the absolute path to the file or directory in case you need it to decide how to inflect the basename.
+The second argument, `abspath`, is a string with the absolute path to the file or directory in case you need it to decide how to inflect the basename. Paths to directories don't have trailing slashes.
 
 Then, assign the inflector:
 
