@@ -236,6 +236,16 @@ module Zeitwerk
           $LOADED_FEATURES.delete(path) if ruby?(path)
         end
 
+        repeats = autoloads.keys & shadowed_files.values
+        repeats.each do |repeat|
+          shadowed_files.select { |_, v| v == repeat }.each do |path, _|
+            if ruby?(path)
+              $LOADED_FEATURES.delete(path)
+              log("repeated #{path} removed from $LOADED_FEATURES") if logger
+            end
+          end
+        end
+
         autoloads.clear
         loaded_cpaths.clear
         lazy_subdirs.clear
