@@ -554,7 +554,7 @@ module Zeitwerk
     # @param paths [<String, Pathname, <String, Pathname>>]
     # @return [<String>]
     def expand_paths(paths)
-      Array(paths).flatten.map { |path| File.expand_path(path) }
+      Array(paths).flatten.map! { |path| File.expand_path(path) }
     end
 
     # @param message [String]
