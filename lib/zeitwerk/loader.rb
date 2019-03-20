@@ -236,6 +236,9 @@ module Zeitwerk
           $LOADED_FEATURES.delete(path) if ruby?(path)
         end
 
+        # If some constants has been loaded from A file, and reopened (Open Class) in B file.
+        # shadowed_files will map file to first autoload_path.
+        # repeats find them and delete all from $LOADED_FEATURES for reload.
         repeats = autoloads.keys & shadowed_files.values
         repeats.each do |repeat|
           shadowed_files.select { |_, v| v == repeat }.each do |path, _|
