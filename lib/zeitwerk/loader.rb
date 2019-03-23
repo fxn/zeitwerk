@@ -113,6 +113,10 @@ module Zeitwerk
     # @return [Mutex]
     attr_reader :mutex
 
+    # @private
+    # @return [Mutex]
+    attr_reader :mutex2
+
     def initialize
       @initialized_at = Time.now
 
@@ -130,7 +134,9 @@ module Zeitwerk
       @shadowed_files        = {}
       @eager_load_exclusions = Set.new
 
+      # TODO: find a better name for these mutexes.
       @mutex        = Mutex.new
+      @mutex2       = Mutex.new
       @setup        = false
       @eager_loaded = false
 
