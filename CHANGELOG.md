@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.4.1 (23 March 2019)
+
+* Fixes concurrent autovivifications.
+
 ## 1.4.0 (19 March 2019)
 
 * Trace point optimization for singleton classes by @casperisfine. See the use case, explanation, and patch in [#24](https://github.com/fxn/zeitwerk/pull/24).
