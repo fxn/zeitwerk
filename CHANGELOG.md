@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.4.2 (23 March 2019)
+
+* Includes an optimization.
+
 ## 1.4.1 (23 March 2019)
 
 * Fixes concurrent autovivifications.
