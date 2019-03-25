@@ -227,6 +227,9 @@ module Zeitwerk
     # @return [void]
     def unload
       mutex.synchronize do
+
+        unloaded_paths = Set.new
+
         autoloads.each do |path, (parent, cname)|
           if parent.autoload?(cname)
             parent.send(:remove_const, cname)
@@ -236,10 +239,14 @@ module Zeitwerk
             log("#{cpath(parent, cname)} unloaded") if logger
           end
 
-          # Let Kernel#require load the same path later again by removing it
-          # from $LOADED_FEATURES. We check the extension to avoid unnecessary
-          # array lookups, since directories are not stored in $LOADED_FEATURES.
-          $LOADED_FEATURES.delete(path) if ruby?(path)
+          unloaded_paths << path if ruby?(path)
+        end
+
+        # Let Kernel#require load the same paths later again by removing them
+        # from $LOADED_FEATURES. We check the extension to avoid unnecessary
+        # array lookups, since directories are not stored in $LOADED_FEATURES.
+        unless unloaded_paths.empty?
+          $LOADED_FEATURES.reject! { |path| unloaded_paths.include?(path) }
         end
 
         autoloads.clear
