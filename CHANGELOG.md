@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.4.3 (26 March 2019)
+
+* Faster reload. If you're using `bootsnap`, requires at least version 1.4.2.
+
 ## 1.4.2 (23 March 2019)
 
 * Includes an optimization.
