@@ -227,26 +227,31 @@ module Zeitwerk
     # @return [void]
     def unload
       mutex.synchronize do
+        # We are going to keep track of the files that were required by our
+        # autoloads to later remove them from $LOADED_FEATURES, thus making them
+        # loadable by Kernel#require again.
+        #
+        # Directories are not stored in $LOADED_FEATURES, keeping track of files
+        # is enough.
+        unloaded_files = Set.new
 
-        unloaded_paths = Set.new
-
-        autoloads.each do |path, (parent, cname)|
+        autoloads.each do |realpath, (parent, cname)|
           if parent.autoload?(cname)
             parent.send(:remove_const, cname)
             log("autoload for #{cpath(parent, cname)} removed") if logger
-          elsif cdef?(parent, cname)
-            parent.send(:remove_const, cname)
-            log("#{cpath(parent, cname)} unloaded") if logger
+          else
+            if cdef?(parent, cname)
+              parent.send(:remove_const, cname)
+              log("#{cpath(parent, cname)} unloaded") if logger
+            else
+              # Already unloaded somehow, that is fine.
+            end
+            unloaded_files.add(realpath) if ruby?(realpath)
           end
-
-          unloaded_paths << path if ruby?(path)
         end
 
-        # Let Kernel#require load the same paths later again by removing them
-        # from $LOADED_FEATURES. We check the extension to avoid unnecessary
-        # array lookups, since directories are not stored in $LOADED_FEATURES.
-        unless unloaded_paths.empty?
-          $LOADED_FEATURES.reject! { |path| unloaded_paths.include?(path) }
+        unless unloaded_files.empty?
+          $LOADED_FEATURES.reject! { |file| unloaded_files.member?(file) }
         end
 
         autoloads.clear
