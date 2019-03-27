@@ -251,6 +251,17 @@ module Zeitwerk
         end
 
         unless unloaded_files.empty?
+          # Bootsnap decorates Kernel#require to speed it up using a cache and
+          # this optimization does not check if $LOADED_FEATURES has the file.
+          #
+          # To make it aware of changes, the gem defines singleton methods in
+          # $LOADED_FEATURES:
+          #
+          #   https://github.com/Shopify/bootsnap/blob/master/lib/bootsnap/load_path_cache/core_ext/loaded_features.rb
+          #
+          # Rails applications may depend on bootsnap, so for unloading to work
+          # in that setting it is preferable that we restrict our API choice to
+          # one of those methods.
           $LOADED_FEATURES.reject! { |file| unloaded_files.member?(file) }
         end
 
