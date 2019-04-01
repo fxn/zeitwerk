@@ -1,4 +1,5 @@
 require "test_helper"
+require "pathname"
 
 class TestRubyCompatibility < LoaderTest
   # We decorate Kernel#require in lib/zeitwerk/kernel.rb to be able to log
@@ -267,5 +268,28 @@ class TestRubyCompatibility < LoaderTest
     Module.new
 
     assert !$tracer_for_anonymous_class_and_modules_called
+  end
+
+  # If the user issues a require call with a Pathname object for a path that is
+  # autoloadable, we are able to autoload because $LOADED_FEATURES.last returns
+  # the real path as a string and loader_for is able to find its loader. During
+  # unloading, we find and delete strings in $LOADED_FEATURES too.
+  #
+  # This is not a hard requirement, we could work around it if $LOADED_FEATURES
+  # stored pathnames. But the code is simpler if this property holds.
+  test "required pathnames end up as strings in $LOADED_FEATURES" do
+    on_teardown do
+      remove_const :X
+      $LOADED_FEATURES.pop
+    end
+
+    files = [["x.rb", "X = 1"]]
+    with_files(files) do
+      with_load_path(".") do
+        assert_equal true, require(Pathname.new("x"))
+        assert_equal 1, X
+        assert_equal File.realpath("x.rb"), $LOADED_FEATURES.last
+      end
+    end
   end
 end

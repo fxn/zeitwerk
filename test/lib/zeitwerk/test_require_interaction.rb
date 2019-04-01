@@ -1,4 +1,5 @@
 require "test_helper"
+require "pathname"
 
 class TestRequireInteraction < LoaderTest
   def assert_required(str)
@@ -24,6 +25,22 @@ class TestRequireInteraction < LoaderTest
     end
   end
 
+  test "our decorated require returns true or false as expected (Pathname)" do
+    on_teardown do
+      remove_const :User
+      delete_loaded_feature "user.rb"
+    end
+
+    files = [["user.rb", "class User; end"]]
+    pathname_for_user = Pathname.new("user")
+    with_files(files) do
+      with_load_path(".") do
+        assert_required pathname_for_user
+        assert_not_required pathname_for_user
+      end
+    end
+  end
+
   test "autoloading makes require idempotent even with a relative path" do
     files = [["user.rb", "class User; end"]]
     with_setup(files, load_path: ".") do
@@ -36,6 +53,19 @@ class TestRequireInteraction < LoaderTest
     files = [["user.rb", "class User; end"]]
     with_setup(files, load_path: ".") do
       assert_required "user"
+      loader.unload
+      assert !Object.const_defined?(:User, false)
+
+      loader.setup
+      assert User
+    end
+  end
+
+  test "a required top-level file is still detected as autoloadable (Pathname)" do
+    files = [["user.rb", "class User; end"]]
+    with_setup(files, load_path: ".") do
+      assert_required Pathname.new("user")
+      assert User
       loader.unload
       assert !Object.const_defined?(:User, false)
 
