@@ -66,6 +66,49 @@ class TestRubyCompatibility < LoaderTest
     end
   end
 
+  test "require duplicates the passed path in $LOADED_FEATURES unless specific conditions are met" do
+    on_teardown do
+      delete_loaded_feature('users_controller.rb')
+    end
+
+    files = ["admin/users_controller.rb", "class UsersController; end"]
+    with_files(files) do
+      absolute_path = File.expand_path("admin/users_controller.rb")
+      require absolute_path
+      assert_equal absolute_path, $LOADED_FEATURES.last
+      refute_same absolute_path, $LOADED_FEATURES.last
+    end
+  end
+
+  test "Zeitwerk.intern_path! prevents require from duplicating the passed path in $LOADED_FEATURES" do
+    on_teardown do
+      delete_loaded_feature('users_controller.rb')
+    end
+
+    files = ["admin/users_controller.rb", "class UsersController; end"]
+    with_files(files) do
+      absolute_path = Zeitwerk.intern_path!(File.expand_path("admin/users_controller.rb"))
+      require absolute_path
+      assert_equal absolute_path, $LOADED_FEATURES.last
+      assert_same absolute_path, $LOADED_FEATURES.last
+    end
+  end
+
+  test "Zeitwerk.intern_path! works even with very exotic paths" do
+    on_teardown do
+      delete_loaded_feature('users_controller.rb')
+    end
+
+    path = "you-owe-me-a-🍺.rb"
+
+    files = [path, "class UsersController; end"]
+    with_files(files) do
+      absolute_path = Zeitwerk.intern_path!(File.expand_path(path))
+      require absolute_path
+      assert_equal absolute_path, $LOADED_FEATURES.last
+      assert_same absolute_path, $LOADED_FEATURES.last
+    end
+  end
   # While unloading constants we leverage this property to avoid lookups in
   # $LOADED_FEATURES for strings that we know are not going to be there.
   test "directories are not included in $LOADED_FEATURES" do

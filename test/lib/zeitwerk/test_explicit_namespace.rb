@@ -60,6 +60,42 @@ class TestExplicitNamespace < LoaderTest
     end
   end
 
+  test "the autoload path is re-used by Kernel#require" do
+    files = [
+      ["app/models/hotel.rb", "class Hotel; end"],
+    ]
+    with_setup(files, dirs: "app/models") do
+      abspath = loader.autoloads.keys.first
+
+      assert_equal File.expand_path("app/models/hotel.rb"), abspath
+
+      assert_kind_of Class, Hotel
+
+      assert_equal abspath, $LOADED_FEATURES.last
+      assert_same abspath, $LOADED_FEATURES.last
+    end
+  end
+
+  test "the various cpaths hold onto by the loader are deduplicated" do
+    files = [
+      ["app/models/hotel.rb", "class Hotel; end"],
+    ]
+    with_setup(files, dirs: "app/models") do
+      hotel_cname = Zeitwerk.intern_cname!('Hotel')
+      assert_equal 'Hotel', hotel_cname
+
+      autoload_cpath = loader.autoloads.values.first.last
+      assert_equal hotel_cname, autoload_cpath
+      assert_same hotel_cname, autoload_cpath
+
+      assert_kind_of Class, Hotel
+
+      loaded_cpath = loader.loaded_cpaths.first
+      assert_equal hotel_cname, loaded_cpath
+      assert_same hotel_cname, loaded_cpath
+    end
+  end
+
   # As of this writing, a tracer on the :class event does not seem to have any
   # performance penalty in an ordinary code base. But I prefer to precisely
   # control that we use a tracer only if needed in case this issue

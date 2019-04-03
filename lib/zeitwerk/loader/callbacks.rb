@@ -36,7 +36,7 @@ module Zeitwerk::Loader::Callbacks
       autovivified_module = parent.const_set(cname, Module.new)
       log("module #{autovivified_module.name} autovivified from directory #{dir}") if logger
 
-      loaded_cpaths.add(autovivified_module.name)
+      loaded_cpaths.add(cpath(parent, cname))
       on_namespace_loaded(autovivified_module)
     end
   end

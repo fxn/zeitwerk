@@ -198,7 +198,9 @@ module Zeitwerk
     def expand_ignored_glob_patterns
       # Note that Dir.glob works with regular file names just fine. That is,
       # glob patterns technically need no wildcards.
-      ignored_paths.replace(ignored.flat_map { |path| Dir.glob(path) })
+      paths = ignored.flat_map { |path| Dir.glob(path) }
+      paths.map! { |p| Zeitwerk.intern_path!(p) }
+      ignored_paths.replace(paths)
     end
 
     # Sets autoloads in the root namespace and preloads files, if any.
@@ -459,7 +461,8 @@ module Zeitwerk
       # $LOADED_FEATURES stores real paths since Ruby 2.4.4. We set and save the
       # real path to be able to delete it from $LOADED_FEATURES on unload, and to
       # be able to do a lookup later in Kernel#require for manual require calls.
-      realpath = File.realpath(abspath)
+      realpath = Zeitwerk.intern_path!(File.realpath(abspath))
+
       parent.autoload(cname, realpath)
       if logger
         if ruby?(realpath)
@@ -469,7 +472,7 @@ module Zeitwerk
         end
       end
 
-      autoloads[realpath] = [parent, cname]
+      autoloads[realpath] = [parent, Zeitwerk.intern_cname!(cname)]
       Registry.register_autoload(self, realpath)
 
       # See why in the documentation of Zeitwerk::Registry.inceptions.
@@ -554,7 +557,7 @@ module Zeitwerk
     # @param cname [String]
     # @return [String]
     def cpath(parent, cname)
-      parent.equal?(Object) ? cname : "#{parent.name}::#{cname}"
+      Zeitwerk.intern_cname!(parent.equal?(Object) ? cname : "#{parent.name}::#{cname}")
     end
 
     # @param dir [String]
@@ -563,7 +566,7 @@ module Zeitwerk
     def each_abspath(dir)
       Dir.foreach(dir) do |entry|
         next if entry.start_with?(".")
-        abspath = File.join(dir, entry)
+        abspath = Zeitwerk.intern_path!(File.join(dir, entry))
         yield abspath unless ignored_paths.member?(abspath)
       end
     end
@@ -583,7 +586,7 @@ module Zeitwerk
     # @param paths [<String, Pathname, <String, Pathname>>]
     # @return [<String>]
     def expand_paths(paths)
-      Array(paths).flatten.map! { |path| File.expand_path(path) }
+      Array(paths).flatten.map! { |path| Zeitwerk.intern_path!(File.expand_path(path)) }
     end
 
     # @param message [String]
