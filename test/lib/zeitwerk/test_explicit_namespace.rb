@@ -19,13 +19,8 @@ class TestExplicitNamespace < LoaderTest
       ["b/x.rb", "module X; end"], ["b/x/y.rb", "X::Y = true"],
     ]
     with_files(files) do
-      la = Zeitwerk::Loader.new
-      la.push_dir("a")
-      la.setup
-
-      lb = Zeitwerk::Loader.new
-      lb.push_dir("b")
-      lb.setup
+      new_loader(dirs: "a")
+      new_loader(dirs: "b")
 
       assert M::N
       assert X::Y
@@ -113,14 +108,10 @@ class TestExplicitNamespace < LoaderTest
       ["b/x.rb", "module X; end"], ["b/x/y.rb", "X::Y = true"],
     ]
     with_files(files) do
-      la = Zeitwerk::Loader.new
-      la.push_dir("a")
-      la.setup
+      new_loader(dirs: "a")
       assert tracer.enabled?
 
-      lb = Zeitwerk::Loader.new
-      lb.push_dir("b")
-      lb.setup
+      new_loader(dirs: "b")
       assert tracer.enabled?
 
       assert M

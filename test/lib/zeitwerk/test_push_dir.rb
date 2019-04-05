@@ -16,7 +16,7 @@ class TesPushDir < LoaderTest
 
   test "raises on non-existing directories" do
     dir = File.expand_path("non-existing")
-    e = assert_raises(ArgumentError) { loader.push_dir(dir) }
+    e = assert_raises(Zeitwerk::Error) { loader.push_dir(dir) }
     assert_equal "the root directory #{dir} does not exist", e.message
   end
 end

@@ -121,6 +121,7 @@ class TestRequireInteraction < LoaderTest
       ["my_gem.rb", <<-EOS],
         loader = Zeitwerk::Loader.new
         loader.push_dir(__dir__)
+        loader.enable_reloading
         loader.setup
 
         module MyGem; end
@@ -139,6 +140,7 @@ class TestRequireInteraction < LoaderTest
       ["hotel.rb", <<-EOS],
         loader = Zeitwerk::Loader.new
         loader.push_dir(__dir__)
+        loader.enable_reloading
         loader.setup
 
         Hotel.name
@@ -171,6 +173,7 @@ class TestRequireInteraction < LoaderTest
       ["hotel.rb", <<-EOS],
         loader = Zeitwerk::Loader.new
         loader.push_dir(__dir__)
+        loader.enable_reloading
         loader.setup
 
         Hotel.name

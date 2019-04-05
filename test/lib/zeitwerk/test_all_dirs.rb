@@ -6,7 +6,7 @@ class TestAllDirs < LoaderTest
   end
 
   test "returns an empty array if there are loaders but they have no root dirs" do
-    2.times { Zeitwerk::Loader.new }
+    2.times { new_loader }
     assert_empty Zeitwerk::Loader.all_dirs
   end
 
@@ -16,11 +16,8 @@ class TestAllDirs < LoaderTest
       ["loaderB/b.rb", "B = true"]
     ]
     with_files(files) do
-      loaderA = Zeitwerk::Loader.new
-      loaderA.push_dir("loaderA")
-
-      loaderB = Zeitwerk::Loader.new
-      loaderB.push_dir("loaderB")
+      new_loader(dirs: "loaderA")
+      new_loader(dirs: "loaderB")
 
       assert_equal ["#{Dir.pwd}/loaderA", "#{Dir.pwd}/loaderB"], Zeitwerk::Loader.all_dirs
     end

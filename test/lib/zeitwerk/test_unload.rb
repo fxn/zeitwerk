@@ -32,13 +32,16 @@ class TestUnload < LoaderTest
   test "unload clears internal caches" do
     files = [
       ["app/user.rb", "class User; end"],
+      ["app/api/v1/users_controller.rb", "class Api::V1::UsersController; end"],
       ["app/admin/root.rb", "class Admin::Root; end"],
       ["lib/user.rb", "class User; end"]
     ]
     with_setup(files, dirs: %w(app lib)) do
       assert User
+      assert Api::V1::UsersController
 
       assert !loader.autoloads.empty?
+      assert !loader.autoloaded_dirs.empty?
       assert !loader.loaded_cpaths.empty?
       assert !loader.lazy_subdirs.empty?
       assert !loader.shadowed_files.empty?
@@ -46,6 +49,7 @@ class TestUnload < LoaderTest
       loader.unload
 
       assert loader.autoloads.empty?
+      assert loader.autoloaded_dirs.empty?
       assert loader.loaded_cpaths.empty?
       assert loader.lazy_subdirs.empty?
       assert loader.shadowed_files.empty?
@@ -91,14 +95,10 @@ class TestUnload < LoaderTest
       ["b/x.rb", "module X; end"], ["b/x/y.rb", "X::Y = true"],
     ]
     with_files(files) do
-      la = Zeitwerk::Loader.new
-      la.push_dir("a")
-      la.setup
+      la = new_loader(dirs: "a")
       assert Zeitwerk::ExplicitNamespace.cpaths["M"] == la
 
-      lb = Zeitwerk::Loader.new
-      lb.push_dir("b")
-      lb.setup
+      lb = new_loader(dirs: "b")
       assert Zeitwerk::ExplicitNamespace.cpaths["X"] == lb
 
       la.unload

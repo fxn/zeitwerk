@@ -3,7 +3,14 @@ require "test_helper"
 class TestGemInflector < LoaderTest
   def with_setup
     files = [
-      ["lib/my_gem.rb", "Zeitwerk::Loader.for_gem.setup; module MyGem; end"],
+      ["lib/my_gem.rb", <<-EOS],
+        loader = Zeitwerk::Loader.for_gem
+        loader.enable_reloading
+        loader.setup
+
+        module MyGem
+        end
+      EOS
       ["lib/my_gem/foo.rb", "MyGem::Foo = true"],
       ["lib/my_gem/version.rb", "MyGem::VERSION = '1.0.0'"],
       ["lib/my_gem/ns/version.rb", "MyGem::Ns::Version = true"]

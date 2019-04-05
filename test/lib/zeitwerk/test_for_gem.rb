@@ -5,6 +5,7 @@ class TestForGem < LoaderTest
     files = [
       ["my_gem.rb", <<-EOS],
         $for_gem_test_loader = Zeitwerk::Loader.for_gem
+        $for_gem_test_loader.enable_reloading
         $for_gem_test_loader.setup
 
         class MyGem
@@ -31,6 +32,7 @@ class TestForGem < LoaderTest
     files = [
       ["my_gem.rb", <<-EOS],
         $for_gem_test_zs << Zeitwerk::Loader.for_gem
+        $for_gem_test_zs.last.enable_reloading
         $for_gem_test_zs.last.setup
 
         class MyGem
@@ -57,6 +59,11 @@ class TestForGem < LoaderTest
   end
 
   test "configures the gem inflector by default" do
+    on_teardown do
+      remove_const :MyGem
+      delete_loaded_feature "my_gem.rb"
+    end
+
     files = [
       ["my_gem.rb", <<-EOS],
         $for_gem_test_loader = Zeitwerk::Loader.for_gem
@@ -76,6 +83,11 @@ class TestForGem < LoaderTest
   end
 
   test "configures the basename of the root file as loader name" do
+    on_teardown do
+      remove_const :MyGem
+      delete_loaded_feature "my_gem.rb"
+    end
+
     files = [
       ["my_gem.rb", <<-EOS],
         $for_gem_test_loader = Zeitwerk::Loader.for_gem

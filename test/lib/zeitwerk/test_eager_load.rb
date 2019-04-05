@@ -2,7 +2,7 @@ require "test_helper"
 
 class TestEagerLoad < LoaderTest
   test "eager loads independent files" do
-    loaders = [loader, Zeitwerk::Loader.new]
+    loaders = [loader, new_loader(setup: false)]
 
     $tel0 = $tel1 = false
 
@@ -27,7 +27,7 @@ class TestEagerLoad < LoaderTest
   end
 
   test "eager loads dependent loaders" do
-    loaders = [loader, Zeitwerk::Loader.new]
+    loaders = [loader, new_loader(setup: false)]
 
     $tel0 = $tel1 = false
 
@@ -67,51 +67,77 @@ class TestEagerLoad < LoaderTest
     end
   end
 
-  test "we can opt-out of entire root directories, and still autoload" do
-    $test_eager_load_eager_loaded_p = false
-    files = [["foo.rb", "Foo = true; $test_eager_load_eager_loaded_p = true"]]
-    with_setup(files) do
-      loader.do_not_eager_load(".")
-      loader.eager_load
+  [false, true].each do |enable_reloading|
+    test "we can opt-out of entire root directories, and still autoload (enable_autoloading #{enable_reloading})" do
+      on_teardown do
+        remove_const :Foo
+        delete_loaded_feature "foo.rb"
+      end
 
-      assert !$test_eager_load_eager_loaded_p
-      assert Foo
+      $test_eager_load_eager_loaded_p = false
+      files = [["foo.rb", "Foo = true; $test_eager_load_eager_loaded_p = true"]]
+      with_files(files) do
+        loader = new_loader(dirs: ".", enable_reloading: enable_reloading)
+        loader.do_not_eager_load(".")
+        loader.eager_load
+
+        assert !$test_eager_load_eager_loaded_p
+        assert Foo
+      end
     end
-  end
 
-  test "we can opt-out of sudirectories, and still autoload" do
-    $test_eager_load_eager_loaded_p = false
-    files = [
-      ["db_adapters/mysql_adapter.rb", <<-EOS],
-        module DbAdapters::MysqlAdapter
-        end
-        $test_eager_load_eager_loaded_p = true
-      EOS
-      ["foo.rb", "Foo = true"]
-    ]
-    with_setup(files) do
-      loader.do_not_eager_load("db_adapters")
-      loader.eager_load
+    test "we can opt-out of sudirectories, and still autoload (enable_autoloading #{enable_reloading})" do
+      on_teardown do
+        remove_const :Foo
+        delete_loaded_feature "foo.rb"
 
-      assert Foo
-      assert !$test_eager_load_eager_loaded_p
-      assert DbAdapters::MysqlAdapter
+        remove_const :DbAdapters
+        delete_loaded_feature "db_adapters/mysql_adapter.rb"
+      end
+
+      $test_eager_load_eager_loaded_p = false
+      files = [
+        ["db_adapters/mysql_adapter.rb", <<-EOS],
+          module DbAdapters::MysqlAdapter
+          end
+          $test_eager_load_eager_loaded_p = true
+        EOS
+        ["foo.rb", "Foo = true"]
+      ]
+      with_files(files) do
+        loader = new_loader(dirs: ".", enable_reloading: enable_reloading)
+        loader.do_not_eager_load("db_adapters")
+        loader.eager_load
+
+        assert Foo
+        assert !$test_eager_load_eager_loaded_p
+        assert DbAdapters::MysqlAdapter
+      end
     end
-  end
 
-  test "we can opt-out of files, and still autoload" do
-    $test_eager_load_eager_loaded_p = false
-    files = [
-      ["foo.rb", "Foo = true"],
-      ["bar.rb", "Bar = true; $test_eager_load_eager_loaded_p = true"]
-    ]
-    with_setup(files) do
-      loader.do_not_eager_load("bar.rb")
-      loader.eager_load
+    test "we can opt-out of files, and still autoload (enable_autoloading #{enable_reloading})" do
+      on_teardown do
+        remove_const :Foo
+        delete_loaded_feature "foo.rb"
 
-      assert Foo
-      assert !$test_eager_load_eager_loaded_p
-      assert Bar
+        remove_const :Bar
+        delete_loaded_feature "bar.rb"
+      end
+
+      $test_eager_load_eager_loaded_p = false
+      files = [
+        ["foo.rb", "Foo = true"],
+        ["bar.rb", "Bar = true; $test_eager_load_eager_loaded_p = true"]
+      ]
+      with_files(files) do
+        loader = new_loader(dirs: ".", enable_reloading: enable_reloading)
+        loader.do_not_eager_load("bar.rb")
+        loader.eager_load
+
+        assert Foo
+        assert !$test_eager_load_eager_loaded_p
+        assert Bar
+      end
     end
   end
 
@@ -122,13 +148,8 @@ class TestEagerLoad < LoaderTest
       ["b/foo.rb", "Foo = 1; $test_eager_loaded_file = :b"]
     ]
     with_files(files) do
-      la = Zeitwerk::Loader.new
-      la.push_dir("a")
-      la.setup
-
-      lb = Zeitwerk::Loader.new
-      lb.push_dir("b")
-      lb.setup
+      la = new_loader(dirs: "a")
+      lb = new_loader(dirs: "b")
 
       la.eager_load
       lb.eager_load

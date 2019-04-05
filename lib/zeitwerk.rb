@@ -7,5 +7,5 @@ module Zeitwerk
   require_relative "zeitwerk/inflector"
   require_relative "zeitwerk/gem_inflector"
   require_relative "zeitwerk/kernel"
-  require_relative "zeitwerk/conflicting_directory"
+  require_relative "zeitwerk/error"
 end

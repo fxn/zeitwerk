@@ -5,7 +5,7 @@ module Zeitwerk::Loader::Callbacks
   # @param file [String]
   # @return [void]
   def on_file_autoloaded(file)
-    parent, cname = autoloads[file]
+    parent, cname = cref_autoloaded_from(file)
     loaded_cpaths.add(cpath(parent, cname))
     Zeitwerk::Registry.unregister_autoload(file)
     log("constant #{cpath(parent, cname)} loaded from file #{file}") if logger
@@ -30,13 +30,17 @@ module Zeitwerk::Loader::Callbacks
     # the module object created by t2 wouldn't have any of the autoloads for its
     # children, since t1 would have correctly deleted its lazy_subdirs entry.
     mutex2.synchronize do
-      parent, cname = autoloads[dir]
-      break if loaded_cpaths.include?(cpath(parent, cname))
+      parent, cname = cref_autoloaded_from(dir)
+      # If reloading is disabled and there are several threads autoloading the
+      # same namespace at the same time, the parent is going to bbe nil for all
+      # except the first one.
+      break if parent.nil? || loaded_cpaths.include?(cpath(parent, cname))
 
       autovivified_module = parent.const_set(cname, Module.new)
       log("module #{autovivified_module.name} autovivified from directory #{dir}") if logger
 
       loaded_cpaths.add(autovivified_module.name)
+      autoloaded_dirs << dir
       on_namespace_loaded(autovivified_module)
     end
   end
@@ -54,5 +58,11 @@ module Zeitwerk::Loader::Callbacks
         set_autoloads_in_dir(subdir, namespace)
       end
     end
+  end
+
+  # @private
+  # @return [(Module, String)]
+  def cref_autoloaded_from(path)
+    reloading_enabled? ? autoloads[path] : autoloads.delete(path)
   end
 end

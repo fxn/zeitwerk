@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2.0.0 (Unreleased)
+
+* Reloading is disabled by default. In order to be able to reload you need to opt-in by calling `loader.enable_reloading` before setup. The motivation for this breaking change is twofold. On one hand, this is a design decision at the interface/usage level that reflects that the majority of use cases for Zeitwerk do not need reloading. On the other hand, if reloading is not enabled, Zeitwerk is able to use less memory. Notably, this is more optimal for large web applications in production.
+
 ## 1.4.3 (26 March 2019)
 
 * Faster reload. If you're using `bootsnap`, requires at least version 1.4.2.

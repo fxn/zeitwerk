@@ -10,11 +10,11 @@ class TestConflictingDirectory < LoaderTest
   end
 
   def existing_loader
-    @existing_loader ||= Zeitwerk::Loader.new
+    @existing_loader ||= new_loader(setup: false)
   end
 
   def loader
-    @loader ||= Zeitwerk::Loader.new
+    @loader ||= new_loader(setup: false)
   end
 
   def conflicting_directory_message(dir)
@@ -26,27 +26,21 @@ class TestConflictingDirectory < LoaderTest
   test "raises if an existing loader manages the same root dir" do
     existing_loader.push_dir(dir)
 
-    e = assert_raises(Zeitwerk::ConflictingDirectory) do
-      loader.push_dir(dir)
-    end
+    e = assert_raises(Zeitwerk::Error) { loader.push_dir(dir) }
     assert_equal conflicting_directory_message(dir), e.message
   end
 
   test "raises if an existing loader manages a parent directory" do
     existing_loader.push_dir(parent)
 
-    e = assert_raises(Zeitwerk::ConflictingDirectory) do
-      loader.push_dir(dir)
-    end
+    e = assert_raises(Zeitwerk::Error) { loader.push_dir(dir) }
     assert_equal conflicting_directory_message(dir), e.message
   end
 
   test "raises if an existing loader manages a subdirectory" do
     existing_loader.push_dir(dir)
 
-    e = assert_raises(Zeitwerk::ConflictingDirectory) do
-      loader.push_dir(parent)
-    end
+    e = assert_raises(Zeitwerk::Error) { loader.push_dir(parent) }
     assert_equal conflicting_directory_message(parent), e.message
   end
 end

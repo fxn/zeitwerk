@@ -78,13 +78,18 @@ loader.setup # ready!
 
 The `loader` variable can go out of scope. Zeitwerk keeps a registry with all of them, and so the object won't be garbage collected.
 
-Later, you can reload if you want to:
+You can reload if you want to:
 
 ```ruby
+loader = Zeitwerk::Loader.new
+loader.push_dir(...)
+loader.enable_reloading # you need to opt-in before setup
+loader.setup
+...
 loader.reload
 ```
 
-and you can also eager load all the code:
+and you can eager load all the code:
 
 ```ruby
 loader.eager_load
@@ -191,17 +196,26 @@ Zeitwerk works internally only with absolute paths to avoid costly file searches
 
 ### Reloading
 
-In order to reload code:
+Zeitwer is able to reload code, but you need to enable this feature:
 
 ```ruby
+loader = Zeitwerk::Loader.new
+loader.push_dir(...)
+loader.enable_reloading # you need to opt-in before setup
+loader.setup
+...
 loader.reload
 ```
 
-Generally speaking, reloading is useful while developing running services like web applications. Gems that implement regular libraries, so to speak, won't normally have a use case for reloading.
+There is no way to undo this, either you want to reload or you don't.
+
+Enabling reloading after setup raises `Zeitwerk::Error`. Similarly, calling `reload` without having enabled reloading also raises `Zeitwerk::Error`.
+
+Generally speaking, reloading is useful while developing running services like web applications. Gems that implement regular libraries, so to speak, or services running in testing or production environments, won't normally have a use case for reloading. If reloading is not enabled, Zeitwerk is able to use less memory.
 
 Reloading removes the currently loaded classes and modules, resets the loader so that it will pick whatever is in the file system now, and runs preloads if there are any.
 
-It is important to highlight that this is an instance method. Don't worry about the project dependencies, their loaders are independent.
+It is important to highlight that this is an instance method. Don't worry about project dependencies managed by Zeitwerk, their loaders are independent.
 
 In order for reloading to be thread-safe, you need to implement some coordination. For example, a web framework that serves each request with its own thread may have a globally accessible RW lock. When a request comes in, the framework acquires the lock for reading at the beginning, and the code in the framework that calls `loader.reload` needs to acquire the lock for writing.
 

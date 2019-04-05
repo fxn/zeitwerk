@@ -4,7 +4,23 @@ class LoaderTest < Minitest::Test
   attr_reader :loader
 
   def setup
-    @loader = Zeitwerk::Loader.new
+    @loader = new_loader(setup: false)
+  end
+
+  # We enable reloading in the reloaders of the test suite to have a robust
+  # cleanup of constants.
+  #
+  # There are gems that allow you to run tests in forked processes and you do
+  # not need to care, but JRuby does not support forking, and I prefer to be
+  # ready for the day in which Zeitwerk runs on JRuby.
+  def new_loader(dirs: [], enable_reloading: true, setup: true)
+    Zeitwerk::Loader.new.tap do |loader|
+      Array(dirs).each do |dir|
+        loader.push_dir(dir)
+      end
+      loader.enable_reloading if enable_reloading
+      loader.setup            if setup
+    end
   end
 
   def reset_constants

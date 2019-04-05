@@ -79,6 +79,13 @@ module Zeitwerk
     # @return [{String => (Module, String)}]
     attr_reader :autoloads
 
+    # We keep track of autoloaded directories to remove them from the registry
+    # at the end of eager loading.
+    #
+    # Files are removed as they are autoloaded, but directories need to wait due
+    # to concurrency (see why in Zeitwerk::Loader::Callbacks#on_dir_autoloaded).
+    attr_reader :autoloaded_dirs
+
     # Constant paths loaded so far.
     #
     # @private
@@ -129,6 +136,7 @@ module Zeitwerk
       @ignored               = Set.new
       @ignored_paths         = Set.new
       @autoloads             = {}
+      @autoloaded_dirs       = []
       @loaded_cpaths         = Set.new
       @lazy_subdirs          = {}
       @shadowed_files        = {}
@@ -139,6 +147,8 @@ module Zeitwerk
       @mutex2       = Mutex.new
       @setup        = false
       @eager_loaded = false
+
+      @reloading_enabled = false
 
       Registry.register_loader(self)
     end
@@ -161,6 +171,7 @@ module Zeitwerk
     # Pushes `paths` to the list of root directories.
     #
     # @param path [<String, Pathname>]
+    # @raise [Zeitwerk::Error]
     # @return [void]
     def push_dir(path)
       abspath = File.expand_path(path)
@@ -168,8 +179,30 @@ module Zeitwerk
         raise_if_conflicting_directory(abspath)
         root_dirs[abspath] = true
       else
-        raise ArgumentError, "the root directory #{abspath} does not exist"
+        raise Error, "the root directory #{abspath} does not exist"
       end
+    end
+
+    # You need to call this method before setup in order to be able to reload.
+    # There is no way to undo this, either you want to reload or you don't.
+    #
+    # @raise [Zeitwerk::Error]
+    # @return [void]
+    def enable_reloading
+      mutex.synchronize do
+        break if @reloading_enabled
+
+        if @setup
+          raise Error, "cannot enable reloading after setup"
+        else
+          @reloading_enabled = true
+        end
+      end
+    end
+
+    # @return [Boolean]
+    def reloading_enabled?
+      @reloading_enabled
     end
 
     # Files or directories to be preloaded instead of lazy loaded.
@@ -266,6 +299,7 @@ module Zeitwerk
         end
 
         autoloads.clear
+        autoloaded_dirs.clear
         loaded_cpaths.clear
         lazy_subdirs.clear
         shadowed_files.clear
@@ -283,10 +317,15 @@ module Zeitwerk
     # This method is not thread-safe, please see how this can be achieved by
     # client code in the README of the project.
     #
+    # @raise [Zeitwerk::Error]
     # @return [void]
     def reload
-      unload
-      setup
+      if reloading_enabled?
+        unload
+        setup
+      else
+        raise Error, "can't reload, please call loader.enable_reloading before setup"
+      end
     end
 
     # Eager loads all files in the root directories, recursively. Files do not
@@ -311,6 +350,11 @@ module Zeitwerk
             end
           end
         end
+
+        autoloaded_dirs.each do |dir|
+          Registry.unregister_autoload(dir)
+        end
+        autoloaded_dirs.clear
 
         @eager_loaded = true
       end
@@ -609,7 +653,7 @@ module Zeitwerk
           loader.dirs.each do |already_managed_dir|
             if dir.start_with?(already_managed_dir) || already_managed_dir.start_with?(dir)
               require "pp"
-              raise ConflictingDirectory,
+              raise Error,
                 "loader\n\n#{pretty_inspect}\n\nwants to manage directory #{dir}," \
                 " which is already managed by\n\n#{loader.pretty_inspect}\n"
               EOS

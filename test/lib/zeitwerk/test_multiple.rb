@@ -2,8 +2,6 @@ require "test_helper"
 
 class TestMultiple < LoaderTest
   test "multiple independent loaders" do
-    loaders = [loader, Zeitwerk::Loader.new]
-
     files = [
       ["lib0/app0.rb", "module App0; end"],
       ["lib0/app0/foo.rb", "class App0::Foo; end"],
@@ -11,9 +9,8 @@ class TestMultiple < LoaderTest
       ["lib1/app1/foo/bar/baz.rb", "class App1::Foo::Bar::Baz; end"]
     ]
     with_files(files) do
-      loaders[0].push_dir("lib0")
-      loaders[1].push_dir("lib1")
-      loaders.each(&:setup)
+      new_loader(dirs: "lib0")
+      new_loader(dirs: "lib1")
 
       assert App0::Foo
       assert App1::Foo::Bar::Baz
@@ -21,8 +18,6 @@ class TestMultiple < LoaderTest
   end
 
   test "multiple dependent loaders" do
-    loaders = [loader, Zeitwerk::Loader.new]
-
     files = [
       ["lib0/app0.rb", <<-EOS],
         module App0
@@ -46,9 +41,8 @@ class TestMultiple < LoaderTest
       EOS
     ]
     with_files(files) do
-      loaders[0].push_dir("lib0")
-      loaders[1].push_dir("lib1")
-      loaders.each(&:setup)
+      new_loader(dirs: "lib0")
+      new_loader(dirs: "lib1")
 
       assert App0::Foo
       assert App1::Foo::Bar::Baz
