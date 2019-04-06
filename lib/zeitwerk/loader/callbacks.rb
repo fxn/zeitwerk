@@ -19,17 +19,16 @@ module Zeitwerk::Loader::Callbacks
   # @return [void]
   def on_dir_autoloaded(dir)
     # Module#autoload does not serialize concurrent requires, and we handle
-    # directories ourselves.
+    # directories ourselves, so the callback needs to account for concurrency.
     #
-    # That introduces a race condition here in which thread t1 autovivifies the
-    # module, and while autoloads are being set on that module object, thread t2
-    # autoloads the same namespace.
+    # Multi-threading would introduce a race condition here in which thread t1
+    # autovivifies the module, and while autoloads for its children are being
+    # set, thread t2 autoloads the same namespace.
     #
-    # In that situation, t2 resets the constant to store a new module. That not
-    # only sets the constant twice (undesirable per se), but it gets worse,
-    # because the module object created by t2 won't have any of the autoloads
-    # for child constants set, since t1 correctly deleted the lazy_dirs entry,
-    # thus resulting in NameErrors when client code tries to reach them.
+    # Without the mutex and short-circuiting break, t2 would reset the module.
+    # That not only would reassign the constant (undesirable per se) but, worse,
+    # the module object created by t2 wouldn't have any of the autoloads for its
+    # children, since t1 would have correctly deleted its lazy_subdirs entry.
     mutex2.synchronize do
       parent, cname = autoloads[dir]
       break if loaded_cpaths.include?(cpath(parent, cname))
