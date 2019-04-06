@@ -7,6 +7,7 @@ module Zeitwerk::Loader::Callbacks
   def on_file_autoloaded(file)
     parent, cname = autoloads[file]
     loaded_cpaths.add(cpath(parent, cname))
+    Zeitwerk::Registry.unregister_autoload(file)
     log("constant #{cpath(parent, cname)} loaded from file #{file}") if logger
   end
 
