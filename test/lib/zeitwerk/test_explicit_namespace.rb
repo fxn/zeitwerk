@@ -41,6 +41,20 @@ class TestExplicitNamespace < LoaderTest
     end
   end
 
+  test "autoloads are set correctly, even if there are autoloads for the same cname in a module prepended to the superclass" do
+    files = [
+      ["m/x.rb", "M::X = :M"],
+      ["a.rb", "class A; prepend M; end"],
+      ["b.rb", "class B < A; end"],
+      ["b/x.rb", "B::X = :B"]
+    ]
+    with_setup(files) do
+      assert_kind_of Class, A
+      assert_kind_of Class, B
+      assert_equal :B, B::X
+    end
+  end
+
   test "autoloads are set correctly, even if there are autoloads for the same cname in other ancestors" do
     files = [
       ["m/x.rb", "M::X = :M"],
