@@ -36,7 +36,6 @@ class TestIgnore < LoaderTest
       ["m/b.rb", "M::B = true"],
       ["m/c.rb", "M::C = true"]
     ]
-
     with_files(files) do
       loader.push_dir(".")
       loader.ignore("m")
@@ -59,7 +58,6 @@ class TestIgnore < LoaderTest
       loader.setup
       loader.eager_load
 
-      assert_equal 1, loader.autoloads.size
       assert ::X
       assert_raises(NameError) { ::Y }
     end
@@ -72,14 +70,12 @@ class TestIgnore < LoaderTest
       ["m/b.rb", "M::B = true"],
       ["m/c.rb", "M::C = true"]
     ]
-
     with_files(files) do
       loader.push_dir(".")
       loader.ignore("m")
       loader.setup
       loader.eager_load
 
-      assert_equal 1, loader.autoloads.size
       assert ::X
       assert_raises(NameError) { ::M }
     end

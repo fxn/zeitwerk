@@ -68,8 +68,9 @@ module Zeitwerk
     # @return [{String => String}]
     attr_reader :shadowed_files
 
-    # Maps real absolute paths for which an autoload has been set to their
-    # corresponding parent class or module and constant name.
+    # Maps real absolute paths for which an autoload has been set ---and not
+    # executed--- to their corresponding parent class or module and constant
+    # name.
     #
     #   "/Users/fxn/blog/app/models/user.rb"          => [Object, "User"],
     #   "/Users/fxn/blog/app/models/hotel/pricing.rb" => [Hotel, "Pricing"]
@@ -84,13 +85,18 @@ module Zeitwerk
     #
     # Files are removed as they are autoloaded, but directories need to wait due
     # to concurrency (see why in Zeitwerk::Loader::Callbacks#on_dir_autoloaded).
-    attr_reader :autoloaded_dirs
-
-    # Constant paths loaded so far.
     #
     # @private
-    # @return [Set<String>]
-    attr_reader :loaded_cpaths
+    # @return [<String>]
+    attr_reader :autoloaded_dirs
+
+    # Constants paths that would be unloaded if you would reload. If reloading
+    # is enabled, this hash is filled as constants are autoloaded or eager
+    # loaded. Otherwise, the collection remains empty.
+    #
+    # @private
+    # @return [{String => (String, (Module, String))}]
+    attr_reader :to_unload
 
     # Maps constant paths of namespaces to arrays of corresponding directories.
     #
@@ -137,7 +143,7 @@ module Zeitwerk
       @ignored_paths         = Set.new
       @autoloads             = {}
       @autoloaded_dirs       = []
-      @loaded_cpaths         = Set.new
+      @to_unload             = {}
       @lazy_subdirs          = {}
       @shadowed_files        = {}
       @eager_load_exclusions = Set.new
@@ -270,17 +276,19 @@ module Zeitwerk
 
         autoloads.each do |realpath, (parent, cname)|
           if parent.autoload?(cname)
-            parent.send(:remove_const, cname)
-            log("autoload for #{cpath(parent, cname)} removed") if logger
+            unload_autoload(parent, cname)
           else
-            if cdef?(parent, cname)
-              parent.send(:remove_const, cname)
-              log("#{cpath(parent, cname)} unloaded") if logger
-            else
-              # Already unloaded somehow, that is fine.
-            end
+            # Could happen if loaded with require_relative. require_relative is
+            # not supported, and the cpath would escape `to_unload?`. This is
+            # just defensive code to clean things up as much as we are able to.
+            unload_cref(parent, cname)   if cdef?(parent, cname)
             unloaded_files.add(realpath) if ruby?(realpath)
           end
+        end
+
+        to_unload.each_value do |(realpath, (parent, cname))|
+          unload_cref(parent, cname)   if cdef?(parent, cname)
+          unloaded_files.add(realpath) if ruby?(realpath)
         end
 
         unless unloaded_files.empty?
@@ -300,7 +308,7 @@ module Zeitwerk
 
         autoloads.clear
         autoloaded_dirs.clear
-        loaded_cpaths.clear
+        to_unload.clear
         lazy_subdirs.clear
         shadowed_files.clear
 
@@ -369,12 +377,13 @@ module Zeitwerk
       mutex.synchronize { eager_load_exclusions.merge(expand_paths(paths)) }
     end
 
-    # Says if the given constant path has been loaded.
+    # Says if the given constant path would be unloaded on reload. This
+    # predicate returns `false` if reloading is disabled.
     #
     # @param cpath [String]
     # @return [Boolean]
-    def loaded?(cpath)
-      loaded_cpaths.member?(cpath)
+    def to_unload?(cpath)
+      to_unload.key?(cpath)
     end
 
     # --- Class methods ---------------------------------------------------------------------------
@@ -661,6 +670,22 @@ module Zeitwerk
           end
         end
       end
+    end
+
+    # @param parent [Module]
+    # @param cname [String]
+    # @return [void]
+    def unload_autoload(parent, cname)
+      parent.send(:remove_const, cname)
+      log("autoload for #{cpath(parent, cname)} removed") if logger
+    end
+
+    # @param parent [Module]
+    # @param cname [String]
+    # @return [void]
+    def unload_cref(parent, cname)
+      parent.send(:remove_const, cname)
+      log("#{cpath(parent, cname)} unloaded") if logger
     end
   end
 end

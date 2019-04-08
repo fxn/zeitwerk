@@ -42,7 +42,7 @@ class TestUnload < LoaderTest
 
       assert !loader.autoloads.empty?
       assert !loader.autoloaded_dirs.empty?
-      assert !loader.loaded_cpaths.empty?
+      assert !loader.to_unload.empty?
       assert !loader.lazy_subdirs.empty?
       assert !loader.shadowed_files.empty?
 
@@ -50,7 +50,7 @@ class TestUnload < LoaderTest
 
       assert loader.autoloads.empty?
       assert loader.autoloaded_dirs.empty?
-      assert loader.loaded_cpaths.empty?
+      assert loader.to_unload.empty?
       assert loader.lazy_subdirs.empty?
       assert loader.shadowed_files.empty?
     end

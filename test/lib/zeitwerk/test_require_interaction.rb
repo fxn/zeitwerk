@@ -74,7 +74,7 @@ class TestRequireInteraction < LoaderTest
     end
   end
 
-  test "a required top-level file is still detected as autoloadable (require_relative)" do
+  test "a required top-level file is still detected as unloadable (require_relative)" do
     files = [["user.rb", "class User; end"]]
     with_setup(files) do
       assert_equal true, require_relative("../../tmp/user")
@@ -95,7 +95,6 @@ class TestRequireInteraction < LoaderTest
     with_setup(files, dirs: dirs, load_path: dirs) do
       assert_required "admin/user"
 
-      assert_equal 3, loader.autoloads.size
       assert Admin::User
       assert Admin::UsersController
 

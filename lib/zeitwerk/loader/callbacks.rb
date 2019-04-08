@@ -5,10 +5,10 @@ module Zeitwerk::Loader::Callbacks
   # @param file [String]
   # @return [void]
   def on_file_autoloaded(file)
-    parent, cname = cref_autoloaded_from(file)
-    loaded_cpaths.add(cpath(parent, cname))
+    cref = autoloads.delete(file)
+    to_unload[cpath(*cref)] = [file, cref] if reloading_enabled?
     Zeitwerk::Registry.unregister_autoload(file)
-    log("constant #{cpath(parent, cname)} loaded from file #{file}") if logger
+    log("constant #{cpath(*cref)} loaded from file #{file}") if logger
   end
 
   # Invoked from our decorated Kernel#require when a managed directory is
@@ -25,23 +25,25 @@ module Zeitwerk::Loader::Callbacks
     # autovivifies the module, and while autoloads for its children are being
     # set, thread t2 autoloads the same namespace.
     #
-    # Without the mutex and short-circuiting break, t2 would reset the module.
+    # Without the mutex and subsequent delete call, t2 would reset the module.
     # That not only would reassign the constant (undesirable per se) but, worse,
     # the module object created by t2 wouldn't have any of the autoloads for its
     # children, since t1 would have correctly deleted its lazy_subdirs entry.
     mutex2.synchronize do
-      parent, cname = cref_autoloaded_from(dir)
-      # If reloading is disabled and there are several threads autoloading the
-      # same namespace at the same time, the parent is going to bbe nil for all
-      # except the first one.
-      break if parent.nil? || loaded_cpaths.include?(cpath(parent, cname))
+      if cref = autoloads.delete(dir)
+        autovivified_module = cref[0].const_set(cref[1], Module.new)
+        log("module #{autovivified_module.name} autovivified from directory #{dir}") if logger
 
-      autovivified_module = parent.const_set(cname, Module.new)
-      log("module #{autovivified_module.name} autovivified from directory #{dir}") if logger
+        to_unload[autovivified_module.name] = [dir, cref] if reloading_enabled?
 
-      loaded_cpaths.add(autovivified_module.name)
-      autoloaded_dirs << dir
-      on_namespace_loaded(autovivified_module)
+        # We don't unregister `dir` in the registry because concurrent threads
+        # wouldn't find a loader associated to it in Kernel#require and would
+        # try to require the directory. Instead, we are going to keep track of
+        # these to be able to unregister later if eager loading.
+        autoloaded_dirs << dir
+
+        on_namespace_loaded(autovivified_module)
+      end
     end
   end
 
@@ -58,11 +60,5 @@ module Zeitwerk::Loader::Callbacks
         set_autoloads_in_dir(subdir, namespace)
       end
     end
-  end
-
-  # @private
-  # @return [(Module, String)]
-  def cref_autoloaded_from(path)
-    reloading_enabled? ? autoloads[path] : autoloads.delete(path)
   end
 end
