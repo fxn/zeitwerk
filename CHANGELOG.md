@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 2.1.0 (Unreleased)
+## 2.1.0 (9 April 2019)
 
 * `loaded_cpaths` is gone, you can ask if a constant path is going to be unloaded instead with `loader.to_unload?(cpath)`. Thanks to this refinement, Zeitwerk is able to consume even less memory. (Change included in a minor upgrade because the introspection API is not documented, and it still isn't, needs some time to settle down).
 
