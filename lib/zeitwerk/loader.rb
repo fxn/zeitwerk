@@ -359,8 +359,8 @@ module Zeitwerk
           end
         end
 
-        autoloaded_dirs.each do |dir|
-          Registry.unregister_autoload(dir)
+        autoloaded_dirs.each do |autoloaded_dir|
+          Registry.unregister_autoload(autoloaded_dir)
         end
         autoloaded_dirs.clear
 
