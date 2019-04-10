@@ -155,20 +155,29 @@ class TestEagerLoad < LoaderTest
       lb.eager_load
 
       assert_equal :a, $test_eager_loaded_file
-      assert_empty la.shadowed_files
-      assert_equal Hash[File.expand_path("b/foo.rb") => File.expand_path("a/foo.rb")], lb.shadowed_files
     end
   end
 
   test "eager loading skips files that would map to already loaded constants" do
+    on_teardown { remove_const :X }
+
     $test_eager_loaded_file = false
     files = [["x.rb", "X = 1; $test_eager_loaded_file = true"]]
     ::X = 1
     with_setup(files) do
       loader.eager_load
       assert !$test_eager_loaded_file
-      assert_equal "X", loader.shadowed_files[File.expand_path("x.rb")]
     end
-    remove_const :X
+  end
+
+  test "eager loading clears shadowed_files (performance)" do
+    on_teardown { remove_const :X }
+
+    files = [["x.rb", "X = 1; $test_eager_loaded_file = true"]]
+    ::X = 1
+    with_setup(files) do
+      loader.eager_load
+      assert loader.shadowed_files.empty?
+    end
   end
 end

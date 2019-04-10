@@ -53,19 +53,21 @@ module Zeitwerk
     # @return [Set<String>]
     attr_reader :ignored_paths
 
-    # Keeps track of shadowed files.
+    # A _shadowed file_ is a file managed by this loader that is ignored when
+    # setting autoloads because its matching constant is taken. Either the
+    # constant is already defined, or there exists an autoload for it.
     #
-    # A shadowed file is a file managed by this autoloader that is skipped
-    # because its matching constant path has already been seen. Think $LOAD_PATH
-    # and require, only the first occurrence of a given relative name is loaded.
+    # Think $LOAD_PATH and require, only the first occurrence of a given
+    # relative name is loaded.
     #
-    # If the existing occurrence is an autoload, we map the file name to the
-    # shadowing autoload path. If the existing occurrence is an already defined
-    # constant, the file name is mapped to the constant path, meaning it was
-    # loaded elsewhere.
+    # This set keeps track of the absolute path of shadowed files, to be able to
+    # skip them while eager loading.
+    #
+    # Note this cannot be implemented with do_not_eager_load because these
+    # files are not autoloadable.
     #
     # @private
-    # @return [{String => String}]
+    # @return [Set<String>]
     attr_reader :shadowed_files
 
     # Maps real absolute paths for which an autoload has been set ---and not
@@ -145,7 +147,7 @@ module Zeitwerk
       @autoloaded_dirs       = []
       @to_unload             = {}
       @lazy_subdirs          = {}
-      @shadowed_files        = {}
+      @shadowed_files        = Set.new
       @eager_load_exclusions = Set.new
 
       # TODO: find a better name for these mutexes.
@@ -352,15 +354,17 @@ module Zeitwerk
             next if eager_load_exclusions.member?(abspath)
 
             if ruby?(abspath)
-              require abspath unless shadowed_files.key?(abspath)
+              require abspath unless shadowed_files.member?(abspath)
             elsif dir?(abspath)
               queue << abspath
             end
           end
         end
 
-        autoloaded_dirs.each do |autoloaded_dir|
-          Registry.unregister_autoload(autoloaded_dir)
+        shadowed_files.clear
+
+        autoloaded_dirs.each do |dir|
+          Registry.unregister_autoload(dir)
         end
         autoloaded_dirs.clear
 
@@ -488,20 +492,36 @@ module Zeitwerk
     def autoload_file(parent, cname, file)
       if autoload_path = autoload_for?(parent, cname)
         # First autoload for a Ruby file wins, just ignore subsequent ones.
-        shadowed_files[file] = autoload_path and return if ruby?(autoload_path)
-
-        # Override autovivification, we want the namespace to become the
-        # class/module defined in this file.
-        autoloads.delete(autoload_path)
-        Registry.unregister_autoload(autoload_path)
-
-        set_autoload(parent, cname, file)
-        register_explicit_namespace(cpath(parent, cname))
+        if ruby?(autoload_path)
+          log("file #{file} is ignored because #{autoload_path} has precedence") if logger
+          shadowed_files.add(file)
+        else
+          promote_namespace_from_implicit_to_explicit(
+            dir:    autoload_path,
+            file:   file,
+            parent: parent,
+            cname:  cname
+          )
+        end
       elsif cdef?(parent, cname)
-        shadowed_files[file] = cpath(parent, cname)
+        log("file #{file} is ignored because #{cpath(parent, cname)} is already defined") if logger
+        shadowed_files.add(file)
       else
         set_autoload(parent, cname, file)
       end
+    end
+
+    # @param dir [String] directory that would have autovivified a module
+    # @param file [String] the file where the namespace is explictly defined
+    # @param parent [Module]
+    # @param cname [String]
+    # @return [void]
+    def promote_namespace_from_implicit_to_explicit(dir:, file:, parent:, cname:)
+      autoloads.delete(dir)
+      Registry.unregister_autoload(dir)
+
+      set_autoload(parent, cname, file)
+      register_explicit_namespace(cpath(parent, cname))
     end
 
     # @param parent [Module]

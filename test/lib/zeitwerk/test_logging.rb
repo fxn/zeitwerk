@@ -152,4 +152,31 @@ class TestLogging < LoaderTest
       end
     end
   end
+
+  test "logs files shadowed by autoloads" do
+    files = [
+      ["a/foo.rb", "Foo = :a"],
+      ["b/foo.rb", "Foo = :b"]
+    ]
+    with_files(files) do
+      new_loader(dirs: "a")
+      assert_logged(%r(file .*?/b/foo\.rb is ignored because .*?/a/foo\.rb has precedence)) do
+        loader.push_dir("b")
+        loader.setup
+      end
+    end
+  end
+
+  test "eager loading skips files that would map to already loaded constants" do
+    on_teardown { remove_const :X }
+
+    ::X = 1
+    files = [["x.rb", "X = 1"]]
+    with_files(files) do
+      loader.push_dir(".")
+      assert_logged(%r(file .*?/x\.rb is ignored because X is already defined)) do
+        loader.setup
+      end
+    end
+  end
 end
