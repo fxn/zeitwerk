@@ -363,6 +363,7 @@ module Zeitwerk
           Registry.unregister_autoload(autoloaded_dir)
         end
         autoloaded_dirs.clear
+        shadowed_files.clear
 
         @eager_loaded = true
       end
