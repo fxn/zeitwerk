@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 2.1.2 (Unreleased)
+## 2.1.2 (11 April 2019)
 
 * Calling `reload` with reloading disabled raises `Zeitwerk::ReloadingDisabledError`.
 
