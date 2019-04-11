@@ -50,7 +50,7 @@ class TestReloading < LoaderTest
   end
 
   test "reloading raises if the flag is not set" do
-    e = assert_raises(Zeitwerk::Error) do
+    e = assert_raises(Zeitwerk::ReloadingDisabledError) do
       loader = Zeitwerk::Loader.new
       loader.setup
       loader.reload

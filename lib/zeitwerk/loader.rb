@@ -334,7 +334,7 @@ module Zeitwerk
         unload
         setup
       else
-        raise Error, "can't reload, please call loader.enable_reloading before setup"
+        raise ReloadingDisabledError, "can't reload, please call loader.enable_reloading before setup"
       end
     end
 
