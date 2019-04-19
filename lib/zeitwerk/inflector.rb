@@ -4,9 +4,10 @@ module Zeitwerk
   class Inflector # :nodoc:
     # Very basic snake case -> camel case conversion.
     #
-    #   Zeitwerk::Inflector.camelize("post", ...)             # => "Post"
-    #   Zeitwerk::Inflector.camelize("users_controller", ...) # => "UsersController"
-    #   Zeitwerk::Inflector.camelize("api", ...)              # => "Api"
+    #   inflector = Zeitwerk::Inflector.new
+    #   inflector.camelize("post", ...)             # => "Post"
+    #   inflector.camelize("users_controller", ...) # => "UsersController"
+    #   inflector.camelize("api", ...)              # => "Api"
     #
     # @param basename [String]
     # @param _abspath [String]
