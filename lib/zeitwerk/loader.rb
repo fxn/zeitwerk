@@ -578,14 +578,7 @@ module Zeitwerk
     # @param cname [Symbol]
     # @return [String, nil]
     def strict_autoload_path(parent, cname)
-      if autoload_path = parent.autoload?(cname)
-        # Due to the use cases we have, we are done if parent is a Module.
-        return autoload_path unless parent.is_a?(Class)
-        # Since file and constant names match, if both parent and one of its
-        # ancestors have an autoload for the same cname, their autoload paths
-        # cannot be equal.
-        return autoload_path unless parent.superclass.autoload?(cname) == autoload_path
-      end
+      parent.autoload?(cname) if cdef?(parent, cname)
     end
 
     # This method is called this way because I prefer `preload` to be the method
