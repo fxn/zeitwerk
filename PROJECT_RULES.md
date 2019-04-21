@@ -18,6 +18,8 @@ You should pick always the most specific option:
 * `abspath`: Absolute path of a file or directory.
 * `realpath`: Absolute real path of a file or directory.
 
+Note that Zeitwerk does not deal with file or directory objects, only with paths. For brevity, we exploit this fact to adopt the convention `file`/`dir` instead of `filename`/`dirname` or somesuch.
+
 ## Paths
 
 * The only relative file names allowed in the project come from users. For example, public methods like `push_dir` should understand relative paths.
