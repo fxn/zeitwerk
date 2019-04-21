@@ -15,31 +15,32 @@ You should pick always the most specific option:
 
 * `file`: Absolute path of a file.
 * `dir`: Absolute path of a directory.
-* `abspath`: Absolute path to a file or directory.
-* `realpath`: Absolute real path to a file or directory.
+* `abspath`: Absolute path of a file or directory.
+* `realpath`: Absolute real path of a file or directory.
 
 ## Paths
 
 * The only relative file names allowed in the project come from users. For example, public methods like `push_dir` should understand relative paths.
 * As soon as a relative file name comes from outside, it has to be converted to an absolute file name right away.
 * Internally, you have to use exclusively absolute file names. In particular, any `autoload` or `require` calls have to be issued using absolute paths to avoid `$LOAD_PATH` walks.
-* It is forbidden to do any sort of directory walk resolving relative file names.
+* It is forbidden to do any sort of directory lookups resolving relative file names.
 * The only directory walks allowed are the one needed to set autoloads. One pass, and as lazy as possible (do not descend into subdirectories until necessary).
+* File and directory names should be kept as entered as much as possible so that logging prints what the user expects. Convert to real paths only in code that needs coordination with `Kernel#require`.
 
 ## Types
 
 * All methods should have a documented signature.
-* Use the most concise type always. Use a set when a set is the best choices, use `Module` when a class or module object is the natural data type (rather than its name).
+* Use the most concise type always. Use a set when a set is the best choice, use `Module` when a class or module object is the natural data type (rather than its name).
 * Use always symbols for constant names.
 * Use always strings for constant paths.
-* Use always strings for paths, not pathnames. Pathnames are only accepted coming from the user, but internally everything are strings.
+* Use always strings for paths, not pathnames. Pathnames are only accepted coming from the user, but internally everything is strings.
 
 ## Public interface definition
 
 Documented public methods conform the public interface. In particular:
 
 * Public methods tagged as `@private` do not belong to the public interface.
-* Undocumented public methods do not belong to the public interface. They are probably exploratory.
+* Undocumented public methods do not belong to the public interface. They are probably exploratory and may change or be deleted without warning. These are private interface in practice.
 * Undocumented public methods can be used in the Rails integration. We control both repositories, and Rails usage may help refine the actual public interface.
 
 Any release can change the private interface, including patch releases.
