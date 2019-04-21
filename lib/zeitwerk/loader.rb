@@ -74,12 +74,12 @@ module Zeitwerk
     # executed--- to their corresponding parent class or module and constant
     # name.
     #
-    #   "/Users/fxn/blog/app/models/user.rb"          => [Object, "User"],
-    #   "/Users/fxn/blog/app/models/hotel/pricing.rb" => [Hotel, "Pricing"]
+    #   "/Users/fxn/blog/app/models/user.rb"          => [Object, :User],
+    #   "/Users/fxn/blog/app/models/hotel/pricing.rb" => [Hotel, :Pricing]
     #   ...
     #
     # @private
-    # @return [{String => (Module, String)}]
+    # @return [{String => (Module, Symbol)}]
     attr_reader :autoloads
 
     # We keep track of autoloaded directories to remove them from the registry
@@ -97,7 +97,7 @@ module Zeitwerk
     # loaded. Otherwise, the collection remains empty.
     #
     # @private
-    # @return [{String => (String, (Module, String))}]
+    # @return [{String => (String, (Module, Symbol))}]
     attr_reader :to_unload
 
     # Maps constant paths of namespaces to arrays of corresponding directories.
@@ -447,7 +447,7 @@ module Zeitwerk
     # @return [void]
     def set_autoloads_in_dir(dir, parent)
       each_abspath(dir) do |abspath|
-        cname = inflector.camelize(File.basename(abspath, ".rb"), abspath)
+        cname = inflector.camelize(File.basename(abspath, ".rb"), abspath).to_sym
         if ruby?(abspath)
           autoload_file(parent, cname, abspath)
         elsif dir?(abspath)
@@ -463,7 +463,7 @@ module Zeitwerk
     end
 
     # @param parent [Module]
-    # @param cname [String]
+    # @param cname [Symbol]
     # @param subdir [String]
     # @return [void]
     def autoload_subdir(parent, cname, subdir)
@@ -486,7 +486,7 @@ module Zeitwerk
     end
 
     # @param parent [Module]
-    # @param cname [String]
+    # @param cname [Symbol]
     # @param file [String]
     # @return [void]
     def autoload_file(parent, cname, file)
@@ -514,7 +514,7 @@ module Zeitwerk
     # @param dir [String] directory that would have autovivified a module
     # @param file [String] the file where the namespace is explictly defined
     # @param parent [Module]
-    # @param cname [String]
+    # @param cname [Symbol]
     # @return [void]
     def promote_namespace_from_implicit_to_explicit(dir:, file:, parent:, cname:)
       autoloads.delete(dir)
@@ -525,7 +525,7 @@ module Zeitwerk
     end
 
     # @param parent [Module]
-    # @param cname [String]
+    # @param cname [Symbol]
     # @param abspath [String]
     # @return [void]
     def set_autoload(parent, cname, abspath)
@@ -552,7 +552,7 @@ module Zeitwerk
     end
 
     # @param parent [Module]
-    # @param cname [String]
+    # @param cname [Symbol]
     # @return [String, nil]
     def autoload_for?(parent, cname)
       strict_autoload_path(parent, cname) || Registry.inception?(cpath(parent, cname))
@@ -575,7 +575,7 @@ module Zeitwerk
     # We need a way to strictly check in parent ignoring ancestors.
     #
     # @param parent [Module]
-    # @param cname [String]
+    # @param cname [Symbol]
     # @return [String, nil]
     def strict_autoload_path(parent, cname)
       if autoload_path = parent.autoload?(cname)
@@ -624,10 +624,10 @@ module Zeitwerk
     end
 
     # @param parent [Module]
-    # @param cname [String]
+    # @param cname [Symbol]
     # @return [String]
     def cpath(parent, cname)
-      parent.equal?(Object) ? cname : "#{parent.name}::#{cname}"
+      parent.equal?(Object) ? cname.to_s : "#{parent.name}::#{cname}"
     end
 
     # @param dir [String]
@@ -693,7 +693,7 @@ module Zeitwerk
     end
 
     # @param parent [Module]
-    # @param cname [String]
+    # @param cname [Symbol]
     # @return [void]
     def unload_autoload(parent, cname)
       parent.send(:remove_const, cname)
@@ -701,7 +701,7 @@ module Zeitwerk
     end
 
     # @param parent [Module]
-    # @param cname [String]
+    # @param cname [Symbol]
     # @return [void]
     def unload_cref(parent, cname)
       parent.send(:remove_const, cname)
