@@ -186,6 +186,10 @@ module Zeitwerk
 
     # Pushes `path` to the list of root directories.
     #
+    # Raises `Zeitwerk::Error` if `path` does not exist, or if another loader in
+    # the same process already manages that directory or one of its ascendants
+    # or descendants.
+    #
     # @param path [<String, Pathname>]
     # @raise [Zeitwerk::Error]
     # @return [void]
