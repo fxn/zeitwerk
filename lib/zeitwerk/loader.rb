@@ -92,9 +92,17 @@ module Zeitwerk
     # @return [<String>]
     attr_reader :autoloaded_dirs
 
-    # Constants paths that would be unloaded if you would reload. If reloading
-    # is enabled, this hash is filled as constants are autoloaded or eager
-    # loaded. Otherwise, the collection remains empty.
+    # Stores metadata needed for unloading. Its entries look like this:
+    #
+    #   "Admin::Role" => [".../admin/role.rb", [Admin, :Role]]
+    #
+    # The constant path as key helps implementing to_unload? The real file name
+    # is stored in order to be able to delete it from $LOADED_FEATURES, and the
+    # pair [Module, Symbol] is used to remove_const the constant from the class
+    # or module object.
+    #
+    # If reloading is enabled, this hash is filled as constants are autoloaded
+    # or eager loaded. Otherwise, the collection remains empty.
     #
     # @private
     # @return [{String => (String, (Module, Symbol))}]
