@@ -184,7 +184,7 @@ module Zeitwerk
       root_dirs.keys.freeze
     end
 
-    # Pushes `paths` to the list of root directories.
+    # Pushes `path` to the list of root directories.
     #
     # @param path [<String, Pathname>]
     # @raise [Zeitwerk::Error]
