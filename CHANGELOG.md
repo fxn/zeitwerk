@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 2.1.4 (Unreleased)
+
+* Supports deletion of root directories in disk after they've been configured.
+
+  `push_dir` requires root directories to exist to prevent misconfigurations,
+  but after that Zeitwerk no longer assumes they exist. This might be convenient
+  if you removed one in a web application while a server was running.
+
 ## 2.1.3 (22 April 2019)
 
 * Documentation improvements.

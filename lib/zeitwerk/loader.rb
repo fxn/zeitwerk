@@ -262,7 +262,7 @@ module Zeitwerk
         break if @setup
 
         expand_ignored_glob_patterns
-        non_ignored_root_dirs.each { |root_dir| set_autoloads_in_dir(root_dir, Object) }
+        actual_root_dirs.each { |root_dir| set_autoloads_in_dir(root_dir, Object) }
         do_preload
 
         @setup = true
@@ -360,7 +360,7 @@ module Zeitwerk
       mutex.synchronize do
         break if @eager_loaded
 
-        queue = non_ignored_root_dirs.reject { |dir| eager_load_exclusions.member?(dir) }
+        queue = actual_root_dirs.reject { |dir| eager_load_exclusions.member?(dir) }
         while dir = queue.shift
           each_abspath(dir) do |abspath|
             next if eager_load_exclusions.member?(abspath)
@@ -450,8 +450,10 @@ module Zeitwerk
     private # -------------------------------------------------------------------------------------
 
     # @return [<String>]
-    def non_ignored_root_dirs
-      root_dirs.keys.delete_if { |root_dir| ignored_paths.member?(root_dir) }
+    def actual_root_dirs
+      root_dirs.keys.delete_if do |root_dir|
+        !dir?(root_dir) || ignored_paths.member?(root_dir)
+      end
     end
 
     # @param dir [String]

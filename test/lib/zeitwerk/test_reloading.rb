@@ -1,4 +1,5 @@
 require "test_helper"
+require "fileutils"
 
 class TestReloading < LoaderTest
   test "enabling reloading after setup raises" do
@@ -121,6 +122,19 @@ class TestReloading < LoaderTest
       assert loader.autoloads.empty?
       assert Zeitwerk::Registry.autoloads.empty?
       assert loader.to_unload.empty?
+    end
+  end
+
+  test "reloading supports deleted root directories" do
+    files = [["a/x.rb", "X = 1"], ["b/y.rb", "Y = 1"]]
+    with_setup(files, dirs: %w(a b)) do
+      assert X
+      assert Y
+
+      FileUtils.rm_rf("b")
+      loader.reload
+
+      assert X
     end
   end
 end
