@@ -96,7 +96,7 @@ module Zeitwerk
     #
     #   "Admin::Role" => [".../admin/role.rb", [Admin, :Role]]
     #
-    # The constant path as key helps implementing to_unload? The real file name
+    # The cpath as key helps implementing unloadable_cpath? The real file name
     # is stored in order to be able to delete it from $LOADED_FEATURES, and the
     # pair [Module, Symbol] is used to remove_const the constant from the class
     # or module object.
@@ -292,9 +292,9 @@ module Zeitwerk
           if parent.autoload?(cname)
             unload_autoload(parent, cname)
           else
-            # Could happen if loaded with require_relative. require_relative is
-            # not supported, and the cpath would escape `to_unload?`. This is
-            # just defensive code to clean things up as much as we are able to.
+            # Could happen if loaded with require_relative. That is unsupported,
+            # and the constant path would escape unloadable_cpath? This is just
+            # defensive code to clean things up as much as we are able to.
             unload_cref(parent, cname)   if cdef?(parent, cname)
             unloaded_files.add(realpath) if ruby?(realpath)
           end
@@ -398,8 +398,16 @@ module Zeitwerk
     #
     # @param cpath [String]
     # @return [Boolean]
-    def to_unload?(cpath)
+    def unloadable_cpath?(cpath)
       to_unload.key?(cpath)
+    end
+
+    # Returns an array with the constant paths that would be unloaded on reload.
+    # This predicate returns an empty array if reloading is disabled.
+    #
+    # @return [<String>]
+    def unloadable_cpaths
+      to_unload.keys.freeze
     end
 
     # --- Class methods ---------------------------------------------------------------------------

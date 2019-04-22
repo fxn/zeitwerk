@@ -1,12 +1,12 @@
 require "test_helper"
 require "set"
 
-class TestToUnload < LoaderTest
+class TestUnloadableCpath < LoaderTest
   test "a loader that has loading nothing, has nothing to unload" do
     files = [["x.rb", "X = true"]]
     with_setup(files) do
-      assert_empty loader.to_unload
-      assert !loader.to_unload?("X")
+      assert_empty loader.unloadable_cpaths
+      assert !loader.unloadable_cpath?("X")
     end
   end
 
@@ -19,11 +19,13 @@ class TestToUnload < LoaderTest
     with_setup(files) do
       assert M::X
 
-      assert loader.to_unload?("M")
-      assert loader.to_unload?("M::X")
+      assert_equal %w(M M::X), loader.unloadable_cpaths
 
-      assert !loader.to_unload?("M::Y")
-      assert !loader.to_unload?("Z")
+      assert loader.unloadable_cpath?("M")
+      assert loader.unloadable_cpath?("M::X")
+
+      assert !loader.unloadable_cpath?("M::Y")
+      assert !loader.unloadable_cpath?("Z")
     end
   end
 
@@ -36,6 +38,7 @@ class TestToUnload < LoaderTest
       remove_const :Z
       delete_loaded_feature "z.rb"
     end
+
     files = [
       ["m/x.rb", "M::X = true"],
       ["m/y.rb", "M::Y = true"],
@@ -48,6 +51,7 @@ class TestToUnload < LoaderTest
       assert M::Y
       assert Z
 
+      assert_empty loader.unloadable_cpaths
       assert loader.to_unload.empty?
     end
   end
