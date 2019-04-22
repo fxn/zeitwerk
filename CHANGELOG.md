@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 2.1.4 (Unreleased)
+## 2.1.4 (23 April 2019)
 
 * Supports deletion of root directories in disk after they've been configured.
 
