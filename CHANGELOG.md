@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 2.1.5 (24 April 2019)
+
+* Failed autoloads raise `NameError` as always, but with a more user-friendly
+  message instead of the original generic one from Ruby.
+
+* Eager loading uses `const_get` now rather than `require`. A file that does not
+  define the expected constant could be eager loaded, but not autoloaded, which would be inconsistent. Thanks to @casperisfine for reporting this one and help testing the alternative.
+
 ## 2.1.4 (23 April 2019)
 
 * Supports deletion of root directories in disk after they've been configured.
