@@ -37,6 +37,7 @@
 
 <!-- /TOC -->
 
+<a id="markdown-introduction" name="introduction"></a>
 ## Introduction
 
 Zeitwerk is an efficient and thread-safe code loader for Ruby.
@@ -51,6 +52,7 @@ Zeitwerk is also able to reload code, which may be handy for web applications. C
 
 Finally, in some production setups it may be optimal to eager load all code upfront. Zeitwerk is able to do that too.
 
+<a id="markdown-synopsis" name="synopsis"></a>
 ## Synopsis
 
 Main interface for gems:
@@ -101,6 +103,7 @@ It is also possible to broadcast `eager_load` to all instances:
 Zeitwerk::Loader.eager_load_all
 ```
 
+<a id="markdown-file-structure" name="file-structure"></a>
 ## File structure
 
 To have a file structure Zeitwerk can work with, just name files and directories after the name of the classes and modules they define:
@@ -126,6 +129,7 @@ app/models/user.rb                        -> User
 app/controllers/admin/users_controller.rb -> Admin::UsersController
 ```
 
+<a id="markdown-implicit-namespaces" name="implicit-namespaces"></a>
 ### Implicit namespaces
 
 Directories without a matching Ruby file get modules autovivified automatically by Zeitwerk. For example, in
@@ -136,6 +140,7 @@ app/controllers/admin/users_controller.rb -> Admin::UsersController
 
 `Admin` is autovivified as a module on demand, you do not need to define an `Admin` class or module in an `admin.rb` file explicitly.
 
+<a id="markdown-explicit-namespaces" name="explicit-namespaces"></a>
 ### Explicit namespaces
 
 Classes and modules that act as namespaces can also be explicitly defined, though. For instance, consider
@@ -158,6 +163,7 @@ end
 
 An explicit namespace must be managed by one single loader. Loaders that reopen namespaces owned by other projects are responsible for loading their constants before setup.
 
+<a id="markdown-nested-root-directories" name="nested-root-directories"></a>
 ### Nested root directories
 
 Root directories should not be ideally nested, but Zeitwerk supports them because in Rails, for example, both `app/models` and `app/models/concerns` belong to the autoload paths.
@@ -170,8 +176,10 @@ app/models/concerns/geolocatable.rb
 
 should define `Geolocatable`, not `Concerns::Geolocatable`.
 
+<a id="markdown-usage" name="usage"></a>
 ## Usage
 
+<a id="markdown-setup" name="setup"></a>
 ### Setup
 
 Loaders are ready to load code right after calling `setup` on them:
@@ -194,6 +202,7 @@ The loader returned by `Zeitwerk::Loader.for_gem` has the directory of the calle
 
 Zeitwerk works internally only with absolute paths to avoid costly file searches in `$LOAD_PATH`. Indeed, the root directories do not even need to belong to `$LOAD_PATH`, everything just works by design if they don't.
 
+<a id="markdown-reloading" name="reloading"></a>
 ### Reloading
 
 Zeitwer is able to reload code, but you need to enable this feature:
@@ -221,6 +230,7 @@ In order for reloading to be thread-safe, you need to implement some coordinatio
 
 On reloading, client code has to update anything that would otherwise be storing a stale object. For example, if the routing layer of a web framework stores controller class objects or instances in internal structures, on reload it has to refresh them somehow, possibly reevaluating routes.
 
+<a id="markdown-eager-loading" name="eager-loading"></a>
 ### Eager loading
 
 Zeitwerk instances are able to eager load their managed files:
@@ -250,6 +260,7 @@ This may be handy in top-level services, like web applications.
 
 Note that thanks to idempotence `Zeitwerk::Loader.eager_load_all` won't eager load twice if any of the instances already eager loaded.
 
+<a id="markdown-preloading" name="preloading"></a>
 ### Preloading
 
 Zeitwerk instances are able to preload files and directories.
@@ -265,10 +276,12 @@ This is a feature specifically thought for STIs in Rails, preloading the leafs o
 
 The example above depicts several calls are supported, but `preload` accepts multiple arguments and arrays of strings as well.
 
+<a id="markdown-inflection" name="inflection"></a>
 ### Inflection
 
 Each individual loader needs an inflector to figure out which constant path would a given file or directory map to. Zeitwerk ships with two basic inflectors.
 
+<a id="markdown-zeitwerkinflector" name="zeitwerkinflector"></a>
 #### Zeitwerk::Inflector
 
 This is a very basic inflector that converts snake case to camel case:
@@ -283,10 +296,12 @@ There are no inflection rules or global configuration that can affect this infle
 
 This is the default inflector.
 
+<a id="markdown-zeitwerkgeminflector" name="zeitwerkgeminflector"></a>
 #### Zeitwerk::GemInflector
 
 The loader instantiated behind the scenes by `Zeitwerk::Loader.for_gem` gets assigned by default an inflector that is like the basic one, except it expects `lib/my_gem/version.rb` to define `MyGem::VERSION`.
 
+<a id="markdown-custom-inflector" name="custom-inflector"></a>
 #### Custom inflector
 
 The inflectors that ship with Zeitwerk are deterministic and simple. But you can configure your own:
@@ -320,6 +335,7 @@ loader.inflector = MyInflector.new
 
 This needs to be done before calling `setup`.
 
+<a id="markdown-logging" name="logging"></a>
 ### Logging
 
 Zeitwerk is silent by default, but you can configure a callable as logger:
@@ -348,6 +364,7 @@ If there is a logger configured, you'll see traces when autoloads are set, files
 
 As a curiosity, if your project has namespaces you'll notice in the traces Zeitwerk sets autoloads for _directories_. That's a technique used to be able to descend into subdirectories on demand, avoiding that way unnecessary tree walks.
 
+<a id="markdown-loader-tag" name="loader-tag"></a>
 #### Loader tag
 
 Loaders have a tag that is printed in traces in order to be able to distinguish them in globally logged activity:
@@ -368,6 +385,7 @@ The tag of a loader returned by `for_gem` is the basename of the root file witho
 Zeitwerk@my_gem: constant MyGem::Foo loaded from ...
 ```
 
+<a id="markdown-ignoring-parts-of-the-project" name="ignoring-parts-of-the-project"></a>
 ### Ignoring parts of the project
 
 Zeitwerk ignores automatically any file or directory whose name starts with a dot, and any files that do not have extension ".rb".
@@ -378,6 +396,7 @@ You can ignore file names, directory names, and glob patterns. Glob patterns are
 
 Let's see some use cases.
 
+<a id="markdown-use-case-files-that-do-not-follow-the-conventions" name="use-case-files-that-do-not-follow-the-conventions"></a>
 #### Use case: Files that do not follow the conventions
 
 Let's suppose that your gem decorates something in `Kernel`:
@@ -406,6 +425,7 @@ loader.ignore(core_ext)
 loader.setup
 ```
 
+<a id="markdown-use-case-the-adapter-pattern" name="use-case-the-adapter-pattern"></a>
 #### Use case: The adapter pattern
 
 Another use case for ignoring files is the adapter pattern.
@@ -433,6 +453,7 @@ The chosen adapter, then, has to be loaded by hand somehow:
 require "my_gem/db_adapters/#{config[:db_adapter]}"
 ```
 
+<a id="markdown-use-case-test-files-mixed-with-implementation-files" name="use-case-test-files-mixed-with-implementation-files"></a>
 #### Use case: Test files mixed with implementation files
 
 There are project layouts that put implementation files and test files together. To ignore the test files, you can use a glob pattern like this:
@@ -443,6 +464,7 @@ loader.ignore(tests)
 loader.setup
 ```
 
+<a id="markdown-edge-cases" name="edge-cases"></a>
 ### Edge cases
 
 A class or module that acts as a namespace:
@@ -471,20 +493,24 @@ Trip = Struct.new { ... } # NOT SUPPORTED
 
 This only affects explicit namespaces, those idioms work well for any other ordinary class or module.
 
+<a id="markdown-pronunciation" name="pronunciation"></a>
 ## Pronunciation
 
 "Zeitwerk" is pronounced [this way](http://share.hashref.com/zeitwerk/zeitwerk_pronunciation.mp3).
 
+<a id="markdown-supported-ruby-versions" name="supported-ruby-versions"></a>
 ## Supported Ruby versions
 
 Zeitwerk works with MRI 2.4.4 and above.
 
+<a id="markdown-motivation" name="motivation"></a>
 ## Motivation
 
 Since `require` has global side-effects, and there is no static way to verify that you have issued the `require` calls for code that your file depends on, in practice it is very easy to forget some. That introduces bugs that depend on the load order. Zeitwerk provides a way to forget about `require` in your own code, just name things following conventions and done.
 
 On the other hand, autoloading in Rails is based on `const_missing`, which lacks fundamental information like the nesting and the resolution algorithm that was being used. Because of that, Rails autoloading is not able to match Ruby's semantics and that introduces a series of gotchas. The original goal of this project was to bring a better autoloading mechanism for Rails 6.
 
+<a id="markdown-thanks" name="thanks"></a>
 ## Thanks
 
 I'd like to thank [@matthewd](https://github.com/matthewd) for the discussions we've had about this topic in the past years, I learned a couple of tricks used in Zeitwerk from him.
@@ -493,6 +519,7 @@ Also, would like to thank [@Shopify](https://github.com/Shopify), [@rafaelfranca
 
 Finally, many thanks to [@schurig](https://github.com/schurig) for recording an [audio file](http://share.hashref.com/zeitwerk/zeitwerk_pronunciation.mp3) with the pronunciation of "Zeitwerk" in perfect German. 💯
 
+<a id="markdown-license" name="license"></a>
 ## License
 
 Released under the MIT License, Copyright (c) 2019–<i>ω</i> Xavier Noria.
