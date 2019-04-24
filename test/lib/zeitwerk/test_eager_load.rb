@@ -171,19 +171,6 @@ class TestEagerLoad < LoaderTest
     end
   end
 
-  test "eager loading raises NameError if files do not define the expected constants" do
-    on_teardown do
-      remove_const :X # should be unnecessary, but $LOADED_FEATURES.reject! redefines it
-      remove_const :Y
-    end
-
-    files = [["x.rb", "Y = 1"]]
-    with_setup(files) do
-      e = assert_raises(NameError) { loader.eager_load }
-      assert_includes e.message, "uninitialized constant X"
-    end
-  end
-
   test "eager loading works with symbolic links" do
     files = [["real/x.rb", "X = true"]]
     with_files(files) do

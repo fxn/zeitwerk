@@ -4,7 +4,23 @@ class TestExceptions < LoaderTest
   test "raises NameError if the expected constant is not defined" do
     files = [["typo.rb", "TyPo = 1"]]
     with_setup(files) do
-      assert_raises(NameError) { Typo }
+      typo_rb = File.realpath("typo.rb")
+      e = assert_raises(NameError) { Typo }
+      assert_equal "expected file #{typo_rb} to define constant Typo, but didn't", e.message
+    end
+  end
+
+  test "eager loading raises NameError if files do not define the expected constants" do
+    on_teardown do
+      remove_const :X # should be unnecessary, but $LOADED_FEATURES.reject! redefines it
+      remove_const :Y
+    end
+
+    files = [["x.rb", "Y = 1"]]
+    with_setup(files) do
+      x_rb = File.realpath("x.rb")
+      e = assert_raises(NameError) { loader.eager_load }
+      assert_equal "expected file #{x_rb} to define constant X, but didn't", e.message
     end
   end
 
