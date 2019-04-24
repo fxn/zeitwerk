@@ -1,4 +1,5 @@
 require "test_helper"
+require "fileutils"
 
 class TestEagerLoad < LoaderTest
   test "eager loads independent files" do
@@ -170,14 +171,28 @@ class TestEagerLoad < LoaderTest
     end
   end
 
-  test "eager loading clears shadowed_files (performance)" do
-    on_teardown { remove_const :X }
+  test "eager loading raises NameError if files do not define the expected constants" do
+    on_teardown do
+      remove_const :X # should be unnecessary, but $LOADED_FEATURES.reject! redefines it
+      remove_const :Y
+    end
 
-    files = [["x.rb", "X = 1; $test_eager_loaded_file = true"]]
-    ::X = 1
+    files = [["x.rb", "Y = 1"]]
     with_setup(files) do
+      e = assert_raises(NameError) { loader.eager_load }
+      assert_includes e.message, "uninitialized constant X"
+    end
+  end
+
+  test "eager loading works with symbolic links" do
+    files = [["real/x.rb", "X = true"]]
+    with_files(files) do
+      FileUtils.ln_s("real", "symlink")
+      loader.push_dir("symlink")
+      loader.setup
       loader.eager_load
-      assert loader.shadowed_files.empty?
+
+      assert_nil Object.autoload?(:X)
     end
   end
 end
