@@ -8,6 +8,7 @@ It is very important that all the source code uses systematically the following 
 
 * `cname`: A constant name, for example `:User`. Must be a symbol.
 * `cpath`: A constant path, for example `"User"` or `"Hotel::Pricing"`. Must be a string.
+* `cref`: A constant reference represented as an array of two elements. The first one a class or module object, and the second one a constant name as a symbol. For example `[Admin, :UsersController]`.
 
 ### Variables for paths
 
