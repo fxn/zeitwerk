@@ -343,13 +343,13 @@ module Zeitwerk
 
         queue = actual_root_dirs.reject { |dir| eager_load_exclusions.member?(dir) }
         while dir = queue.shift
-          const_get_if_autoload(dir)
+          autocget(dir)
 
           each_abspath(dir) do |abspath|
             next if eager_load_exclusions.member?(abspath)
 
             if ruby?(abspath)
-              const_get_if_autoload(abspath)
+              autocget(abspath)
             elsif dir?(abspath)
               queue << abspath
             end
@@ -664,7 +664,7 @@ module Zeitwerk
       parent.const_defined?(cname, false)
     end
 
-    def const_get_if_autoload(abspath)
+    def autocget(abspath)
       if cref = autoloads[File.realpath(abspath)]
         cref[0].const_get(cref[1], false)
       end
