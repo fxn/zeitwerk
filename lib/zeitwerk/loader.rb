@@ -414,7 +414,7 @@ module Zeitwerk
       #
       # @return [Zeitwerk::Loader]
       def for_gem
-        called_from = caller_locations.first.path
+        called_from = caller_locations(1, 1).first.path
         Registry.loader_for_gem(called_from)
       end
 
