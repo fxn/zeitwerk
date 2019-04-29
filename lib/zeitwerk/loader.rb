@@ -345,7 +345,7 @@ module Zeitwerk
         while dir = queue.shift
           autocget(dir)
 
-          each_abspath(dir) do |abspath|
+          ls(dir) do |_basename, abspath|
             next if eager_load_exclusions.member?(abspath)
 
             if ruby?(abspath)
@@ -449,9 +449,10 @@ module Zeitwerk
     # @param parent [Module]
     # @return [void]
     def set_autoloads_in_dir(dir, parent)
-      each_abspath(dir) do |abspath|
-        cname = inflector.camelize(File.basename(abspath, ".rb"), abspath).to_sym
-        if ruby?(abspath)
+      ls(dir) do |basename, abspath|
+        if ruby?(basename)
+          basename.slice!(-3, 3)
+          cname = inflector.camelize(basename, abspath).to_sym
           autoload_file(parent, cname, abspath)
         elsif dir?(abspath)
           # In a Rails application, `app/models/concerns` is a subdirectory of
@@ -460,7 +461,10 @@ module Zeitwerk
           # To resolve the ambiguity file name -> constant path this introduces,
           # the `app/models/concerns` directory is totally ignored as a namespace,
           # it counts only as root. The guard checks that.
-          autoload_subdir(parent, cname, abspath) unless root_dirs.key?(abspath)
+          unless root_dirs.key?(abspath)
+            cname = inflector.camelize(basename, abspath).to_sym
+            autoload_subdir(parent, cname, abspath)
+          end
         end
       end
     end
@@ -605,7 +609,7 @@ module Zeitwerk
     # @param dir [String]
     # @return [void]
     def do_preload_dir(dir)
-      each_abspath(dir) do |abspath|
+      ls(dir) do |_basename, abspath|
         do_preload_abspath(abspath)
       end
     end
@@ -625,13 +629,13 @@ module Zeitwerk
     end
 
     # @param dir [String]
-    # @yieldparam path [String]
+    # @yieldparam path [String, String]
     # @return [void]
-    def each_abspath(dir)
-      Dir.foreach(dir) do |entry|
-        next if entry.start_with?(".")
-        abspath = File.join(dir, entry)
-        yield abspath unless ignored_paths.member?(abspath)
+    def ls(dir)
+      Dir.foreach(dir) do |basename|
+        next if basename.start_with?(".")
+        abspath = File.join(dir, basename)
+        yield basename, abspath unless ignored_paths.member?(abspath)
       end
     end
 
