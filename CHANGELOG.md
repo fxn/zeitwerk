@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 2.1.6 (30 April 2019)
+
+* Fixed: If an eager load exclusion contained an autoload for a namespace also
+  present in other branches that had to be eager loaded, they could be skipped.
+
+* `loader.log!` is a convenient shortcut to get traces to `$stdout`.
+
+* Allocates less strings.
+
 ## 2.1.5 (24 April 2019)
 
 * Failed autoloads raise `NameError` as always, but with a more user-friendly
