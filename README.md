@@ -338,7 +338,15 @@ This needs to be done before calling `setup`.
 <a id="markdown-logging" name="logging"></a>
 ### Logging
 
-Zeitwerk is silent by default, but you can configure a callable as logger:
+Zeitwerk is silent by default, but you can ask loaders to trace their activity. Logging is meant just for troubleshooting, shouldn't normally be enabled.
+
+The `log!` mehtod is a quick shortcut to let the loader log to `$stdout`:
+
+```
+loader.log!
+```
+
+If you want more control, a logger can be configured as a callable
 
 ```ruby
 loader.logger = method(:puts)

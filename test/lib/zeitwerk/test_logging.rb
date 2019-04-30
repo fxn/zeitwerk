@@ -25,6 +25,13 @@ class TestLogging < LoaderTest
     end
   end
 
+  test "log! just prints to $stdout" do
+    loader.logger = nil # make sure we are setting something
+    loader.log!
+    message = "test log!"
+    assert_logged(/#{message}\n/) { loader.send(:log, message) }
+  end
+
   test "accepts objects that respond to :call" do
     logger = Object.new
     def logger.call(message)

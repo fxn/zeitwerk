@@ -391,6 +391,13 @@ module Zeitwerk
       to_unload.keys.freeze
     end
 
+    # Logs to `$stdout`, handy shortcut for debugging.
+    #
+    # @return [void]
+    def log!
+      @logger = ->(msg) { puts msg }
+    end
+
     # --- Class methods ---------------------------------------------------------------------------
 
     class << self
