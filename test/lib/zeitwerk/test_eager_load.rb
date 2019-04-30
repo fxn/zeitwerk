@@ -140,6 +140,29 @@ class TestEagerLoad < LoaderTest
         assert Bar
       end
     end
+
+    test "opt-ed out files sharing a namespace don't prevent autoload (enable_autoloading #{enable_reloading})" do
+      on_teardown do
+        remove_const :Namespace
+        delete_loaded_feature "eagerlib/namespace/foo.rb"
+        delete_loaded_feature "lazylib/namespace/bar.rb"
+      end
+
+      refute defined?(Namespace)
+
+      $test_eager_load_eager_loaded_p = false
+      files = [
+        ["eagerlib/namespace/foo.rb", "module Namespace; Foo = true; $test_eager_load_eager_loaded_p = true; end"],
+        ["lazylib/namespace/bar.rb", "module Namespace; Bar = true; end"]
+      ]
+      with_files(files) do
+        loader = new_loader(dirs: %w(lazylib eagerlib), enable_reloading: enable_reloading)
+        loader.do_not_eager_load('lazylib')
+        loader.eager_load
+
+        assert $test_eager_load_eager_loaded_p
+      end
+    end
   end
 
   test "eager loading skips repeated files" do

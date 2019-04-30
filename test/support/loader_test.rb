@@ -18,6 +18,7 @@ class LoaderTest < Minitest::Test
       Array(dirs).each do |dir|
         loader.push_dir(dir)
       end
+      loader.logger = method(:puts) if ENV['ZEITWERK_LOG']
       loader.enable_reloading if enable_reloading
       loader.setup            if setup
     end

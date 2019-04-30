@@ -62,6 +62,7 @@ module Zeitwerk::Loader::Callbacks
   def on_namespace_loaded(namespace)
     if subdirs = lazy_subdirs.delete(namespace.name)
       subdirs.each do |subdir|
+        autoloads.delete(subdir)
         set_autoloads_in_dir(subdir, namespace)
       end
     end

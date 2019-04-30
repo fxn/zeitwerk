@@ -481,6 +481,7 @@ module Zeitwerk
         # no matter if it is for a file or a directory. Just remember the
         # subdirectory has to be visited if the namespace is used.
         (lazy_subdirs[cpath] ||= []) << subdir
+        autoloads[subdir] = [parent, cname]
       elsif !cdef?(parent, cname)
         # First time we find this namespace, set an autoload for it.
         (lazy_subdirs[cpath(parent, cname)] ||= []) << subdir
