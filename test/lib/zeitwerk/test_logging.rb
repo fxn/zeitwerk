@@ -33,7 +33,7 @@ class TestLogging < LoaderTest
 
     loader.logger = logger
 
-    message = "test messag :call"
+    message = "test message :call"
     assert_logged(message) { loader.send(:log, message) }
   end
 
