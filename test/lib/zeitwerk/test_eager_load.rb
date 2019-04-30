@@ -140,6 +140,50 @@ class TestEagerLoad < LoaderTest
         assert Bar
       end
     end
+
+    test "opt-ed out root directories sharing a namespace don't prevent autoload (enable_autoloading #{enable_reloading})" do
+      on_teardown do
+        remove_const :Ns
+
+        delete_loaded_feature "ns/foo.rb"
+        delete_loaded_feature "ns/bar.rb"
+      end
+
+      $test_eager_load_eager_loaded_p = false
+      files = [
+        ["lazylib/ns/foo.rb", "module Ns::Foo; end"],
+        ["eagerlib/ns/bar.rb", "module Ns::Bar; $test_eager_load_eager_loaded_p = true; end"]
+      ]
+      with_files(files) do
+        loader = new_loader(dirs: %w(lazylib eagerlib), enable_reloading: enable_reloading)
+        loader.do_not_eager_load('lazylib')
+        loader.eager_load
+
+        assert $test_eager_load_eager_loaded_p
+      end
+    end
+
+    test "opt-ed out subdirectories don't prevent autoloading shared namespaces (enable_autoloading #{enable_reloading})" do
+      on_teardown do
+        remove_const :Ns
+
+        delete_loaded_feature "ns/foo.rb"
+        delete_loaded_feature "ns/bar.rb"
+      end
+
+      $test_eager_load_eager_loaded_p = false
+      files = [
+        ["lazylib/ns/foo.rb", "module Ns::Foo; end"],
+        ["eagerlib/ns/bar.rb", "module Ns::Bar; $test_eager_load_eager_loaded_p = true; end"]
+      ]
+      with_files(files) do
+        loader = new_loader(dirs: %w(lazylib eagerlib), enable_reloading: enable_reloading)
+        loader.do_not_eager_load('lazylib/namespace')
+        loader.eager_load
+
+        assert $test_eager_load_eager_loaded_p
+      end
+    end
   end
 
   test "eager loading skips repeated files" do

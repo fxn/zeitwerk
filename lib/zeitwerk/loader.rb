@@ -53,6 +53,23 @@ module Zeitwerk
     # @return [Set<String>]
     attr_reader :ignored_paths
 
+    # A _shadowed file_ is a file managed by this loader that is ignored when
+    # setting autoloads because its matching constant is taken. Either the
+    # constant is already defined, or there exists an autoload for it.
+    #
+    # Think $LOAD_PATH and require, only the first occurrence of a given
+    # relative name is loaded.
+    #
+    # This set keeps track of the absolute path of shadowed files, to be able to
+    # skip them while eager loading.
+    #
+    # Note this cannot be implemented with do_not_eager_load because these
+    # files are not autoloadable.
+    #
+    # @private
+    # @return [Set<String>]
+    attr_reader :shadowed_files
+
     # Maps real absolute paths for which an autoload has been set ---and not
     # executed--- to their corresponding parent class or module and constant
     # name.
@@ -138,6 +155,7 @@ module Zeitwerk
       @autoloaded_dirs       = []
       @to_unload             = {}
       @lazy_subdirs          = {}
+      @shadowed_files        = Set.new
       @eager_load_exclusions = Set.new
 
       # TODO: find a better name for these mutexes.
@@ -306,6 +324,7 @@ module Zeitwerk
         autoloaded_dirs.clear
         to_unload.clear
         lazy_subdirs.clear
+        shadowed_files.clear
 
         Registry.on_unload(self)
         ExplicitNamespace.unregister(self)
@@ -343,18 +362,18 @@ module Zeitwerk
 
         queue = actual_root_dirs.reject { |dir| eager_load_exclusions.member?(dir) }
         while dir = queue.shift
-          autocget(dir)
-
           ls(dir) do |_basename, abspath|
             next if eager_load_exclusions.member?(abspath)
 
             if ruby?(abspath)
-              autocget(abspath)
+              require abspath unless shadowed_files.member?(abspath)
             elsif dir?(abspath)
               queue << abspath
             end
           end
         end
+
+        shadowed_files.clear
 
         autoloaded_dirs.each do |autoloaded_dir|
           Registry.unregister_autoload(autoloaded_dir)
@@ -507,6 +526,7 @@ module Zeitwerk
       if autoload_path = autoload_for?(parent, cname)
         # First autoload for a Ruby file wins, just ignore subsequent ones.
         if ruby?(autoload_path)
+          shadowed_files.add(file)
           log("file #{file} is ignored because #{autoload_path} has precedence") if logger
         else
           promote_namespace_from_implicit_to_explicit(
@@ -517,6 +537,7 @@ module Zeitwerk
           )
         end
       elsif cdef?(parent, cname)
+        shadowed_files.add(file)
         log("file #{file} is ignored because #{cpath(parent, cname)} is already defined") if logger
       else
         set_autoload(parent, cname, file)
@@ -673,12 +694,6 @@ module Zeitwerk
 
     def cdef?(parent, cname)
       parent.const_defined?(cname, false)
-    end
-
-    def autocget(abspath)
-      if cref = autoloads[File.realpath(abspath)]
-        cref[0].const_get(cref[1], false)
-      end
     end
 
     def register_explicit_namespace(cpath)
