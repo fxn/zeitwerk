@@ -205,7 +205,7 @@ Zeitwerk works internally only with absolute paths to avoid costly file searches
 <a id="markdown-reloading" name="reloading"></a>
 ### Reloading
 
-Zeitwer is able to reload code, but you need to enable this feature:
+Zeitwerk is able to reload code, but you need to enable this feature:
 
 ```ruby
 loader = Zeitwerk::Loader.new
