@@ -340,7 +340,7 @@ This needs to be done before calling `setup`.
 
 Zeitwerk is silent by default, but you can ask loaders to trace their activity. Logging is meant just for troubleshooting, shouldn't normally be enabled.
 
-The `log!` mehtod is a quick shortcut to let the loader log to `$stdout`:
+The `log!` method is a quick shortcut to let the loader log to `$stdout`:
 
 ```
 loader.log!
