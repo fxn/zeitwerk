@@ -47,7 +47,7 @@ Given a conventional file structure, Zeitwerk is able to load your project's cla
 
 Internally, Zeitwerk issues `require` calls exclusively using absolute file names, so there are no costly file system lookups in `$LOAD_PATH`. Technically, the directories managed by Zeitwerk do not even need to be in `$LOAD_PATH`. Furthermore, Zeitwerk does only one single scan of the project tree, and it descends into subdirectories lazily, only if their namespaces are used.
 
-Zeitwerk can be used by any Ruby project with a [compliant file structure](#file-structure). The library is designed so that any project, gem dependency, application, etc. can have their own loader, coeexisting in the same process, managing their own project trees, and independent of each other. Each loader has its own configuration, inflector, and optional logger.
+Zeitwerk can be used by any Ruby project with a [compliant file structure](#file-structure). The library is designed so that any project, gem dependency, application, etc. can have their own loader, coexisting in the same process, managing their own project trees, and independent of each other. Each loader has its own configuration, inflector, and optional logger.
 
 Zeitwerk is also able to reload code, which may be handy for web applications. Coordination is needed to reload in a thread-safe manner. The documentation below explains how to do this.
 
