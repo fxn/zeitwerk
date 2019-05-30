@@ -29,6 +29,7 @@
         - [Use case: The adapter pattern](#use-case-the-adapter-pattern)
         - [Use case: Test files mixed with implementation files](#use-case-test-files-mixed-with-implementation-files)
     - [Edge cases](#edge-cases)
+    - [Rules of thumb](#rules-of-thumb)
 - [Pronunciation](#pronunciation)
 - [Supported Ruby versions](#supported-ruby-versions)
 - [Motivation](#motivation)
@@ -500,6 +501,21 @@ Trip = Struct.new { ... } # NOT SUPPORTED
 ```
 
 This only affects explicit namespaces, those idioms work well for any other ordinary class or module.
+
+<a id="markdown-rules-of-thumb" name="rules-of-thumb"></a>
+### Rules of thumb
+
+1. Different loaders should manage different directory trees. It is an error condition to configure overlapping root directories in different loaders.
+
+2. Think the mere existence of a file is effectively like writing a `require` call for them, which is executed on demand (autoload) or upfront (eager load).
+
+3. In that line, if two loaders manage files that translate to the same constant in the same namespace, the first one wins, the rest are ignored. Similar to what happens with `require` and `$LOAD_PATH`, only the first occurrence matters.
+
+4. Projects that reopen a namespace defined by some dependency have to ensure said namespace is loaded before setup. That is, the project has to make sure it reopens, rather than define. This is often accomplished just loading the dependency.
+
+5. Objects stored in reloadable constants should not be cached in places that are not reloaded. For example, non-reloadable classes should not subclass a reloadable class, or mixin a reloadable module. Otherwise, after reloading, those classes or module objects would become stale. Referring to constants in dynamic places like method calls or lambdas is fine.
+
+6. In a given process, ideally, there should be at most one loader with reloading enabled. Technically, you can have more, but it may get tricky if one refers to constants managed by the other one. Do that only if you know what you are doing.
 
 <a id="markdown-pronunciation" name="pronunciation"></a>
 ## Pronunciation
