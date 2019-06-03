@@ -68,6 +68,6 @@ log(message) if logger
 
 to avoid unncessary calls, and unnecessary computed values in the message.
 
-Some projects my have hundreds of root directories and hundreds of thousands of files, please remember that.
+Some projects may have hundreds of root directories and hundreds of thousands of files, please remember that.
 
 However, do not write ugly code. Ugly code should be extremely justified in terms of performance. Instead, keep it simple, write simple performant code that reads well and is idiomatic.
