@@ -43,15 +43,13 @@
 
 Zeitwerk is an efficient and thread-safe code loader for Ruby.
 
-Given a conventional file structure, Zeitwerk is able to load your project's classes and modules on demand (autoloading), or upfront (eager loading). You don't need to write `require` calls for your own files, rather, you can streamline your programming knowing that your classes and modules are available everywhere. This feature is efficient, thread-safe, and matches Ruby's semantics for constants.
+Given a [conventional file structure](#file-structure), Zeitwerk is able to load your project's classes and modules on demand (autoloading), or upfront (eager loading). You don't need to write `require` calls for your own files, rather, you can streamline your programming knowing that your classes and modules are available everywhere. This feature is efficient, thread-safe, and matches Ruby's semantics for constants.
+
+Zeitwerk is also able to reload code, which may be handy while developing web applications. Coordination is needed to reload in a thread-safe manner. The documentation below explains how to do this.
+
+The gem is designed so that any project, gem dependency, application, etc. can have their own independent loader, coexisting in the same process, managing their own project trees, and independent of each other. Each loader has its own configuration, inflector, and optional logger.
 
 Internally, Zeitwerk issues `require` calls exclusively using absolute file names, so there are no costly file system lookups in `$LOAD_PATH`. Technically, the directories managed by Zeitwerk do not even need to be in `$LOAD_PATH`. Furthermore, Zeitwerk does only one single scan of the project tree, and it descends into subdirectories lazily, only if their namespaces are used.
-
-Zeitwerk can be used by any Ruby project with a [compliant file structure](#file-structure). The library is designed so that any project, gem dependency, application, etc. can have their own loader, coexisting in the same process, managing their own project trees, and independent of each other. Each loader has its own configuration, inflector, and optional logger.
-
-Zeitwerk is also able to reload code, which may be handy for web applications. Coordination is needed to reload in a thread-safe manner. The documentation below explains how to do this.
-
-Finally, in some production setups it may be optimal to eager load all code upfront. Zeitwerk is able to do that too.
 
 <a id="markdown-synopsis" name="synopsis"></a>
 ## Synopsis
@@ -63,8 +61,8 @@ Main interface for gems:
 
 require "zeitwerk"
 loader = Zeitwerk::Loader.for_gem
-loader.setup # ready!
-# loader.eager_load, optionally
+loader.setup      # ready!
+loader.eager_load # optionally
 
 module MyGem
   # ...
