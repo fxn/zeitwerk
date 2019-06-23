@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Zeitwerk
-  class GemInflector < Inflector
+  class GemInflector < Inflector # :nodoc:
     # @param root_file [String]
     def initialize(root_file)
       namespace     = File.basename(root_file, ".rb")
