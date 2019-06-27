@@ -248,6 +248,7 @@ loader.eager_load # won't eager load the database adapters
 ```
 
 Eager loading is synchronized and idempotent.
+Eager loading doesn't need inflectors due to using ```require``` for files loading.
 
 If you want to eager load yourself and all dependencies using Zeitwerk, you can broadcast the `eager_load` call to all instances:
 
