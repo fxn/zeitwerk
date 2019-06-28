@@ -44,7 +44,6 @@ class TestUnload < LoaderTest
       assert !loader.autoloaded_dirs.empty?
       assert !loader.to_unload.empty?
       assert !loader.lazy_subdirs.empty?
-      assert !loader.shadowed_files.empty?
 
       loader.unload
 
@@ -52,7 +51,6 @@ class TestUnload < LoaderTest
       assert loader.autoloaded_dirs.empty?
       assert loader.to_unload.empty?
       assert loader.lazy_subdirs.empty?
-      assert loader.shadowed_files.empty?
     end
   end
 
