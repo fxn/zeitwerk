@@ -13,6 +13,10 @@ class TestInflector < Minitest::Test
     assert_equal "UsersController", camelize("users_controller")
   end
 
+  test "supports segments that do not capitalize" do
+    assert_equal "Point3dValue", camelize("point_3d_value")
+  end
+
   test "knows nothing about acronyms" do
     assert_equal "HtmlParser", camelize("html_parser")
   end
