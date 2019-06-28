@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 2.1.7 (29 June 2019)
+
+* Prevent the inflector from deleting parts un multiword constants whose capitalization is the same. For example, `point_2d` should be inflected as `Point2d`, rather than `Point`. While the inflector is frozen, this seems to be just wrong, and the refinement should be backwards compatible, since those constants were not usable.
+
+* Make eager loading consistent with auto loading with regard to detecting namespaces that do not define the matching constant.
+
+* Documentation improvements.
+
 ## 2.1.6 (30 April 2019)
 
 * Fixed: If an eager load exclusion contained an autoload for a namespace also
