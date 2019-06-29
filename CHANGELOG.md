@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2.1.8 (29 June 2019)
+
+* Fixes eager loading nested root directories. The new approach in 2.1.7 introduced a regression.
+
 ## 2.1.7 (29 June 2019)
 
 * Prevent the inflector from deleting parts un multiword constants whose capitalization is the same. For example, `point_2d` should be inflected as `Point2d`, rather than `Point`. While the inflector is frozen, this seems to be just wrong, and the refinement should be backwards compatible, since those constants were not usable.

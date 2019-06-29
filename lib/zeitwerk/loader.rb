@@ -353,7 +353,7 @@ module Zeitwerk
               if cref = autoloads[File.realpath(abspath)]
                 cref[0].const_get(cref[1], false)
               end
-            elsif dir?(abspath)
+            elsif dir?(abspath) && !root_dirs.key?(abspath)
               cname = inflector.camelize(basename, abspath)
               queue << [namespace.const_get(cname, false), abspath]
             end

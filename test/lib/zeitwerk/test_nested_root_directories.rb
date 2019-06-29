@@ -19,4 +19,17 @@ class TestNestedRootDirectories < LoaderTest
       assert Hotel
     end
   end
+
+  test "eager loading handles nested root directories correctly" do
+    $airplane_eager_loaded = $locatable_eager_loaded = false
+    files = [
+      ["airplane.rb", "class Airplane; $airplane_eager_loaded = true; end"],
+      ["concerns/locatable.rb", "module Locatable; $locatable_eager_loaded = true; end"]
+    ]
+    with_setup(files, dirs: [".", "concerns"]) do
+      loader.eager_load
+      assert $airplane_eager_loaded
+      assert $locatable_eager_loaded
+    end
+  end
 end
