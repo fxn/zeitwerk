@@ -68,6 +68,33 @@ class TestEagerLoad < LoaderTest
     end
   end
 
+  test "eager loads gems" do
+    $my_gem_foo_bar_eager_loaded = false
+
+    files = [
+      ["my_gem.rb", <<-EOS],
+        $for_gem_test_loader = Zeitwerk::Loader.for_gem
+        $for_gem_test_loader.setup
+
+        class MyGem
+          Foo::Baz # autoloads fine
+        end
+
+        $for_gem_test_loader.eager_load
+      EOS
+      ["my_gem/foo.rb", "class MyGem::Foo; end"],
+      ["my_gem/foo/bar.rb", "class MyGem::Foo::Bar; end; $my_gem_foo_bar_eager_loaded = true"],
+      ["my_gem/foo/baz.rb", "class MyGem::Foo::Baz; end"],
+    ]
+
+    with_files(files) do
+      with_load_path(".") do
+        require "my_gem"
+        assert $my_gem_foo_bar_eager_loaded
+      end
+    end
+  end
+
   [false, true].each do |enable_reloading|
     test "we can opt-out of entire root directories, and still autoload (enable_autoloading #{enable_reloading})" do
       on_teardown do
