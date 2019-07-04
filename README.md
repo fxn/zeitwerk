@@ -61,12 +61,13 @@ Main interface for gems:
 
 require "zeitwerk"
 loader = Zeitwerk::Loader.for_gem
-loader.setup      # ready!
-loader.eager_load # optionally
+loader.setup # ready!
 
 module MyGem
   # ...
 end
+
+loader.eager_load # optionally
 ```
 
 Main generic interface:
