@@ -52,4 +52,40 @@ class TestCallbacks < LoaderTest
       assert $on_dir_autoloaded_called
     end
   end
+
+  test "autoloading a module that overrides `Module#name`" do
+    def loader.on_namespace_loaded(namespace)
+      if A == namespace
+        $on_namespace_loaded_called = true
+      end
+      super
+    end
+
+    files = [
+      ["a/m.rb", "module A; def self.name; raise; end; M = true; end"],
+    ]
+    with_setup(files) do
+      $on_namespace_loaded_called = false
+      assert A::M
+      assert $on_namespace_loaded_called
+    end
+  end
+
+  test "autoloading a class that overrides `Class#name`" do
+    def loader.on_namespace_loaded(namespace)
+      if B == namespace
+        $on_namespace_loaded_called = true
+      end
+      super
+    end
+
+    files = [
+      ["b/m.rb", "class B < Class.new { def self.name; 'b'; end }; M = true; end"]
+    ]
+    with_setup(files) do
+      $on_namespace_loaded_called = false
+      assert B
+      assert $on_namespace_loaded_called
+    end
+  end
 end

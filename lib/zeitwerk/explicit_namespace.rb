@@ -63,7 +63,7 @@ module Zeitwerk
 
       # Note that it makes sense to compute the hash code unconditionally,
       # because the trace point is disabled if cpaths is empty.
-      if loader = cpaths.delete(event.self.name)
+      if loader = cpaths.delete(Class.instance_method(:name).bind(event.self).call)
         loader.on_namespace_loaded(event.self)
         disable_tracer_if_unneeded
       end

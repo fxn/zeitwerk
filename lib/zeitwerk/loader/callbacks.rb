@@ -37,9 +37,9 @@ module Zeitwerk::Loader::Callbacks
     mutex2.synchronize do
       if cref = autoloads.delete(dir)
         autovivified_module = cref[0].const_set(cref[1], Module.new)
-        log("module #{autovivified_module.name} autovivified from directory #{dir}") if logger
+        log("module #{cname_of(autovivified_module)} autovivified from directory #{dir}") if logger
 
-        to_unload[autovivified_module.name] = [dir, cref] if reloading_enabled?
+        to_unload[cname_of(autovivified_module)] = [dir, cref] if reloading_enabled?
 
         # We don't unregister `dir` in the registry because concurrent threads
         # wouldn't find a loader associated to it in Kernel#require and would
@@ -60,7 +60,7 @@ module Zeitwerk::Loader::Callbacks
   # @param namespace [Module]
   # @return [void]
   def on_namespace_loaded(namespace)
-    if subdirs = lazy_subdirs.delete(namespace.name)
+    if subdirs = lazy_subdirs.delete(cname_of(namespace))
       subdirs.each do |subdir|
         set_autoloads_in_dir(subdir, namespace)
       end

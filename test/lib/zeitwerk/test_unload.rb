@@ -104,4 +104,16 @@ class TestUnload < LoaderTest
       assert Zeitwerk::ExplicitNamespace.cpaths["X"] == lb
     end
   end
+
+  test "autoload clears explicit namespaces associated" do
+    files = [
+      ["f/z.rb", "class Z < Class.new { def self.name; 'z'; end }; end"], ["f/z/n.rb", "Z::N = true"],
+    ]
+    with_files(files) do
+      l = new_loader(dirs: "f")
+      assert Zeitwerk::ExplicitNamespace.cpaths["Z"] == l
+      assert Z
+      assert_nil Zeitwerk::ExplicitNamespace.cpaths["Z"]
+    end
+  end
 end

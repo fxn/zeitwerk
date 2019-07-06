@@ -636,7 +636,7 @@ module Zeitwerk
     # @param cname [Symbol]
     # @return [String]
     def cpath(parent, cname)
-      parent.equal?(Object) ? cname.to_s : "#{parent.name}::#{cname}"
+      parent.equal?(Object) ? cname.to_s : "#{cname_of(parent)}::#{cname}"
     end
 
     # @param dir [String]
@@ -715,6 +715,12 @@ module Zeitwerk
     def unload_cref(parent, cname)
       parent.send(:remove_const, cname)
       log("#{cpath(parent, cname)} unloaded") if logger
+    end
+
+    # @param klass [Module]
+    # @return [String]
+    def cname_of(klass)
+      Class.instance_method(:name).bind(klass).call
     end
   end
 end
