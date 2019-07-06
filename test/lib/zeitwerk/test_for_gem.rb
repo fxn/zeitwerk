@@ -2,6 +2,11 @@ require "test_helper"
 
 class TestForGem < LoaderTest
   test "sets things correctly" do
+    on_teardown do
+      remove_const :MyGem
+      delete_loaded_feature "my_gem.rb"
+    end
+
     files = [
       ["my_gem.rb", <<-EOS],
         $for_gem_test_loader = Zeitwerk::Loader.for_gem
@@ -29,6 +34,11 @@ class TestForGem < LoaderTest
   end
 
   test "is idempotent" do
+    on_teardown do
+      remove_const :MyGem
+      delete_loaded_feature "my_gem.rb"
+    end
+
     files = [
       ["my_gem.rb", <<-EOS],
         $for_gem_test_zs << Zeitwerk::Loader.for_gem
