@@ -461,6 +461,28 @@ The chosen adapter, then, has to be loaded by hand somehow:
 require "my_gem/db_adapters/#{config[:db_adapter]}"
 ```
 
+If the adapter requires to use some extras (like dependent models), they can be loaded with another instance of `zeitwerk` loader, but to avoid the conflicts, it have to be eager_loaded. Here is the use case, which extends described earlier example:
+
+```ruby
+require 'my_gem/db_adapters/active_record.rb'
+```
+
+```ruby
+# my_gem/db_adapters/active_record.rb
+
+...
+
+# we load dependencies only after adapter is loaded
+loader = Zeitwerk::Loader.new
+loader.push_dir "#{__dir__}/active_record/models"
+loader.setup
+```
+
+```ruby
+# my_gem/db_adapters/active_record/models/foo.rb
+class Foo; end
+```
+
 <a id="markdown-use-case-test-files-mixed-with-implementation-files" name="use-case-test-files-mixed-with-implementation-files"></a>
 #### Use case: Test files mixed with implementation files
 

@@ -690,6 +690,8 @@ module Zeitwerk
 
           loader.dirs.each do |already_managed_dir|
             if dir.start_with?(already_managed_dir) || already_managed_dir.start_with?(dir)
+              next if loader.ignored_paths.any? {|path| dir.start_with?(path) }
+
               require "pp"
               raise Error,
                 "loader\n\n#{pretty_inspect}\n\nwants to manage directory #{dir}," \
