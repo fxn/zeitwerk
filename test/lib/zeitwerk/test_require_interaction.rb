@@ -116,6 +116,11 @@ class TestRequireInteraction < LoaderTest
   end
 
   test "you can autoload yourself in a required file" do
+    on_teardown do
+      remove_const :MyGem
+      delete_loaded_feature "my_gem.rb", "foo.rb"
+    end
+
     files = [
       ["my_gem.rb", <<-EOS],
         loader = Zeitwerk::Loader.new

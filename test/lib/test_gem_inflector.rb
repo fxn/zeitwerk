@@ -2,6 +2,11 @@ require "test_helper"
 
 class TestGemInflector < LoaderTest
   def with_setup
+    on_teardown do
+      remove_const :MyGem
+      delete_loaded_feature "my_gem.rb", "my_gem/version.rb", "ns/version.rb"
+    end
+
     files = [
       ["lib/my_gem.rb", <<-EOS],
         loader = Zeitwerk::Loader.for_gem

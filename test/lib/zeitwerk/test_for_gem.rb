@@ -2,6 +2,11 @@ require "test_helper"
 
 class TestForGem < LoaderTest
   test "sets things correctly" do
+    on_teardown do
+      remove_const :MyGem
+      delete_loaded_feature "my_gem.rb", "foo.rb", "bar.rb"
+    end
+
     files = [
       ["my_gem.rb", <<-EOS],
         $for_gem_test_loader = Zeitwerk::Loader.for_gem
@@ -29,6 +34,11 @@ class TestForGem < LoaderTest
   end
 
   test "is idempotent" do
+    on_teardown do
+      remove_const :MyGem
+      delete_loaded_feature "my_gem.rb", "foo.rb"
+    end
+
     files = [
       ["my_gem.rb", <<-EOS],
         $for_gem_test_zs << Zeitwerk::Loader.for_gem
@@ -61,7 +71,7 @@ class TestForGem < LoaderTest
   test "configures the gem inflector by default" do
     on_teardown do
       remove_const :MyGem
-      delete_loaded_feature "my_gem.rb"
+      delete_loaded_feature "my_gem.rb", "foo.rb"
     end
 
     files = [
@@ -85,7 +95,7 @@ class TestForGem < LoaderTest
   test "configures the basename of the root file as loader name" do
     on_teardown do
       remove_const :MyGem
-      delete_loaded_feature "my_gem.rb"
+      delete_loaded_feature "my_gem.rb", "foo.rb"
     end
 
     files = [
