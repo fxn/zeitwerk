@@ -69,6 +69,15 @@ class TestEagerLoad < LoaderTest
   end
 
   test "eager loads gems" do
+    on_teardown do
+      remove_const :MyGem
+
+      delete_loaded_feature "my_gem.rb"
+      delete_loaded_feature "my_gem/foo.rb"
+      delete_loaded_feature "my_gem/foo/bar.rb"
+      delete_loaded_feature "my_gem/foo/baz.rb"
+    end
+
     $my_gem_foo_bar_eager_loaded = false
 
     files = [
