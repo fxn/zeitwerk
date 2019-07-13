@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2.1.9 (Unreleased)
+
+* Supports classes and modules with overridden `name` methods.
+
 ## 2.1.8 (29 June 2019)
 
 * Fixes eager loading nested root directories. The new approach in 2.1.7 introduced a regression.

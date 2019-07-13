@@ -13,6 +13,22 @@ class TestExplicitNamespace < LoaderTest
     end
   end
 
+  test "explicit namespaces are loaded correctly even if #name is overridden" do
+    files = [
+      ["app/models/hotel.rb", <<~RUBY],
+        class Hotel
+          def self.name
+            "X"
+          end
+        end
+      RUBY
+      ["app/models/hotel/pricing.rb", "class Hotel::Pricing; end"]
+    ]
+    with_setup(files, dirs: "app/models") do
+      assert Hotel::Pricing
+    end
+  end
+
   test "explicit namespaces managed by different instances" do
     files = [
       ["a/m.rb", "module M; end"], ["a/m/n.rb", "M::N = true"],

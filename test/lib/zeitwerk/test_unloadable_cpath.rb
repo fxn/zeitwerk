@@ -29,6 +29,20 @@ class TestUnloadableCpath < LoaderTest
     end
   end
 
+  test "unloadable_cpaths returns actual constant paths even if #name is overridden" do
+    files = [["m.rb", <<~RUBY], ["m/c.rb", "M::C = true"]]
+      module M
+        def self.name
+          "X"
+        end
+      end
+    RUBY
+    with_setup(files) do
+      assert M::C
+      assert loader.unloadable_cpath?("M::C")
+    end
+  end
+
   test "a loader that loaded some stuff has nothing to unload if reloading is disabled" do
     on_teardown do
       remove_const :M

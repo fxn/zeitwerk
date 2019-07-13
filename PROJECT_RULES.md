@@ -30,6 +30,10 @@ Note that Zeitwerk does not deal with file or directory objects, only with paths
 * The only directory walks allowed are the one needed to set autoloads. One pass, and as lazy as possible (do not descend into subdirectories until necessary).
 * File and directory names should be kept as entered as much as possible so that logging prints what the user expects. Convert to real paths only in code that needs coordination with `Kernel#require`.
 
+## Class and module names
+
+* Classes and modules may override the `name` method, therefore we cannot assume it returns their original constant path. Always use the helper `real_mod_name` on classes and modules coming from the user.
+
 ## Types
 
 * All methods should have a documented signature.

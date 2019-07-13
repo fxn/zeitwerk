@@ -7,6 +7,7 @@ module Zeitwerk
   class Loader
     require_relative "loader/callbacks"
     include Callbacks
+    include RealModName
 
     # @return [String]
     attr_reader :tag
@@ -636,7 +637,7 @@ module Zeitwerk
     # @param cname [Symbol]
     # @return [String]
     def cpath(parent, cname)
-      parent.equal?(Object) ? cname.to_s : "#{parent.name}::#{cname}"
+      parent.equal?(Object) ? cname.to_s : "#{real_mod_name(parent)}::#{cname}"
     end
 
     # @param dir [String]

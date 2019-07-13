@@ -1,4 +1,6 @@
 module Zeitwerk::Loader::Callbacks
+  include Zeitwerk::RealModName
+
   # Invoked from our decorated Kernel#require when a managed file is autoloaded.
   #
   # @private
@@ -60,7 +62,7 @@ module Zeitwerk::Loader::Callbacks
   # @param namespace [Module]
   # @return [void]
   def on_namespace_loaded(namespace)
-    if subdirs = lazy_subdirs.delete(namespace.name)
+    if subdirs = lazy_subdirs.delete(real_mod_name(namespace))
       subdirs.each do |subdir|
         set_autoloads_in_dir(subdir, namespace)
       end

@@ -19,6 +19,21 @@ class TestUnload < LoaderTest
     end
   end
 
+  test "unload removes autoloaded constants, even if #name is overridden" do
+    files = [["x.rb", <<~RUBY]]
+      module X
+        def self.name
+          "Y"
+        end
+      end
+    RUBY
+    with_setup(files) do
+      assert X
+      loader.unload
+      assert !Object.const_defined?(:X)
+    end
+  end
+
   test "unload removes non-executed autoloads" do
     files = [["x.rb", "X = true"]]
     with_setup(files) do
