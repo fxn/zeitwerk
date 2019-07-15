@@ -17,7 +17,6 @@
     - [Setup](#setup)
     - [Reloading](#reloading)
     - [Eager loading](#eager-loading)
-    - [Preloading](#preloading)
     - [Inflection](#inflection)
         - [Zeitwerk::Inflector](#zeitwerkinflector)
         - [Zeitwerk::GemInflector](#zeitwerkgeminflector)
@@ -259,22 +258,6 @@ Zeitwerk::Loader.eager_load_all
 This may be handy in top-level services, like web applications.
 
 Note that thanks to idempotence `Zeitwerk::Loader.eager_load_all` won't eager load twice if any of the instances already eager loaded.
-
-<a id="markdown-preloading" name="preloading"></a>
-### Preloading
-
-Zeitwerk instances are able to preload files and directories.
-
-```ruby
-loader.preload("app/models/videogame.rb")
-loader.preload("app/models/book.rb")
-```
-
-The call can happen before `setup` (preloads during setup), or after `setup` (preloads on the spot). Each reload preloads too.
-
-This is a feature specifically thought for STIs in Rails, preloading the leafs of a STI tree ensures all classes are known when doing a query.
-
-The example above depicts several calls are supported, but `preload` accepts multiple arguments and arrays of strings as well.
 
 <a id="markdown-inflection" name="inflection"></a>
 ### Inflection
