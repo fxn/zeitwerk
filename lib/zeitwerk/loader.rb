@@ -403,12 +403,13 @@ module Zeitwerk
     # @param dir [String]
     # @return [Boolean]
     def manages?(dir)
+      dir = dir + "/"
       ignored_paths.each do |ignored_path|
-        return false if dir.start_with?(ignored_path)
+        return false if dir.start_with?(ignored_path + "/")
       end
 
       root_dirs.each_key do |root_dir|
-        return true if root_dir.start_with?(dir) || dir.start_with?(root_dir)
+        return true if root_dir.start_with?(dir) || dir.start_with?(root_dir + "/")
       end
 
       false

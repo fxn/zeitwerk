@@ -44,6 +44,14 @@ class TestConflictingDirectory < LoaderTest
     assert_equal conflicting_directory_message(parent), e.message
   end
 
+  test "does not raise if an existing loader manages a directory with a matching prefix" do
+    files = [["foo/x.rb", "X = 1"], ["foobar/y.rb", "Y = 1"]]
+    with_files(files) do
+      existing_loader.push_dir("foo")
+      assert loader.push_dir("foobar")
+    end
+  end
+
   test "does not raise if an existing loader ignores the directory (dir)" do
     existing_loader.push_dir(parent)
     existing_loader.ignore(dir)
@@ -54,5 +62,19 @@ class TestConflictingDirectory < LoaderTest
     existing_loader.push_dir(parent)
     existing_loader.ignore("#{parent}/*")
     assert loader.push_dir(dir)
+  end
+
+  test "raises if an existing loader ignores a directory with a matching prefix" do
+    files = [["foo/x.rb", "X = 1"], ["foobar/y.rb", "Y = 1"]]
+    with_files(files) do
+      ignored         = File.expand_path("foo")
+      conflicting_dir = File.expand_path("foobar")
+
+      existing_loader.push_dir(".")
+      existing_loader.ignore(ignored)
+
+      e = assert_raises(Zeitwerk::Error) { loader.push_dir(conflicting_dir) }
+      assert_equal conflicting_directory_message(conflicting_dir), e.message
+    end
   end
 end
