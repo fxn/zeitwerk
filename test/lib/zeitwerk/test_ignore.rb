@@ -85,14 +85,14 @@ class TestIgnore < LoaderTest
     a = "#{Dir.pwd}/a.rb"
     b = "#{Dir.pwd}/b.rb"
     loader.ignore(a, b)
-    assert_equal [a, b].to_set, loader.ignored
+    assert_equal [a, b].to_set, loader.ignored_glob_patterns
   end
 
   test "supports an array" do
     a = "#{Dir.pwd}/a.rb"
     b = "#{Dir.pwd}/b.rb"
     loader.ignore([a, b])
-    assert_equal [a, b].to_set, loader.ignored
+    assert_equal [a, b].to_set, loader.ignored_glob_patterns
   end
 
   test "supports glob patterns" do

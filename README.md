@@ -383,7 +383,7 @@ Zeitwerk ignores automatically any file or directory whose name starts with a do
 
 However, sometimes it might still be convenient to tell Zeitwerk to completely ignore some particular Ruby file or directory. That is possible with `ignore`, which accepts an arbitrary number of strings or `Pathname` objects, and also an array of them.
 
-You can ignore file names, directory names, and glob patterns. Glob patterns are expanded on setup and on reload.
+You can ignore file names, directory names, and glob patterns. Glob patterns are expanded when they are added and again on each reload.
 
 Let's see some use cases.
 
@@ -443,6 +443,8 @@ The chosen adapter, then, has to be loaded by hand somehow:
 ```ruby
 require "my_gem/db_adapters/#{config[:db_adapter]}"
 ```
+
+Note that since the directory is ignored, the required adapter can instantiate another loader to manage its subtree, if desired. Such loader would coexist with the main one just fine.
 
 <a id="markdown-use-case-test-files-mixed-with-implementation-files" name="use-case-test-files-mixed-with-implementation-files"></a>
 #### Use case: Test files mixed with implementation files

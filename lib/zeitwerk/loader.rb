@@ -44,7 +44,7 @@ module Zeitwerk
     #
     # @private
     # @return [Set<String>]
-    attr_reader :ignored
+    attr_reader :ignored_glob_patterns
 
     # The actual collection of absolute file and directory names at the time the
     # ignored glob patterns were expanded. Computed on setup, and recomputed on
@@ -133,7 +133,7 @@ module Zeitwerk
 
       @root_dirs             = {}
       @preloads              = []
-      @ignored               = Set.new
+      @ignored_glob_patterns = Set.new
       @ignored_paths         = Set.new
       @autoloads             = {}
       @autoloaded_dirs       = []
@@ -225,16 +225,12 @@ module Zeitwerk
     #
     # @param paths [<String, Pathname, <String, Pathname>>]
     # @return [void]
-    def ignore(*paths)
-      mutex.synchronize { ignored.merge(expand_paths(paths)) }
-    end
-
-    # @private
-    # @return [void]
-    def expand_ignored_glob_patterns
-      # Note that Dir.glob works with regular file names just fine. That is,
-      # glob patterns technically need no wildcards.
-      ignored_paths.replace(ignored.flat_map { |path| Dir.glob(path) })
+    def ignore(*glob_patterns)
+      glob_patterns = expand_paths(glob_patterns)
+      mutex.synchronize do
+        ignored_glob_patterns.merge(glob_patterns)
+        ignored_paths.merge(expand_glob_patterns(glob_patterns))
+      end
     end
 
     # Sets autoloads in the root namespace and preloads files, if any.
@@ -244,7 +240,6 @@ module Zeitwerk
       mutex.synchronize do
         break if @setup
 
-        expand_ignored_glob_patterns
         actual_root_dirs.each { |root_dir| set_autoloads_in_dir(root_dir, Object) }
         do_preload
 
@@ -326,6 +321,7 @@ module Zeitwerk
     def reload
       if reloading_enabled?
         unload
+        recompute_ignored_paths
         setup
       else
         raise ReloadingDisabledError, "can't reload, please call loader.enable_reloading before setup"
@@ -401,6 +397,21 @@ module Zeitwerk
     # @return [void]
     def log!
       @logger = ->(msg) { puts msg }
+    end
+
+    # @private
+    # @param dir [String]
+    # @return [Boolean]
+    def manages?(dir)
+      ignored_paths.each do |ignored_path|
+        return false if dir.start_with?(ignored_path)
+      end
+
+      root_dirs.each_key do |root_dir|
+        return true if root_dir.start_with?(dir) || dir.start_with?(root_dir)
+      end
+
+      false
     end
 
     # --- Class methods ---------------------------------------------------------------------------
@@ -666,7 +677,20 @@ module Zeitwerk
     # @param paths [<String, Pathname, <String, Pathname>>]
     # @return [<String>]
     def expand_paths(paths)
-      Array(paths).flatten.map! { |path| File.expand_path(path) }
+      paths.flatten.map! { |path| File.expand_path(path) }
+    end
+
+    # @param glob_patterns [<String>]
+    # @return [<String>]
+    def expand_glob_patterns(glob_patterns)
+      # Note that Dir.glob works with regular file names just fine. That is,
+      # glob patterns technically need no wildcards.
+      glob_patterns.flat_map { |glob_pattern| Dir.glob(glob_pattern) }
+    end
+
+    # @return [void]
+    def recompute_ignored_paths
+      ignored_paths.replace(expand_glob_patterns(ignored_glob_patterns))
     end
 
     # @param message [String]
@@ -687,16 +711,12 @@ module Zeitwerk
     def raise_if_conflicting_directory(dir)
       self.class.mutex.synchronize do
         Registry.loaders.each do |loader|
-          next if loader == self
-
-          loader.dirs.each do |already_managed_dir|
-            if dir.start_with?(already_managed_dir) || already_managed_dir.start_with?(dir)
-              require "pp"
-              raise Error,
-                "loader\n\n#{pretty_inspect}\n\nwants to manage directory #{dir}," \
-                " which is already managed by\n\n#{loader.pretty_inspect}\n"
-              EOS
-            end
+          if loader != self && loader.manages?(dir)
+            require "pp"
+            raise Error,
+              "loader\n\n#{pretty_inspect}\n\nwants to manage directory #{dir}," \
+              " which is already managed by\n\n#{loader.pretty_inspect}\n"
+            EOS
           end
         end
       end
