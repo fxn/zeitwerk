@@ -1,8 +1,14 @@
 # CHANGELOG
 
-## 2.1.9 (Unreleased)
+## 2.1.9 (16 July 2019)
+
+* Preloading is soft-deprecated. The use case it was thought for is no longer. Please, if you have a legit use case for it, drop me a line.
+
+* Root directory conflict detection among loaders takes ignored directories into account.
 
 * Supports classes and modules with overridden `name` methods.
+
+* Documentation improvements.
 
 ## 2.1.8 (29 June 2019)
 
