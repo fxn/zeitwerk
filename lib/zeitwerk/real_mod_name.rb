@@ -8,7 +8,7 @@ module Zeitwerk::RealModName
   # The name method can be overridden, hence the indirection in this method.
   #
   # @param mod [Class, Module]
-  # @return [String]
+  # @return [String, nil]
   def real_mod_name(mod)
     UNBOUND_METHOD_MODULE_NAME.bind(mod).call
   end
