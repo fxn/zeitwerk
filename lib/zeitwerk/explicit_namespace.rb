@@ -72,6 +72,9 @@ module Zeitwerk
 
     @cpaths = {}
     @mutex  = Mutex.new
+
+    # We go through a method instead of defining a block mainly to have a better
+    # label when profiling.
     @tracer = TracePoint.new(:class, &method(:tracepoint_class_callback))
   end
 end
