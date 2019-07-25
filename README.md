@@ -221,7 +221,7 @@ Enabling reloading after setup raises `Zeitwerk::Error`. Similarly, calling `rel
 
 Generally speaking, reloading is useful while developing running services like web applications. Gems that implement regular libraries, so to speak, or services running in testing or production environments, won't normally have a use case for reloading. If reloading is not enabled, Zeitwerk is able to use less memory.
 
-Reloading removes the currently loaded classes and modules, resets the loader so that it will pick whatever is in the file system now, and runs preloads if there are any.
+Reloading removes the currently loaded classes and modules and resets the loader so that it will pick whatever is in the file system now.
 
 It is important to highlight that this is an instance method. Don't worry about project dependencies managed by Zeitwerk, their loaders are independent.
 
