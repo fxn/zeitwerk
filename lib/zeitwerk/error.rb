@@ -4,4 +4,7 @@ module Zeitwerk
 
   class ReloadingDisabledError < Error
   end
+
+  class NameError < ::NameError
+  end
 end

@@ -490,6 +490,16 @@ module Zeitwerk
             autoload_subdir(parent, cname, abspath)
           end
         end
+      rescue ::NameError => error
+        raise NameError, <<~MESSAGE
+          #{error.message}
+          This invalid constant name was inferred by #{inflector.class} from #{abspath}.
+
+          You can either:
+            - Mark this path to be ignored.
+            - Rename the file to respect the general convention.
+            - Modify the inflector to handle this case better.
+        MESSAGE
       end
     end
 
