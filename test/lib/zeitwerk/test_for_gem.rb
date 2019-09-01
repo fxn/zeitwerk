@@ -105,4 +105,31 @@ class TestForGem < LoaderTest
       end
     end
   end
+
+  test "is able to handle a caller defined in a relative path" do
+    on_teardown do
+      remove_const :MyGem
+      delete_loaded_feature "my_gem.rb"
+    end
+
+    files = [
+      ["my_gem.rb", <<-EOS],
+        $for_gem_test_loader = Zeitwerk::Loader.for_gem
+        $for_gem_test_loader.setup
+
+        class MyGem
+          def self.caller_path
+            $caller_file = caller_locations(1, 1).first.path
+          end
+        end
+        $caller_path = MyGem.caller_path
+      EOS
+    ]
+    with_files(files) do
+      load "my_gem.rb"
+      assert_equal "my_gem", $for_gem_test_loader.tag
+      assert_equal "my_gem.rb", $caller_path
+      assert_includes $for_gem_test_loader.root_dirs, File.expand_path(".")
+    end
+  end
 end
