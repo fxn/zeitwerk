@@ -45,19 +45,21 @@ class TestExceptions < LoaderTest
     end
   end
 
-  test "raises NameError if the inflector return an invalid constant name for a file" do
+  test "raises Zeitwerk::NameError if the inflector returns an invalid constant name for a file" do
     files = [["foo-bar.rb", "FooBar = 1"]]
     error = assert_raises Zeitwerk::NameError do
       with_setup(files) {}
     end
     assert_includes error.message, "wrong constant name Foo-bar"
+    assert_includes error.message, "Tell Zeitwerk to ignore this particular file."
   end
 
-  test "raises NameError if the inflector return an invalid constant name for a directory" do
-    files = [["foo-bar/baz.rb", "FooBar = 1"]]
-    error = assert_raises NameError do
+  test "raises Zeitwerk::NameError if the inflector returns an invalid constant name for a directory" do
+    files = [["foo-bar/baz.rb", "FooBar::Baz = 1"]]
+    error = assert_raises Zeitwerk::NameError do
       with_setup(files) {}
     end
     assert_includes error.message, "wrong constant name Foo-bar"
+    assert_includes error.message, "Tell Zeitwerk to ignore this particular directory."
   end
 end

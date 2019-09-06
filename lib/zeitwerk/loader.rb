@@ -474,32 +474,39 @@ module Zeitwerk
     # @return [void]
     def set_autoloads_in_dir(dir, parent)
       ls(dir) do |basename, abspath|
-        if ruby?(basename)
-          basename.slice!(-3, 3)
-          cname = inflector.camelize(basename, abspath).to_sym
-          autoload_file(parent, cname, abspath)
-        elsif dir?(abspath)
-          # In a Rails application, `app/models/concerns` is a subdirectory of
-          # `app/models`, but both of them are root directories.
-          #
-          # To resolve the ambiguity file name -> constant path this introduces,
-          # the `app/models/concerns` directory is totally ignored as a namespace,
-          # it counts only as root. The guard checks that.
-          unless root_dirs.key?(abspath)
+        begin
+          if ruby?(basename)
+            basename.slice!(-3, 3)
             cname = inflector.camelize(basename, abspath).to_sym
-            autoload_subdir(parent, cname, abspath)
+            autoload_file(parent, cname, abspath)
+          elsif dir?(abspath)
+            # In a Rails application, `app/models/concerns` is a subdirectory of
+            # `app/models`, but both of them are root directories.
+            #
+            # To resolve the ambiguity file name -> constant path this introduces,
+            # the `app/models/concerns` directory is totally ignored as a namespace,
+            # it counts only as root. The guard checks that.
+            unless root_dirs.key?(abspath)
+              cname = inflector.camelize(basename, abspath).to_sym
+              autoload_subdir(parent, cname, abspath)
+            end
           end
-        end
-      rescue ::NameError => error
-        raise NameError, <<~MESSAGE
-          #{error.message}
-          This invalid constant name was inferred by #{inflector.class} from #{abspath}.
+        rescue ::NameError => error
+          path_type = ruby?(abspath) ? "file" : "directory"
 
-          You can either:
-            - Mark this path to be ignored.
-            - Rename the file to respect the general convention.
-            - Modify the inflector to handle this case better.
-        MESSAGE
+          raise NameError, <<~MESSAGE
+            #{error.message} inferred by #{inflector.class} from #{path_type}
+
+              #{abspath}
+
+            Possible ways to address this:
+
+              * Tell Zeitwerk to ignore this particular #{path_type}.
+              * Tell Zeitwerk to ignore one of its parent directories.
+              * Rename the #{path_type} to comply with the naming conventions.
+              * Modify the inflector to handle this case.
+          MESSAGE
+        end
       end
     end
 
