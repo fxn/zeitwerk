@@ -199,6 +199,22 @@ loader.setup
 
 The loader returned by `Zeitwerk::Loader.for_gem` has the directory of the caller pushed, normally that is the absolute path of `lib`. In that sense, `for_gem` can be used also by projects with a gem structure, even if they are not technically gems. That is, you don't need a gemspec or anything.
 
+If the main module of a library references project constants at the top-level, Zeitwerk has to be ready to load them. Their definitions, in turn, may reference other project constants. And this is recursive. Therefore, it is important that the `setup` call happens above the main module definition:
+
+```ruby
+# lib/my_gem.rb (main file)
+
+require "zeitwerk"
+loader = Zeitwerk::Loader.for_gem
+loader.setup
+
+module MyGem
+  # Since the setup has been performed, at this point we are already able
+  # to reference project constants, in this case MyGem::MyLogger.
+  include MyLogger
+end
+```
+
 Zeitwerk works internally only with absolute paths to avoid costly file searches in `$LOAD_PATH`. Indeed, the root directories do not even need to belong to `$LOAD_PATH`, everything just works by design if they don't.
 
 <a id="markdown-reloading" name="reloading"></a>
