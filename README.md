@@ -336,6 +336,49 @@ loader.inflector = MyInflector.new
 
 This needs to be done before calling `setup`.
 
+If a custom inflector definition in a gem takes too much space in the main file, you can extract it. For example, this is a simple pattern:
+
+```ruby
+# lib/my_gem/inflector.rb
+module MyGem
+  class Inflector < Zeitwerk::GemInflector
+    ...
+  end
+end
+
+# lib/my_gem.rb
+require "zeitwerk"
+require_relative "my_gem/inflector"
+
+loader = Zeitwerk::Loader.for_gem
+loader.inflector = MyGem::Inflector.new(__FILE__)
+loader.setup
+
+module MyGem
+  # ...
+end
+```
+
+Since `MyGem` is referenced before the namespace is defined in the main file, it is important to use this style:
+
+```ruby
+# Correct, effectively defines MyGem.
+module MyGem
+  class Inflector < Zeitwerk::GemInflector
+    # ...
+  end
+end
+```
+
+instead of:
+
+```ruby
+# Raises uninitialized constant MyGem (NameError).
+class MyGem::Inflector < Zeitwerk::GemInflector
+  # ...
+end
+```
+
 <a id="markdown-logging" name="logging"></a>
 ### Logging
 
