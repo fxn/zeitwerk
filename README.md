@@ -263,6 +263,8 @@ loader.setup
 loader.eager_load # won't eager load the database adapters
 ```
 
+In gems, the method needs to be invoked after the main namespace has been defined, as shown in [Synopsis](https://github.com/fxn/zeitwerk#synopsis).
+
 Eager loading is synchronized and idempotent.
 
 If you want to eager load yourself and all dependencies using Zeitwerk, you can broadcast the `eager_load` call to all instances:
