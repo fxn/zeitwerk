@@ -570,7 +570,7 @@ As of this writing, Zeitwerk is unable to autoload classes or modules that belon
 
 The root cause is that debuggers set trace points, and Zeitwerk does too to support explicit namespaces. A debugger session happens inside a trace point handler, and Ruby does not invoke other handlers from within a running handler. Therefore, the code that manages explicit namespaces in Zeitwerk does not get called by the interpreter. See [this issue](https://github.com/deivid-rodriguez/byebug/issues/564#issuecomment-499413606) for further details.
 
-As a workaround, you can eager load. Zeitwerk tries hard to success or fail consistently both autoloading and eager loading, so switching to eager loading should not introduce any interference in your debugging logic, generally speaking.
+As a workaround, you can eager load. Zeitwerk tries hard to succeed or fail consistently both autoloading and eager loading, so switching to eager loading should not introduce any interference in your debugging logic, generally speaking.
 
 <a id="markdown-pronunciation" name="pronunciation"></a>
 ## Pronunciation
