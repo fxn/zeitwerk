@@ -29,6 +29,7 @@
         - [Use case: Test files mixed with implementation files](#use-case-test-files-mixed-with-implementation-files)
     - [Edge cases](#edge-cases)
     - [Rules of thumb](#rules-of-thumb)
+    - [Autoloading, explicit namespaces, and debuggers](#autoloading-explicit-namespaces-and-debuggers)
 - [Pronunciation](#pronunciation)
 - [Supported Ruby versions](#supported-ruby-versions)
 - [Motivation](#motivation)
@@ -561,6 +562,15 @@ This only affects explicit namespaces, those idioms work well for any other ordi
 5. Objects stored in reloadable constants should not be cached in places that are not reloaded. For example, non-reloadable classes should not subclass a reloadable class, or mixin a reloadable module. Otherwise, after reloading, those classes or module objects would become stale. Referring to constants in dynamic places like method calls or lambdas is fine.
 
 6. In a given process, ideally, there should be at most one loader with reloading enabled. Technically, you can have more, but it may get tricky if one refers to constants managed by the other one. Do that only if you know what you are doing.
+
+<a id="markdown-autoloading-explicit-namespaces-and-debuggers" name="autoloading-explicit-namespaces-and-debuggers"></a>
+### Autoloading, explicit namespaces, and debuggers
+
+As of this writing, Zeitwerk is unable to autoload classes or modules that belong to [explicit namespaces](#explicit-namespaces) inside debugger sessions. You'll get a `NameError`.
+
+The root cause is that debuggers set trace points, and Zeitwerk does too to support explicit namespaces. A debugger session happens inside a trace point handler, and Ruby does not invoke other handlers from within a running handler. Therefore, the code that manages explicit namespaces in Zeitwerk does not get called by the interpreter. See https://github.com/deivid-rodriguez/byebug/issues/564#issuecomment-499413606 for further details.
+
+As a workaround, you can eager load. Zeitwerk tries hard to success or fail consistently both autoloading and eager loading, so switching to eager loading should not introduce any interference in your debugging logic, generally speaking.
 
 <a id="markdown-pronunciation" name="pronunciation"></a>
 ## Pronunciation
