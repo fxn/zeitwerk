@@ -14,7 +14,7 @@ Gem::Specification.new do |spec|
   spec.email    = 'fxn@hashref.com'
   spec.license  = "MIT"
   spec.homepage = "https://github.com/fxn/zeitwerk"
-  spec.files    = Dir.glob("lib/**/*.rb") + ["README.md"]
+  spec.files    = Dir["README.md", "MIT-LICENSE", "lib/**/*.rb"]
   spec.version  = Zeitwerk::VERSION
 
   spec.required_ruby_version = ">= 2.4.4"
