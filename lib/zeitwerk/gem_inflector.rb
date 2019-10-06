@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
 module Zeitwerk
-  class GemInflector < Inflector # :nodoc:
+  class GemInflector < Inflector
     # @param root_file [String]
     def initialize(root_file)
+      super()
       namespace     = File.basename(root_file, ".rb")
       lib_dir       = File.dirname(root_file)
       @version_file = File.join(lib_dir, namespace, "version.rb")
@@ -13,7 +14,7 @@ module Zeitwerk
     # @param abspath [String]
     # @return [String]
     def camelize(basename, abspath)
-      (basename == "version" && abspath == @version_file) ? "VERSION" : super
+      abspath == @version_file ? "VERSION" : super
     end
   end
 end
