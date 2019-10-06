@@ -35,4 +35,13 @@ class TestInflector < Minitest::Test
       assert_equal class_name, inflector.camelize(basename, nil)
     end
   end
+
+  test "subclasses that override the initializer can hard-code inflections (backwards compatibility)" do
+    inflector = Class.new(Zeitwerk::Inflector) do
+      def initialize; end
+    end.new
+    inflector.inflect("foo" => "FOO")
+
+    assert_equal "FOO", inflector.camelize("foo", nil)
+  end
 end
