@@ -13,7 +13,19 @@ module Zeitwerk
     # @param _abspath [String]
     # @return [String]
     def camelize(basename, _abspath)
-      basename.split('_').map!(&:capitalize).join
+      __inflections[basename] || basename.split('_').map!(&:capitalize).join
+    end
+
+    # @param inflections [Hash]
+    # @return [Hash]
+    def inflect(inflections)
+      __inflections.merge!(inflections)
+    end
+
+    private
+
+    def __inflections
+      @__inflections ||= {}
     end
   end
 end

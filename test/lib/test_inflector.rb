@@ -20,4 +20,19 @@ class TestInflector < Minitest::Test
   test "knows nothing about acronyms" do
     assert_equal "HtmlParser", camelize("html_parser")
   end
+
+  test "returns inflections defined using the inflect method" do
+    inflections = {
+      "html_parser" => "HTMLParser",
+      "csv_controller" => "CSVController",
+      "mysql_adapter" => "MySQLAdapter"
+    }
+
+    inflector = Zeitwerk::Inflector.new
+    inflector.inflect(inflections)
+
+    inflections.each do |basename, class_name|
+      assert_equal class_name, inflector.camelize(basename, nil)
+    end
+  end
 end
