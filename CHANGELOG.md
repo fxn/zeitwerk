@@ -5,7 +5,7 @@
 * The default inflectors have API to override how to camelize selected basenames:
 
     ```ruby
-    loader.inflector.inflect "mysql_adapter" => "MySQLAdapter'
+    loader.inflector.inflect "mysql_adapter" => "MySQLAdapter"
     ```
 
     This addresses a common pattern, which is to use the basic inflectors with a few straightforward exceptions typically configured in a hash table or `case` expression. You no longer have to define a custom inflector if that is all you need.
