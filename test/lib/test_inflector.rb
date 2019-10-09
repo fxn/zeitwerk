@@ -23,25 +23,18 @@ class TestInflector < Minitest::Test
 
   test "returns inflections defined using the inflect method" do
     inflections = {
-      "html_parser" => "HTMLParser",
+      "html_parser"    => "HTMLParser",
       "csv_controller" => "CSVController",
-      "mysql_adapter" => "MySQLAdapter"
+      "mysql_adapter"  => "MySQLAdapter"
     }
 
     inflector = Zeitwerk::Inflector.new
     inflector.inflect(inflections)
 
-    inflections.each do |basename, class_name|
-      assert_equal class_name, inflector.camelize(basename, nil)
+    inflections.each do |basename, cname|
+      assert_equal cname, inflector.camelize(basename, nil)
     end
-  end
 
-  test "subclasses that override the initializer can hard-code inflections (backwards compatibility)" do
-    inflector = Class.new(Zeitwerk::Inflector) do
-      def initialize; end
-    end.new
-    inflector.inflect("foo" => "FOO")
-
-    assert_equal "FOO", inflector.camelize("foo", nil)
+    assert_equal "UsersController", inflector.camelize("users_controller", nil)
   end
 end

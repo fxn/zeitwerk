@@ -1,8 +1,20 @@
 # CHANGELOG
 
+## 2.2.0 (9 October 2019)
+
+* The default inflectors have API to override how to camelize selected basenames:
+
+    ```ruby
+    loader.inflector.inflect "mysql_adapter" => "MySQLAdapter'
+    ```
+
+    This addresses a common pattern, which is to use the basic inflectors with a few straightforward exceptions typically configured in a hash table or `case` expression. You no longer have to define a custom inflector if that is all you need.
+
+* Documentation improvements.
+
 ## 2.1.10 (6 September 2019)
 
-* Raises Zeitwerk::NameError with a better error message when a managed file or directory has a name that yields an invalid constant name when inflected. Zeitwerk::NameError is a subclass of NameError.
+* Raises `Zeitwerk::NameError` with a better error message when a managed file or directory has a name that yields an invalid constant name when inflected. Zeitwerk::NameError is a subclass of NameError.
 
 ## 2.1.9 (16 July 2019)
 

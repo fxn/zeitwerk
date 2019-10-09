@@ -15,10 +15,10 @@ module Zeitwerk
     # @param _abspath [String]
     # @return [String]
     def camelize(basename, _abspath)
-      __inflections[basename] || basename.split('_').map!(&:capitalize).join
+      overrides[basename] || basename.split('_').map!(&:capitalize).join
     end
 
-    # Configures hard-coded mappings:
+    # Configures hard-coded inflections:
     #
     #   inflector = Zeitwerk::Inflector.new
     #   inflector.inflect(
@@ -26,25 +26,24 @@ module Zeitwerk
     #     "mysql_adapter" => "MySQLAdapter"
     #   )
     #
+    #   inflector.camelize("html_parser", abspath)      # => "HTMLParser"
     #   inflector.camelize("mysql_adapter", abspath)    # => "MySQLAdapter"
     #   inflector.camelize("users_controller", abspath) # => "PostsController"
     #
     # @param inflections [{String => String}]
     # @return [void]
     def inflect(inflections)
-      __inflections.merge!(inflections)
+      overrides.merge!(inflections)
     end
 
     private
 
-    def __inflections
-      # This ivar has two leading underscores for backwards compatibility.
-      #
-      # Goal is to avoid conflicts with existing subclasses, in case they have
-      # an @inflections ivar, and a camelize calling super. Of course, an ivar
-      # with two underscores could be being used by such subclasses, in which
-      # case there would be a conflict, but that is assumed to be very unlikely.
-      @__inflections ||= {}
+    # Hard-coded basename to constant name user maps that override the default
+    # inflection logic.
+    #
+    # @return [{String => String}]
+    def overrides
+      @overrides ||= {}
     end
   end
 end

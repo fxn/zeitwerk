@@ -294,14 +294,34 @@ users_controller -> UsersController
 html_parser      -> HtmlParser
 ```
 
+The camelize logic can be overridden easily for individual basenames:
+
+```ruby
+loader.inflector.inflect(
+  "html_parser"   => "HTMLParser",
+  "mysql_adapter" => "MySQLAdapter"
+)
+```
+
+The `inflect` method can be invoked several times if you prefer this other style:
+
+```ruby
+loader.inflector.inflect "html_parser" => "HTMLParser"
+loader.inflector.inflect "mysql_adapter" => "MySQLAdapter"
+```
+
+Overrides need to be configured before calling `setup`.
+
 There are no inflection rules or global configuration that can affect this inflector. It is deterministic.
 
-This is the default inflector.
+Loaders instantiated with `Zeitwerk::Loader.new` have an inflector of this type, independent of each other.
 
 <a id="markdown-zeitwerkgeminflector" name="zeitwerkgeminflector"></a>
 #### Zeitwerk::GemInflector
 
-The loader instantiated behind the scenes by `Zeitwerk::Loader.for_gem` gets assigned by default an inflector that is like the basic one, except it expects `lib/my_gem/version.rb` to define `MyGem::VERSION`.
+This inflector is like the basic one, except it expects `lib/my_gem/version.rb` to define `MyGem::VERSION`.
+
+Loaders instantiated with `Zeitwerk::Loader.for_gem` have an inflector of this type, independent of each other.
 
 <a id="markdown-custom-inflector" name="custom-inflector"></a>
 #### Custom inflector
@@ -312,12 +332,9 @@ The inflectors that ship with Zeitwerk are deterministic and simple. But you can
 # frozen_string_literal: true
 
 class MyInflector < Zeitwerk::Inflector
-  def camelize(basename, _abspath)
-    case basename
-    when "api"
-      "API"
-    when "mysql_adapter"
-      "MySQLAdapter"
+  def camelize(basename, abspath)
+    if basename =~ /\Ahtml_(.*)/
+      "HTML" + super($1, abspath)
     else
       super
     end
