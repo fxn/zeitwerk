@@ -28,7 +28,7 @@ module Zeitwerk
     #
     #   inflector.camelize("html_parser", abspath)      # => "HTMLParser"
     #   inflector.camelize("mysql_adapter", abspath)    # => "MySQLAdapter"
-    #   inflector.camelize("users_controller", abspath) # => "PostsController"
+    #   inflector.camelize("users_controller", abspath) # => "UsersController"
     #
     # @param inflections [{String => String}]
     # @return [void]
