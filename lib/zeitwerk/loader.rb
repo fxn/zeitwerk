@@ -623,8 +623,14 @@ module Zeitwerk
     # @param parent [Module]
     # @param cname [Symbol]
     # @return [String, nil]
-    def strict_autoload_path(parent, cname)
-      parent.autoload?(cname) if cdef?(parent, cname)
+    if method(:autoload?).arity == 1
+      def strict_autoload_path(parent, cname)
+        parent.autoload?(cname) if cdef?(parent, cname)
+      end
+    else
+      def strict_autoload_path(parent, cname)
+        parent.autoload?(cname, false)
+      end
     end
 
     # This method is called this way because I prefer `preload` to be the method
