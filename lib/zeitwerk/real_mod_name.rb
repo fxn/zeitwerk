@@ -9,7 +9,13 @@ module Zeitwerk::RealModName
   #
   # @param mod [Class, Module]
   # @return [String, nil]
-  def real_mod_name(mod)
-    UNBOUND_METHOD_MODULE_NAME.bind(mod).call
+  if UnboundMethod.method_defined?(:bind_call)
+    def real_mod_name(mod)
+      UNBOUND_METHOD_MODULE_NAME.bind_call(mod)
+    end
+  else
+    def real_mod_name(mod)
+      UNBOUND_METHOD_MODULE_NAME.bind(mod).call
+    end
   end
 end
