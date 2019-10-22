@@ -32,6 +32,7 @@
     - [Autoloading, explicit namespaces, and debuggers](#autoloading-explicit-namespaces-and-debuggers)
 - [Pronunciation](#pronunciation)
 - [Supported Ruby versions](#supported-ruby-versions)
+- [Testing](#testing)
 - [Motivation](#motivation)
 - [Thanks](#thanks)
 - [License](#license)
@@ -598,6 +599,32 @@ As a workaround, you can eager load. Zeitwerk tries hard to succeed or fail cons
 ## Supported Ruby versions
 
 Zeitwerk works with MRI 2.4.4 and above.
+
+<a id="markdown-testing" name="testing"></a>
+## Testing
+
+In order to run the test suite of Zeitwerk, `cd` into the project root and execute
+
+```
+bin/test
+```
+
+To run one particular suite, pass its file name as an argument:
+
+```
+bin/test test/lib/zeitwerk/test_eager_load.rb
+```
+
+Furthermore, the project has a development dependency on [`minitest-focus`](https://github.com/seattlerb/minitest-focus). To run an individual test mark it with `focus`:
+
+```ruby
+focus
+test "capitalizes the first letter" do
+  assert_equal "User", camelize("user")
+end
+```
+
+and run `bin/test`.
 
 <a id="markdown-motivation" name="motivation"></a>
 ## Motivation
