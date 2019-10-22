@@ -1,9 +1,4 @@
-dist: trusty
 language: ruby
-before_install:
-  - "rm ${BUNDLE_GEMFILE}.lock"
-  - "travis_retry gem update --system"
-  - "travis_retry gem install bundler -N"
 rvm:
   - 2.4.4
   - 2.4
