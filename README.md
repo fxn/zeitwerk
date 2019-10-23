@@ -640,6 +640,8 @@ I'd like to thank [@matthewd](https://github.com/matthewd) for the discussions w
 
 Also, would like to thank [@Shopify](https://github.com/Shopify), [@rafaelfranca](https://github.com/rafaelfranca), and [@dylanahsmith](https://github.com/dylanahsmith), for sharing [this PoC](https://github.com/Shopify/autoload_reloader). The technique Zeitwerk uses to support explicit namespaces was copied from that project.
 
+Jean Boussier ([@casperisfine](https://github.com/casperisfine), [@byroot](https://github.com/byroot)) deserves special mention. Jean migrated autoloading in Shopify when Zeitwerk integration in Rails was yet unreleased. His work and positive attitude have been outstanding, and thanks to his feedback the interface and performance of Zeitwerk are way, way better. Kudos man ❤️.
+
 Finally, many thanks to [@schurig](https://github.com/schurig) for recording an [audio file](http://share.hashref.com/zeitwerk/zeitwerk_pronunciation.mp3) with the pronunciation of "Zeitwerk" in perfect German. 💯
 
 <a id="markdown-license" name="license"></a>
