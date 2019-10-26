@@ -174,13 +174,14 @@ module Zeitwerk
     # or descendants.
     #
     # @param path [<String, Pathname>]
+    # @param options [Hash]
     # @raise [Zeitwerk::Error]
     # @return [void]
-    def push_dir(path)
+    def push_dir(path, options = {})
       abspath = File.expand_path(path)
       if dir?(abspath)
         raise_if_conflicting_directory(abspath)
-        root_dirs[abspath] = true
+        root_dirs[abspath] = { parent: Object }.merge(options)
       else
         raise Error, "the root directory #{abspath} does not exist"
       end
@@ -240,7 +241,7 @@ module Zeitwerk
       mutex.synchronize do
         break if @setup
 
-        actual_root_dirs.each { |root_dir| set_autoloads_in_dir(root_dir, Object) }
+        actual_root_dirs.each { |root_dir| set_autoloads_in_dir(root_dir, parent_for_root_dir(root_dir)) }
         do_preload
 
         @setup = true
@@ -760,6 +761,17 @@ module Zeitwerk
     def unload_cref(parent, cname)
       parent.send(:remove_const, cname)
       log("#{cpath(parent, cname)} unloaded") if logger
+    end
+
+    def parent_for_root_dir(root_dir)
+      parent = root_dirs[root_dir][:parent]
+      if parent.is_a?(Symbol)
+        Object.const_get(parent)
+      elsif parent.respond_to?(:call)
+        parent.call
+      else
+        parent
+      end
     end
   end
 end
