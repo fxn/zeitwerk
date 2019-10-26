@@ -340,7 +340,7 @@ module Zeitwerk
         break if @eager_loaded
 
         queue = actual_root_dirs.reject { |dir| eager_load_exclusions.member?(dir) }
-        queue.map! { |dir| [Object, dir] }
+        queue.map! { |dir| [parent_for_root_dir(dir), dir] }
         while to_eager_load = queue.shift
           namespace, dir = to_eager_load
 
