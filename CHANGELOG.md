@@ -14,7 +14,7 @@
 
 ## 2.1.10 (6 September 2019)
 
-* Raises `Zeitwerk::NameError` with a better error message when a managed file or directory has a name that yields an invalid constant name when inflected. Zeitwerk::NameError is a subclass of NameError.
+* Raises `Zeitwerk::NameError` with a better error message when a managed file or directory has a name that yields an invalid constant name when inflected. `Zeitwerk::NameError` is a subclass of `NameError`.
 
 ## 2.1.9 (16 July 2019)
 
