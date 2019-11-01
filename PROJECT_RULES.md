@@ -60,7 +60,7 @@ We sacrifice there a bit of precision in order to communicate better. Some Ruby 
 
 ## Performance
 
-Zeitwerk is infraestructure, should have minimal cost both in speed and memory usage.
+Zeitwerk is infrastructure, should have minimal cost both in speed and memory usage.
 
 Be extra careful, allocate as less as possible, store as less as possible. Use always absolute file names for `autoload` and `require`.
 
@@ -70,7 +70,7 @@ Log always using this pattern:
 log(message) if logger
 ```
 
-to avoid unncessary calls, and unnecessary computed values in the message.
+to avoid unnecessary calls, and unnecessary computed values in the message.
 
 Some projects may have hundreds of root directories and hundreds of thousands of files, please remember that.
 
