@@ -558,7 +558,7 @@ module Zeitwerk
     end
 
     # @param dir [String] directory that would have autovivified a module
-    # @param file [String] the file where the namespace is explictly defined
+    # @param file [String] the file where the namespace is explicitly defined
     # @param parent [Module]
     # @param cname [Symbol]
     # @return [void]
