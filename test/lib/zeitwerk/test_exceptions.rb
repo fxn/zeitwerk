@@ -5,7 +5,7 @@ class TestExceptions < LoaderTest
     files = [["typo.rb", "TyPo = 1"]]
     with_setup(files) do
       typo_rb = File.realpath("typo.rb")
-      e = assert_raises(NameError) { Typo }
+      e = assert_raises(Zeitwerk::NameError) { Typo }
       assert_equal "expected file #{typo_rb} to define constant Typo, but didn't", e.message
     end
   end
@@ -19,7 +19,7 @@ class TestExceptions < LoaderTest
     files = [["x.rb", "Y = 1"]]
     with_setup(files) do
       x_rb = File.realpath("x.rb")
-      e = assert_raises(NameError) { loader.eager_load }
+      e = assert_raises(Zeitwerk::NameError) { loader.eager_load }
       assert_equal "expected file #{x_rb} to define constant X, but didn't", e.message
     end
   end
@@ -33,7 +33,7 @@ class TestExceptions < LoaderTest
     files = [["cli/x.rb", "module CLI; X = 1; end"]]
     with_setup(files) do
       cli_x_rb = File.realpath("cli/x.rb")
-      e = assert_raises(NameError) { loader.eager_load }
+      e = assert_raises(Zeitwerk::NameError) { loader.eager_load }
       assert_equal "expected file #{cli_x_rb} to define constant Cli::X, but didn't", e.message
     end
   end
