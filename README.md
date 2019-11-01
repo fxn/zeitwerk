@@ -15,6 +15,7 @@
     - [Nested root directories](#nested-root-directories)
 - [Usage](#usage)
     - [Setup](#setup)
+    - [Autoloading](#autoloading)
     - [Reloading](#reloading)
     - [Eager loading](#eager-loading)
     - [Inflection](#inflection)
@@ -219,6 +220,29 @@ end
 
 Zeitwerk works internally only with absolute paths to avoid costly file searches in `$LOAD_PATH`. Indeed, the root directories do not even need to belong to `$LOAD_PATH`, everything just works by design if they don't.
 
+<a id="markdown-autoloading" name="autoloading"></a>
+### Autoloading
+
+After `setup`, you are able to reference classes and modules from the project without issuing `require` calls for them. They are all available everywhere, autoloading loads them on demand. This works even if the reference to the class or module is first hit in client code, outside your project.
+
+Let's revisit the example above:
+
+```ruby
+# lib/my_gem.rb (main file)
+
+require "zeitwerk"
+loader = Zeitwerk::Loader.for_gem
+loader.setup
+
+module MyGem
+  include MyLogger # (*)
+end
+```
+
+That works, and there is no `require "my_gem/my_logger"`. When `(*)` is reached, Zeitwerk seamlessly autoloads `MyGem::MyLogger`.
+
+If autoloading a file does not define the expected class or module, Zeitwerk raises `Zeitwerk::NameError`, which is a subclass of `NameError`.
+
 <a id="markdown-reloading" name="reloading"></a>
 ### Reloading
 
@@ -235,7 +259,7 @@ loader.reload
 
 There is no way to undo this, either you want to reload or you don't.
 
-Enabling reloading after setup raises `Zeitwerk::Error`. Similarly, calling `reload` without having enabled reloading also raises `Zeitwerk::Error`.
+Enabling reloading after setup raises `Zeitwerk::Error`. Attempting to reload without having it enabled raises `Zeitwerk::ReloadingDisabledError`.
 
 Generally speaking, reloading is useful while developing running services like web applications. Gems that implement regular libraries, so to speak, or services running in testing or production environments, won't normally have a use case for reloading. If reloading is not enabled, Zeitwerk is able to use less memory.
 
@@ -268,6 +292,8 @@ loader.eager_load # won't eager load the database adapters
 In gems, the method needs to be invoked after the main namespace has been defined, as shown in [Synopsis](https://github.com/fxn/zeitwerk#synopsis).
 
 Eager loading is synchronized and idempotent.
+
+If eager loading a file does not define the expected class or module, Zeitwerk raises `Zeitwerk::NameError`, which is a subclass of `NameError`.
 
 If you want to eager load yourself and all dependencies using Zeitwerk, you can broadcast the `eager_load` call to all instances:
 
