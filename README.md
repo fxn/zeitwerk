@@ -16,8 +16,8 @@
 - [Usage](#usage)
     - [Setup](#setup)
     - [Autoloading](#autoloading)
-    - [Reloading](#reloading)
     - [Eager loading](#eager-loading)
+    - [Reloading](#reloading)
     - [Inflection](#inflection)
         - [Zeitwerk::Inflector](#zeitwerkinflector)
         - [Zeitwerk::GemInflector](#zeitwerkgeminflector)
@@ -243,34 +243,6 @@ That works, and there is no `require "my_gem/my_logger"`. When `(*)` is reached,
 
 If autoloading a file does not define the expected class or module, Zeitwerk raises `Zeitwerk::NameError`, which is a subclass of `NameError`.
 
-<a id="markdown-reloading" name="reloading"></a>
-### Reloading
-
-Zeitwerk is able to reload code, but you need to enable this feature:
-
-```ruby
-loader = Zeitwerk::Loader.new
-loader.push_dir(...)
-loader.enable_reloading # you need to opt-in before setup
-loader.setup
-...
-loader.reload
-```
-
-There is no way to undo this, either you want to reload or you don't.
-
-Enabling reloading after setup raises `Zeitwerk::Error`. Attempting to reload without having it enabled raises `Zeitwerk::ReloadingDisabledError`.
-
-Generally speaking, reloading is useful while developing running services like web applications. Gems that implement regular libraries, so to speak, or services running in testing or production environments, won't normally have a use case for reloading. If reloading is not enabled, Zeitwerk is able to use less memory.
-
-Reloading removes the currently loaded classes and modules and resets the loader so that it will pick whatever is in the file system now.
-
-It is important to highlight that this is an instance method. Don't worry about project dependencies managed by Zeitwerk, their loaders are independent.
-
-In order for reloading to be thread-safe, you need to implement some coordination. For example, a web framework that serves each request with its own thread may have a globally accessible RW lock. When a request comes in, the framework acquires the lock for reading at the beginning, and the code in the framework that calls `loader.reload` needs to acquire the lock for writing.
-
-On reloading, client code has to update anything that would otherwise be storing a stale object. For example, if the routing layer of a web framework stores controller class objects or instances in internal structures, on reload it has to refresh them somehow, possibly reevaluating routes.
-
 <a id="markdown-eager-loading" name="eager-loading"></a>
 ### Eager loading
 
@@ -304,6 +276,34 @@ Zeitwerk::Loader.eager_load_all
 This may be handy in top-level services, like web applications.
 
 Note that thanks to idempotence `Zeitwerk::Loader.eager_load_all` won't eager load twice if any of the instances already eager loaded.
+
+<a id="markdown-reloading" name="reloading"></a>
+### Reloading
+
+Zeitwerk is able to reload code, but you need to enable this feature:
+
+```ruby
+loader = Zeitwerk::Loader.new
+loader.push_dir(...)
+loader.enable_reloading # you need to opt-in before setup
+loader.setup
+...
+loader.reload
+```
+
+There is no way to undo this, either you want to reload or you don't.
+
+Enabling reloading after setup raises `Zeitwerk::Error`. Attempting to reload without having it enabled raises `Zeitwerk::ReloadingDisabledError`.
+
+Generally speaking, reloading is useful while developing running services like web applications. Gems that implement regular libraries, so to speak, or services running in testing or production environments, won't normally have a use case for reloading. If reloading is not enabled, Zeitwerk is able to use less memory.
+
+Reloading removes the currently loaded classes and modules and resets the loader so that it will pick whatever is in the file system now.
+
+It is important to highlight that this is an instance method. Don't worry about project dependencies managed by Zeitwerk, their loaders are independent.
+
+In order for reloading to be thread-safe, you need to implement some coordination. For example, a web framework that serves each request with its own thread may have a globally accessible RW lock. When a request comes in, the framework acquires the lock for reading at the beginning, and the code in the framework that calls `loader.reload` needs to acquire the lock for writing.
+
+On reloading, client code has to update anything that would otherwise be storing a stale object. For example, if the routing layer of a web framework stores controller class objects or instances in internal structures, on reload it has to refresh them somehow, possibly reevaluating routes.
 
 <a id="markdown-inflection" name="inflection"></a>
 ### Inflection
