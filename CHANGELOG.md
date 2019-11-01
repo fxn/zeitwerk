@@ -2,7 +2,9 @@
 
 ## 2.2.1 (1 November 2019)
 
-* Zeitwerk raised `NameError` when a managed file did not define its expected constant. Now, it raises `Zeitwerk::NameError` instead, so it is possible for client code to distinguish that mismatch from a regular `NameError`. Regarding backwards compatibility, `Zeitwerk::NameError` is a subclass of `NameError`.
+* Zeitwerk raised `NameError` when a managed file did not define its expected constant. Now, it raises `Zeitwerk::NameError` instead, so it is possible for client code to distinguish that mismatch from a regular `NameError`.
+
+    Regarding backwards compatibility, `Zeitwerk::NameError` is a subclass of `NameError`.
 
 ## 2.2.0 (9 October 2019)
 
