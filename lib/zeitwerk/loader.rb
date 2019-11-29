@@ -494,7 +494,7 @@ module Zeitwerk
         rescue ::NameError => error
           path_type = ruby?(abspath) ? "file" : "directory"
 
-          raise NameError, <<~MESSAGE
+          raise NameError.new(<<~MESSAGE, error.name)
             #{error.message} inferred by #{inflector.class} from #{path_type}
 
               #{abspath}
