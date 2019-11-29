@@ -14,7 +14,7 @@ module Zeitwerk::Loader::Callbacks
     if logger && cdef?(*cref)
       log("constant #{cpath(*cref)} loaded from file #{file}")
     elsif !cdef?(*cref)
-      raise Zeitwerk::NameError, "expected file #{file} to define constant #{cpath(*cref)}, but didn't"
+      raise Zeitwerk::NameError.new("expected file #{file} to define constant #{cpath(*cref)}, but didn't", cref.last)
     end
   end
 

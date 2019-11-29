@@ -5,8 +5,9 @@ class TestExceptions < LoaderTest
     files = [["typo.rb", "TyPo = 1"]]
     with_setup(files) do
       typo_rb = File.realpath("typo.rb")
-      e = assert_raises(Zeitwerk::NameError) { Typo }
-      assert_equal "expected file #{typo_rb} to define constant Typo, but didn't", e.message
+      error = assert_raises(Zeitwerk::NameError) { Typo }
+      assert_equal "expected file #{typo_rb} to define constant Typo, but didn't", error.message
+      assert_equal :Typo, error.name
     end
   end
 
@@ -19,8 +20,9 @@ class TestExceptions < LoaderTest
     files = [["x.rb", "Y = 1"]]
     with_setup(files) do
       x_rb = File.realpath("x.rb")
-      e = assert_raises(Zeitwerk::NameError) { loader.eager_load }
-      assert_equal "expected file #{x_rb} to define constant X, but didn't", e.message
+      error = assert_raises(Zeitwerk::NameError) { loader.eager_load }
+      assert_equal "expected file #{x_rb} to define constant X, but didn't", error.message
+      assert_equal :X, error.name
     end
   end
 
@@ -33,8 +35,9 @@ class TestExceptions < LoaderTest
     files = [["cli/x.rb", "module CLI; X = 1; end"]]
     with_setup(files) do
       cli_x_rb = File.realpath("cli/x.rb")
-      e = assert_raises(Zeitwerk::NameError) { loader.eager_load }
-      assert_equal "expected file #{cli_x_rb} to define constant Cli::X, but didn't", e.message
+      error = assert_raises(Zeitwerk::NameError) { loader.eager_load }
+      assert_equal "expected file #{cli_x_rb} to define constant Cli::X, but didn't", error.message
+      assert_equal :X, error.name
     end
   end
 
@@ -50,6 +53,7 @@ class TestExceptions < LoaderTest
     error = assert_raises Zeitwerk::NameError do
       with_setup(files) {}
     end
+    assert_equal :"Foo-bar", error.name
     assert_includes error.message, "wrong constant name Foo-bar"
     assert_includes error.message, "Tell Zeitwerk to ignore this particular file."
   end
@@ -59,6 +63,7 @@ class TestExceptions < LoaderTest
     error = assert_raises Zeitwerk::NameError do
       with_setup(files) {}
     end
+    assert_equal :"Foo-bar", error.name
     assert_includes error.message, "wrong constant name Foo-bar"
     assert_includes error.message, "Tell Zeitwerk to ignore this particular directory."
   end
