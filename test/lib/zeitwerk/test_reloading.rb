@@ -137,4 +137,18 @@ class TestReloading < LoaderTest
       assert X
     end
   end
+
+  test "you can eager load again after reloading" do
+    $test_eager_load_after_reload = 0
+    files = [["x.rb", "$test_eager_load_after_reload += 1; X = 1"]]
+    with_setup(files) do
+      loader.eager_load
+      assert_equal 1, $test_eager_load_after_reload
+
+      loader.reload
+
+      loader.eager_load
+      assert_equal 2, $test_eager_load_after_reload
+    end
+  end
 end

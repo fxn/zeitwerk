@@ -306,7 +306,8 @@ module Zeitwerk
         Registry.on_unload(self)
         ExplicitNamespace.unregister(self)
 
-        @setup = false
+        @setup        = false
+        @eager_loaded = false
       end
     end
 

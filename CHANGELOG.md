@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2.2.3 (Unreleased)
+
+* Eager loading is idempotent, but now you can eager load again after reloading.
+
 ## 2.2.2 (29 November 2019)
 
 * `Zeitwerk::NameError#name` has the name of the missing constant now.
