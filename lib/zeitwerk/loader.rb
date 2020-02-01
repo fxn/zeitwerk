@@ -154,6 +154,7 @@ module Zeitwerk
 
     # Sets a tag for the loader, useful for logging.
     #
+    # @param tag [#to_s]
     # @return [void]
     def tag=(tag)
       @tag = tag.to_s
