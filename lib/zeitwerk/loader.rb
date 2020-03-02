@@ -39,7 +39,7 @@ module Zeitwerk
     # @return [<String>]
     attr_reader :preloads
 
-    # Absolute paths of files, directories, of glob patterns to be totally
+    # Absolute paths of files, directories, or glob patterns to be totally
     # ignored.
     #
     # @private
