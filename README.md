@@ -12,6 +12,7 @@
 - [File structure](#file-structure)
     - [Implicit namespaces](#implicit-namespaces)
     - [Explicit namespaces](#explicit-namespaces)
+    - [Collapsing directories](#collapsing-directories)
     - [Nested root directories](#nested-root-directories)
 - [Usage](#usage)
     - [Setup](#setup)
@@ -164,6 +165,32 @@ end
 ```
 
 An explicit namespace must be managed by one single loader. Loaders that reopen namespaces owned by other projects are responsible for loading their constants before setup.
+
+<a id="markdown-collapsing-directories" name="collapsing-directories"></a>
+### Collapsing directories
+
+Say some directories in a project exist for organizational purposes only, and you prefer not to have them as namespaces. For example, the `actions` subdirectory in the next example is not meant to represent a namespace, it is there only to group all actions related to bookings:
+
+```
+booking.rb                -> Booking
+booking/actions/create.rb -> Booking::Create
+```
+
+To make it work that way, configure Zeitwerk to collapse said directory:
+
+```ruby
+loader.collapse("booking/actions")
+```
+
+This method accepts an arbitrary number of strings or `Pathname` objects, and also an array of them.
+
+You can pass directories and glob patterns. Glob patterns are expanded when they are added, and again on each reload.
+
+To illustrate usage of glob patterns, if `actions` in the example above is part of a standardized structure, you could use a wildcard:
+
+```ruby
+loader.collapse("*/actions")
+```
 
 <a id="markdown-nested-root-directories" name="nested-root-directories"></a>
 ### Nested root directories
