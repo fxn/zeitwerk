@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 2.3.0 (Unreleased)
+## 2.3.0 (3 March 2020)
 
 * Adds support for collapsing directories.
 
