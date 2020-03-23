@@ -6,7 +6,7 @@ Gem::Specification.new do |spec|
   spec.description = <<-EOS
     Zeitwerk implements constant autoloading with Ruby semantics. Each gem
     and application may have their own independent autoloader, with its own
-    configuration, inflector, and logger. Supports autoloading, preloading,
+    configuration, inflector, and logger. Supports autoloading,
     reloading, and eager loading.
   EOS
 
