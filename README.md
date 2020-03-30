@@ -31,7 +31,9 @@
         - [Use case: Test files mixed with implementation files](#use-case-test-files-mixed-with-implementation-files)
     - [Edge cases](#edge-cases)
     - [Rules of thumb](#rules-of-thumb)
-    - [Autoloading, explicit namespaces, and debuggers](#autoloading-explicit-namespaces-and-debuggers)
+    - [Debuggers](#debuggers)
+        - [Break](#break)
+        - [Byebug](#byebug)
 - [Pronunciation](#pronunciation)
 - [Supported Ruby versions](#supported-ruby-versions)
 - [Testing](#testing)
@@ -634,14 +636,18 @@ This only affects explicit namespaces, those idioms work well for any other ordi
 
 6. In a given process, ideally, there should be at most one loader with reloading enabled. Technically, you can have more, but it may get tricky if one refers to constants managed by the other one. Do that only if you know what you are doing.
 
-<a id="markdown-autoloading-explicit-namespaces-and-debuggers" name="autoloading-explicit-namespaces-and-debuggers"></a>
-### Autoloading, explicit namespaces, and debuggers
+<a id="markdown-debuggers" name="debuggers"></a>
+### Debuggers
 
-As of this writing, Zeitwerk is unable to autoload classes or modules that belong to [explicit namespaces](#explicit-namespaces) inside debugger sessions. You'll get a `NameError`.
+<a id="markdown-break" name="break"></a>
+#### Break
 
-The root cause is that debuggers set trace points, and Zeitwerk does too to support explicit namespaces. A debugger session happens inside a trace point handler, and Ruby does not invoke other handlers from within a running handler. Therefore, the code that manages explicit namespaces in Zeitwerk does not get called by the interpreter. See [this issue](https://github.com/deivid-rodriguez/byebug/issues/564#issuecomment-499413606) for further details.
+Zeitwerk works fine with [@gsamokovarov](https://github.com/gsamokovarov)'s [Break](https://github.com/gsamokovarov/break) debugger.
 
-As a workaround, you can eager load. Zeitwerk tries hard to succeed or fail consistently both autoloading and eager loading, so switching to eager loading should not introduce any interference in your debugging logic, generally speaking.
+<a id="markdown-byebug" name="byebug"></a>
+#### Byebug
+
+Zeitwerk and [Byebug](https://github.com/deivid-rodriguez/byebug) are incompatible, classes or modules that belong to [explicit namespaces](#explicit-namespaces) are not autoloaded inside a Byebug session. See [this issue](https://github.com/deivid-rodriguez/byebug/issues/564#issuecomment-499413606) for further details.
 
 <a id="markdown-pronunciation" name="pronunciation"></a>
 ## Pronunciation
