@@ -16,8 +16,12 @@ Gem::Specification.new do |spec|
   spec.homepage = "https://github.com/fxn/zeitwerk"
   spec.files    = Dir["README.md", "MIT-LICENSE", "lib/**/*.rb"]
   spec.version  = Zeitwerk::VERSION
-
-  s.metadata["changelog_uri"] = "https://github.com/fxn/zeitwerk/blob/master/CHANGELOG.md"
+  spec.metadata = {
+    "homepage_uri"    => "https://github.com/fxn/zeitwerk",
+    "changelog_uri"   => "https://github.com/fxn/zeitwerk/blob/master/CHANGELOG.md",
+    "source_code_uri" => "https://github.com/fxn/zeitwerk",
+    "bug_tracker_uri" => "https://github.com/fxn/zeitwerk/issues"
+  }
 
   spec.required_ruby_version = ">= 2.4.4"
 end
