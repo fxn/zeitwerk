@@ -17,5 +17,7 @@ Gem::Specification.new do |spec|
   spec.files    = Dir["README.md", "MIT-LICENSE", "lib/**/*.rb"]
   spec.version  = Zeitwerk::VERSION
 
+  s.metadata["changelog_uri"] = "https://github.com/fxn/zeitwerk/blob/master/CHANGELOG.md"
+
   spec.required_ruby_version = ">= 2.4.4"
 end
