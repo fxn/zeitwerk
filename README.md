@@ -30,6 +30,7 @@
         - [Use case: The adapter pattern](#use-case-the-adapter-pattern)
         - [Use case: Test files mixed with implementation files](#use-case-test-files-mixed-with-implementation-files)
     - [Edge cases](#edge-cases)
+    - [Reopening third-party namespaces](#reopening-third-party-namespaces)
     - [Rules of thumb](#rules-of-thumb)
     - [Debuggers](#debuggers)
         - [Break](#break)
@@ -620,6 +621,42 @@ Trip = Struct.new { ... } # NOT SUPPORTED
 ```
 
 This only affects explicit namespaces, those idioms work well for any other ordinary class or module.
+
+<a id="markdown-reopening-third-party-namespaces" name="reopening-third-party-namespaces"></a>
+### Reopening third-party namespaces
+
+Projects managed by Zeitwerk can work with namespaces defined by third-party libraries. However, they have to be loaded in memory before calling `setup`.
+
+For example, let's imagine you're writing a gem that implements an adapter for [Active Job](https://guides.rubyonrails.org/active_job_basics.html) that uses AwesomeQueue as backend. By convention, your gem has to define a class called `ActiveJob::QueueAdapters::AwesomeQueue`, and it has to do so in a file with a matching path:
+
+```ruby
+# lib/active_job/queue_adapters/awesome_queue.rb
+module ActiveJob
+  module QueueAdapters
+    class AwesomeQueue
+      # ...
+    end
+  end
+end
+```
+
+It is very important that your gem _reopens_ the modules `ActiveJob` and `ActiveJob::QueueAdapters` instead of _defining_ them. Because their proper definition lives in Active Job. Furthermore, if the project reloads, you do not want any of `ActiveJob` or `ActiveJob::QueueAdapters` to be reloaded.
+
+Bottom line, Zeitwerk should not be managing those namespaces. Active Job owns them and defines them. Your gem needs to _reopen_ them.
+
+In order to do so, you need to make sure those modules are loaded before calling `setup`. For instance, in the entry file for the gem:
+
+```ruby
+# Ensure these namespaces are reopened, not defined.
+require "active_job"
+require "active_job/queue_adapters"
+
+require "zeitwerk"
+loader = Zeitwerk::Loader.for_gem
+loader.setup
+```
+
+With that, when Zeitwerk scans the file system and reaches the gem directories `lib/active_job` and `lib/active_job/queue_adapters`, it detects the corresponding modules already exist and therefore understands it does not have to manage them. The loader just descends into those directories. Eventually will reach `lib/active_job/queue_adapters/awesome_queue.rb`, and since `ActiveJob::QueueAdapters::AwesomeQueue` is unknown, Zeitwerk will manage it. Which is what happens regularly with the files in your gem. On reload, the namespaces are safe, won't be reloaded. The loader only reloads what it manages, which in this case is the adapter itself.
 
 <a id="markdown-rules-of-thumb" name="rules-of-thumb"></a>
 ### Rules of thumb
