@@ -3,6 +3,17 @@
 module Kernel
   module_function
 
+  # We are going to decorate Kerner#require with two goals.
+  #
+  # First, by intercepting Kernel#require calls, we are able to autovivify
+  # modules on required directories, and also do internal housekeeping when
+  # managed files are loaded.
+  #
+  # On the other hand, if you publish a new version of a gem that is now managed
+  # by Zeitwerk, client code can reference directly your classes and modules and
+  # should not require anything. But if someone has legacy require calls around,
+  # they will work as expected, and in a compatible way.
+  #
   # We cannot decorate with prepend + super because Kernel has already been
   # included in Object, and changes in ancestors don't get propagated into
   # already existing ancestor chains.
@@ -46,4 +57,8 @@ module Kernel
   # A workaround could be to extract the base directory from caller_locations,
   # but what if someone else decorated require_relative before us? You can't
   # really know with certainty where's the original call site in the stack.
+  #
+  # However, the main use case for require_relative is to load files from your
+  # own project. Projects managed by Zeitwerk don't do this for files managed by
+  # Zeitwerk, precisely.
 end
