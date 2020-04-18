@@ -30,4 +30,20 @@ module Kernel
       end
     end
   end
+
+  # By now, I have seen no way so far to decorate require_relative.
+  #
+  # For starters, at least in CRuby, require_relative does not delegate to
+  # require. Both require and require_relative delegate the bulk of their work
+  # to an internal C function called rb_require_safe. So, our require wrapper is
+  # not executed.
+  #
+  # On the other hand, we cannot use the aliasing technique above because
+  # require_relative receives a path relative to the directory of the file in
+  # which the call is performed. If a wrapper here invoked the original method,
+  # Ruby would resolve the relative path taking lib/zeitwerk as base directory.
+  #
+  # A workaround could be to extract the base directory from caller_locations,
+  # but what if someone else decorated require_relative before us? You can't
+  # really know with certainty where's the original call site in the stack.
 end
