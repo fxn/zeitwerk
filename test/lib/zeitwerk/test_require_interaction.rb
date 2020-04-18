@@ -74,18 +74,6 @@ class TestRequireInteraction < LoaderTest
     end
   end
 
-  test "a required top-level file is still detected as unloadable (require_relative)" do
-    files = [["user.rb", "class User; end"]]
-    with_setup(files) do
-      assert_equal true, require_relative("../../tmp/user")
-      loader.unload
-      assert !Object.const_defined?(:User, false)
-
-      loader.setup
-      assert User
-    end
-  end
-
   test "require autovivifies as needed" do
     files = [
       ["app/models/admin/user.rb", "class Admin::User; end"],
