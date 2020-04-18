@@ -103,6 +103,27 @@ class TestRequireInteraction < LoaderTest
     end
   end
 
+  test "files deep down the current visited level are recognized as managed (implicit)" do
+    files = [["foo/bar/baz/zoo/woo.rb", "Foo::Bar::Baz::Zoo::Woo = 1"]]
+    with_setup(files, load_path: ".") do
+      assert_required "foo/bar/baz/zoo/woo"
+      assert loader.unloadable_cpath?("Foo::Bar::Baz::Zoo::Woo")
+    end
+  end
+
+  test "files deep down the current visited level are recognized as managed (explicit)" do
+    files = [
+      ["foo/bar/baz/zoo.rb", "module Foo::Bar::Baz::Zoo; include Wadus; end"],
+      ["foo/bar/baz/zoo/wadus.rb", "module Foo::Bar::Baz::Zoo::Wadus; end"],
+      ["foo/bar/baz/zoo/woo.rb", "Foo::Bar::Baz::Zoo::Woo = 1"]
+    ]
+    with_setup(files, load_path: ".") do
+      assert_required "foo/bar/baz/zoo/woo"
+      assert loader.unloadable_cpath?("Foo::Bar::Baz::Zoo::Wadus")
+      assert loader.unloadable_cpath?("Foo::Bar::Baz::Zoo::Woo")
+    end
+  end
+
   test "require works well with explicit namespaces" do
     files = [
       ["hotel.rb", "class Hotel; X = true; end"],
