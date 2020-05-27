@@ -463,9 +463,10 @@ module Zeitwerk
       #
       #   require "zeitwerk"
       #   loader = Zeitwerk::Loader.new
-      #   loader.tag = File.basename(__FILE__, ".rb")
-      #   loader.inflector = Zeitwerk::GemInflector.new
-      #   loader.push_dir(__dir__)
+      #   root_file = __FILE__
+      #   loader.tag = File.basename(root_file, ".rb")
+      #   loader.inflector = Zeitwerk::GemInflector.new(root_file)
+      #   loader.push_dir(File.dirname(root_file))
       #
       # except that this method returns the same object in subsequent calls from
       # the same file, in the unlikely case the gem wants to be able to reload.
