@@ -248,7 +248,7 @@ lib/my_gem/version.rb # MyGem::VERSION
 lib/my_gem/foo.rb     # MyGem::Foo
 ```
 
-Neither a gemspec nor a version file are techincally required, this helper works as long as the code is organized using that standard structure.
+Neither a gemspec nor a version file are technically required, this helper works as long as the code is organized using that standard structure.
 
 If the entry point of your gem lives in a subdirectory of `lib` because it is reopening a namespace defined somewhere else, please use the generic API to setup the loader, and make sure you check the section [_Reopening third-party namespaces_](https://github.com/fxn/zeitwerk#reopening-third-party-namespaces) down below.
 
