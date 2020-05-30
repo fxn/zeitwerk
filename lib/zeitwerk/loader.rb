@@ -464,7 +464,7 @@ module Zeitwerk
       #   require "zeitwerk"
       #   loader = Zeitwerk::Loader.new
       #   loader.tag = File.basename(__FILE__, ".rb")
-      #   loader.inflector = Zeitwerk::GemInflector.new
+      #   loader.inflector = Zeitwerk::GemInflector.new(__FILE__)
       #   loader.push_dir(__dir__)
       #
       # except that this method returns the same object in subsequent calls from
