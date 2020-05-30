@@ -16,6 +16,8 @@
     - [Nested root directories](#nested-root-directories)
 - [Usage](#usage)
     - [Setup](#setup)
+        - [Generic](#generic)
+        - [for_gem](#for_gem)
     - [Autoloading](#autoloading)
     - [Eager loading](#eager-loading)
     - [Reloading](#reloading)
@@ -55,7 +57,9 @@ Zeitwerk is also able to reload code, which may be handy while developing web ap
 
 The gem is designed so that any project, gem dependency, application, etc. can have their own independent loader, coexisting in the same process, managing their own project trees, and independent of each other. Each loader has its own configuration, inflector, and optional logger.
 
-Internally, Zeitwerk issues `require` calls exclusively using absolute file names, so there are no costly file system lookups in `$LOAD_PATH`. Technically, the directories managed by Zeitwerk do not even need to be in `$LOAD_PATH`. Furthermore, Zeitwerk does only one single scan of the project tree, and it descends into subdirectories lazily, only if their namespaces are used.
+Internally, Zeitwerk issues `require` calls exclusively using absolute file names, so there are no costly file system lookups in `$LOAD_PATH`. Technically, the directories managed by Zeitwerk do not even need to be in `$LOAD_PATH`.
+
+Furthermore, Zeitwerk does at most one single scan of the project tree, and it descends into subdirectories lazily, only if their namespaces are used.
 
 <a id="markdown-synopsis" name="synopsis"></a>
 ## Synopsis
@@ -214,6 +218,9 @@ should define `Geolocatable`, not `Concerns::Geolocatable`.
 <a id="markdown-setup" name="setup"></a>
 ### Setup
 
+<a id="markdown-generic" name="generic"></a>
+#### Generic
+
 Loaders are ready to load code right after calling `setup` on them:
 
 ```ruby
@@ -230,9 +237,36 @@ loader.push_dir(...)
 loader.setup
 ```
 
-The loader returned by `Zeitwerk::Loader.for_gem` has the directory of the caller pushed, normally that is the absolute path of `lib`. In that sense, `for_gem` can be used also by projects with a gem structure, even if they are not technically gems. That is, you don't need a gemspec or anything.
+<a id="markdown-for_gem" name="for_gem"></a>
+#### for_gem
 
-If the main module of a library references project constants at the top-level, Zeitwerk has to be ready to load them. Their definitions, in turn, may reference other project constants. And this is recursive. Therefore, it is important that the `setup` call happens above the main module definition:
+`Zeitwerk::Loader.for_gem` is a convenience shortcut for the common case in which a gem has its entry point directly under the `lib` directory:
+
+```
+lib/my_gem.rb         # MyGem
+lib/my_gem/version.rb # MyGem::VERSION
+lib/my_gem/foo.rb     # MyGem::Foo
+```
+
+Neither a gemspec nor a version file are techincally required, this helper works as long as the code is organized using that standard structure.
+
+If the entry point of your gem lives in a subdirectory of `lib` because it is reopening a namespace defined somewhere else, please use the generic API to setup the loader, and make sure you check the section [_Reopening third-party namespaces_](https://github.com/fxn/zeitwerk#reopening-third-party-namespaces) down below.
+
+Conceptually, `for_gem` translates to:
+
+```ruby
+# lib/my_gem.rb
+
+require "zeitwerk"
+loader = Zeitwerk::Loader.new
+loader.tag = File.basename(__FILE__, ".rb")
+loader.inflector = Zeitwerk::GemInflector.new(__FILE__)
+loader.push_dir(__dir__)
+```
+
+except that this method returns the same object in subsequent calls from the same file, in the unlikely case the gem wants to be able to reload.
+
+If the main module references project constants at the top-level, Zeitwerk has to be ready to load them. Their definitions, in turn, may reference other project constants. And this is recursive. Therefore, it is important that the `setup` call happens above the main module definition:
 
 ```ruby
 # lib/my_gem.rb (main file)
@@ -247,8 +281,6 @@ module MyGem
   include MyLogger
 end
 ```
-
-Zeitwerk works internally only with absolute paths to avoid costly file searches in `$LOAD_PATH`. Indeed, the root directories do not even need to belong to `$LOAD_PATH`, everything just works by design if they don't.
 
 <a id="markdown-autoloading" name="autoloading"></a>
 ### Autoloading
