@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 2.3.1 (29 June 2020)
+
+* Saves some unnecessary allocations made internally by MRI. See [#125](https://github.com/fxn/zeitwerk/pull/125), by [@casperisfine](https://github.com/casperisfine).
+
+* Documentation improvements.
+
+* Internal code base maintenance.
+
 ## 2.3.0 (3 March 2020)
 
 * Adds support for collapsing directories.
