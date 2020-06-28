@@ -616,7 +616,7 @@ module Zeitwerk
       # $LOADED_FEATURES stores real paths since Ruby 2.4.4. We set and save the
       # real path to be able to delete it from $LOADED_FEATURES on unload, and to
       # be able to do a lookup later in Kernel#require for manual require calls.
-      realpath = File.realpath(abspath)
+      realpath = File.realpath(abspath).freeze
       parent.autoload(cname, realpath)
       if logger
         if ruby?(realpath)
@@ -719,7 +719,7 @@ module Zeitwerk
     def ls(dir)
       Dir.foreach(dir) do |basename|
         next if basename.start_with?(".")
-        abspath = File.join(dir, basename)
+        abspath = File.join(dir, basename).freeze
         yield basename, abspath unless ignored_paths.member?(abspath)
       end
     end
