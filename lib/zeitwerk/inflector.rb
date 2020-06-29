@@ -15,7 +15,7 @@ module Zeitwerk
     # @param _abspath [String]
     # @return [String]
     def camelize(basename, _abspath)
-      overrides[basename] || basename.split('_').map!(&:capitalize).join
+      overrides[basename] || basename.split('_').each(&:capitalize!).join
     end
 
     # Configures hard-coded inflections:
