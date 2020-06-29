@@ -720,7 +720,7 @@ module Zeitwerk
     # @yieldparam path [String, String]
     # @return [void]
     def ls(dir)
-      Dir.foreach(dir) do |basename|
+      Dir.each_child(dir) do |basename|
         next if basename.start_with?(".")
 
         abspath = File.join(dir, basename)
