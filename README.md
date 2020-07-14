@@ -151,7 +151,7 @@ require "active_job/queue_adapters"
 loader.push_dir("#{__dir__}/adapters", namespace: ActiveJob::QueueAdapters)
 ```
 
-your adapter can be stored directly in that directory instead of the canonical `lib/active_job/queue_adapters`.
+your adapter can be stored directly in that directory instead of the canonical `#{__dir__}/active_job/queue_adapters`.
 
 Please, note that the given namespace must be non-reloadable, though autoloaded constants in that namespace can be. That is, if you associate `app/api` with an existing `Api` module, that module should not be reloadable. However, if the project defines and autoloads the class `Api::V2::Deliveries`, that one can be reloaded.
 
