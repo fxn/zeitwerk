@@ -190,13 +190,19 @@ module Zeitwerk
     # or descendants.
     #
     # @param path [<String, Pathname>]
+    # @param namespace [Class, Module]
     # @raise [Zeitwerk::Error]
     # @return [void]
-    def push_dir(path)
+    def push_dir(path, namespace: Object)
+      # Note that Class < Module.
+      unless namespace.is_a?(Module)
+        raise Error, "#{namespace.inspect} is not a class or module object, should be"
+      end
+
       abspath = File.expand_path(path)
       if dir?(abspath)
         raise_if_conflicting_directory(abspath)
-        root_dirs[abspath] = true
+        root_dirs[abspath] = namespace
       else
         raise Error, "the root directory #{abspath} does not exist"
       end
@@ -268,7 +274,9 @@ module Zeitwerk
       mutex.synchronize do
         break if @setup
 
-        actual_root_dirs.each { |root_dir| set_autoloads_in_dir(root_dir, Object) }
+        actual_root_dirs.each do |root_dir, namespace|
+          set_autoloads_in_dir(root_dir, namespace)
+        end
         do_preload
 
         @setup = true
@@ -368,8 +376,11 @@ module Zeitwerk
       mutex.synchronize do
         break if @eager_loaded
 
-        queue = actual_root_dirs.reject { |dir| eager_load_exclusions.member?(dir) }
-        queue.map! { |dir| [Object, dir] }
+        queue = []
+        actual_root_dirs.each do |root_dir, namespace|
+          queue << [namespace, root_dir] unless eager_load_exclusions.member?(root_dir)
+        end
+
         while to_eager_load = queue.shift
           namespace, dir = to_eager_load
 
@@ -498,7 +509,7 @@ module Zeitwerk
 
     # @return [<String>]
     def actual_root_dirs
-      root_dirs.keys.delete_if do |root_dir|
+      root_dirs.reject do |root_dir, _namespace|
         !dir?(root_dir) || ignored_paths.member?(root_dir)
       end
     end

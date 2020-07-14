@@ -139,6 +139,22 @@ app/models/user.rb                        -> User
 app/controllers/admin/users_controller.rb -> Admin::UsersController
 ```
 
+Alternatively, you can associate a custom namespace to a root directory by passing a class or module object in the optional `namespace` keyword argument.
+
+For example, Active Job queue adapters have to define a constant after their name in `ActiveJob::QueueAdapters`.
+
+So, if you declare
+
+```ruby
+require "active_job"
+require "active_job/queue_adapters"
+loader.push_dir("#{__dir__}/adapters", namespace: ActiveJob::QueueAdapters)
+```
+
+your adapter can be stored directly in that directory instead of the canonical `lib/active_job/queue_adapters`.
+
+Please, note that the given namespace must be non-reloadable, though autoloaded constants in that namespace can be. That is, if you associate `app/api` with an existing `Api` module, that module should not be reloadable. However, if the project defines and autoloads the class `Api::V2::Deliveries`, that one can be reloaded.
+
 <a id="markdown-implicit-namespaces" name="implicit-namespaces"></a>
 ### Implicit namespaces
 

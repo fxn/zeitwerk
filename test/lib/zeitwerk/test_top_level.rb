@@ -1,17 +1,33 @@
 require "test_helper"
 
 class TestTopLevel < LoaderTest
-  test "autoloads a simple constant in a top-level file" do
+  module Namespace; end
+
+  test "autoloads a simple constant in a top-level file (Object)" do
     files = [["x.rb", "X = true"]]
     with_setup(files) do
       assert X
     end
   end
 
-  test "autoloads a simple class in a top-level file" do
+  test "autoloads a simple constant in a top-level file (Namespace)" do
+    files = [["x.rb", "#{Namespace}::X = true"]]
+    with_setup(files, namespace: Namespace) do
+      assert Namespace::X
+    end
+  end
+
+  test "autoloads a simple class in a top-level file (Object)" do
     files = [["app/models/user.rb", "class User; end"]]
     with_setup(files, dirs: "app/models") do
       assert User
+    end
+  end
+
+  test "autoloads a simple class in a top-level file (Namespace)" do
+    files = [["app/models/user.rb", "class #{Namespace}::User; end"]]
+    with_setup(files, namespace: Namespace, dirs: "app/models") do
+      assert Namespace::User
     end
   end
 

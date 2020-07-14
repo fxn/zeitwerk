@@ -2,6 +2,8 @@ require "test_helper"
 require "fileutils"
 
 class TestReloading < LoaderTest
+  module Namespace; end
+
   test "enabling reloading after setup raises" do
     e = assert_raises(Zeitwerk::Error) do
       loader = Zeitwerk::Loader.new
@@ -18,7 +20,7 @@ class TestReloading < LoaderTest
     assert loader.reloading_enabled?
   end
 
-  test "reloading works if the flag is set" do
+  test "reloading works if the flag is set (Object)" do
     files = [
       ["x.rb", "X = 1"],         # top-level
       ["y.rb", "module Y; end"], # explicit namespace
@@ -47,6 +49,40 @@ class TestReloading < LoaderTest
       assert Z.object_id != z_object_id
 
       assert_equal 2, X
+    end
+  end
+
+  test "reloading works if the flag is set (Namespace)" do
+    files = [
+      ["x.rb", "#{Namespace}::X = 1"],         # top-level
+      ["y.rb", "module #{Namespace}::Y; end"], # explicit namespace
+      ["y/a.rb", "#{Namespace}::Y::A = 1"],
+      ["z/a.rb", "#{Namespace}::Z::A = 1"]     # implicit namespace
+    ]
+    with_setup(files, namespace: Namespace) do
+      assert_equal 1, Namespace::X
+      assert_equal 1, Namespace::Y::A
+      assert_equal 1, Namespace::Z::A
+
+      ns_object_id = Namespace.object_id
+      y_object_id  = Namespace::Y.object_id
+      z_object_id  = Namespace::Z.object_id
+
+      File.write("x.rb", "#{Namespace}::X = 2")
+      File.write("y/a.rb", "#{Namespace}::Y::A = 2")
+      File.write("z/a.rb", "#{Namespace}::Z::A = 2")
+
+      loader.reload
+
+      assert_equal 2, Namespace::X
+      assert_equal 2, Namespace::Y::A
+      assert_equal 2, Namespace::Z::A
+
+      assert Namespace.object_id    == ns_object_id
+      assert Namespace::Y.object_id != y_object_id
+      assert Namespace::Z.object_id != z_object_id
+
+      assert_equal 2, Namespace::X
     end
   end
 

@@ -2,7 +2,9 @@ require "test_helper"
 require "fileutils"
 
 class TestEagerLoad < LoaderTest
-  test "eager loads independent files" do
+  module Namespace; end
+
+  test "eager loads independent files (Object)" do
     loaders = [loader, new_loader(setup: false)]
 
     $tel0 = $tel1 = false
@@ -15,6 +17,31 @@ class TestEagerLoad < LoaderTest
     ]
     with_files(files) do
       loaders[0].push_dir("lib0")
+      loaders[0].setup
+
+      loaders[1].push_dir("lib1")
+      loaders[1].setup
+
+      Zeitwerk::Loader.eager_load_all
+
+      assert $tel0
+      assert $tel1
+    end
+  end
+
+  test "eager loads independent files (Namespace)" do
+    loaders = [loader, new_loader(setup: false)]
+
+    $tel0 = $tel1 = false
+
+    files = [
+      ["lib0/app0.rb", "module #{Namespace}::App0; end"],
+      ["lib0/app0/foo.rb", "class #{Namespace}::App0::Foo; $tel0 = true; end"],
+      ["lib1/app1/foo.rb", "class App1::Foo; end"],
+      ["lib1/app1/foo/bar/baz.rb", "class App1::Foo::Bar::Baz; $tel1 = true; end"]
+    ]
+    with_files(files) do
+      loaders[0].push_dir("lib0", namespace: Namespace)
       loaders[0].setup
 
       loaders[1].push_dir("lib1")
