@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 2.4.0 (15 July 2020)
+
+* `Zeitwerk::Loader#push_dir` supports an optional `namespace` keyword argument. Pass a class or module object if you want the given root directory to be associated with it instead of `Object`. Said class or module object cannot be reloadable.
+
+* The default inflector is even more performant.
+
 ## 2.3.1 (29 June 2020)
 
 * Saves some unnecessary allocations made internally by MRI. See [#125](https://github.com/fxn/zeitwerk/pull/125), by [@casperisfine](https://github.com/casperisfine).
