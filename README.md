@@ -202,7 +202,7 @@ booking/actions/create.rb -> Booking::Create
 To make it work that way, configure Zeitwerk to collapse said directory:
 
 ```ruby
-loader.collapse("booking/actions")
+loader.collapse("#{__dir__}/booking/actions")
 ```
 
 This method accepts an arbitrary number of strings or `Pathname` objects, and also an array of them.
@@ -212,7 +212,7 @@ You can pass directories and glob patterns. Glob patterns are expanded when they
 To illustrate usage of glob patterns, if `actions` in the example above is part of a standardized structure, you could use a wildcard:
 
 ```ruby
-loader.collapse("*/actions")
+loader.collapse("#{__dir__}/*/actions")
 ```
 
 <a id="markdown-nested-root-directories" name="nested-root-directories"></a>
