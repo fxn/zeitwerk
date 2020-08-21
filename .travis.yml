@@ -8,7 +8,9 @@ rvm:
   - ruby-head
   - jruby-head
   - truffleruby
+  - truffleruby-head
 matrix:
   allow_failures:
     - rvm: jruby-head
+    - rvm: truffleruby-head
     - rvm: truffleruby
