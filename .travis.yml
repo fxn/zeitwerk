@@ -12,5 +12,4 @@ rvm:
 matrix:
   allow_failures:
     - rvm: jruby-head
-    - rvm: truffleruby-head
     - rvm: truffleruby
