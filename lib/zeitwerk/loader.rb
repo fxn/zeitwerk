@@ -18,6 +18,26 @@ module Zeitwerk
     # @return [#call, #debug, nil]
     attr_accessor :logger
 
+    # Enable loading modules using index files in addition to searching the normal location
+    #
+    # The pattern for the file you want to use for an index file ('index', '~index', '*', '*_module')
+    #
+    # Setting a value will cause ZeitWerk to look for a module under the given name in a module sub-folder
+    # in addition to the normal location. i.e. When searching for the `Hello` module it will look in hello/index.rb
+    # in addition to hello.rb.
+    #
+    # The special character '*' is replaced with the module name. A value of '*' will cause ZeitWerk to search
+    # for 'hello/hello.rb' and a value of '*_module' will cause ZeitWerk to search for hello/hello_module.rb
+    #
+    # These two can be comined, for exmple a value of '*_module' will load `Hello` from
+    # hello/hello_module.rb
+    #
+    # The nil default does not perform lookups for an index file
+    #
+    # @private
+    # @return [String]
+    attr_accessor :index_filespec
+
     # Absolute paths of the root directories. Stored in a hash to preserve
     # order, easily handle duplicates, and also be able to have a fast lookup,
     # needed for detecting nested paths.
@@ -517,9 +537,11 @@ module Zeitwerk
     # @param dir [String]
     # @param parent [Module]
     # @return [void]
-    def set_autoloads_in_dir(dir, parent)
+    def set_autoloads_in_dir(dir, parent, current_file = nil)
       ls(dir) do |basename, abspath|
         begin
+          next if abspath == current_file
+
           if ruby?(basename)
             basename[-3..-1] = ''
             cname = inflector.camelize(basename, abspath).to_sym
@@ -654,6 +676,14 @@ module Zeitwerk
     # @return [String, nil]
     def autoload_for?(parent, cname)
       strict_autoload_path(parent, cname) || Registry.inception?(cpath(parent, cname))
+    end
+
+    def index_file_for_autoloaded_dir(parent, cname, dir)
+      return unless index_filespec
+
+      index_file = index_filespec.gsub('*', File.basename(dir)) + '.rb'
+      index_path = File.join(dir, index_file)
+      index_path
     end
 
     # The autoload? predicate takes into account the ancestor chain of the
