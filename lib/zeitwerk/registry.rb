@@ -7,14 +7,14 @@ module Zeitwerk
       # them from being garbage collected.
       #
       # @private
-      # @return [<Zeitwerk::Loader>]
+      # @sig Array[Zeitwerk::Loader]
       attr_reader :loaders
 
       # Registers loaders created with `for_gem` to make the method idempotent
       # in case of reload.
       #
       # @private
-      # @return [{String => Zeitwerk::Loader}]
+      # @sig Hash[String, Zeitwerk::Loader]
       attr_reader :loaders_managing_gems
 
       # Maps real paths to the loaders responsible for them.
@@ -23,7 +23,7 @@ module Zeitwerk
       # invoke callbacks and autovivify modules.
       #
       # @private
-      # @return [{String => Zeitwerk::Loader}]
+      # @sig Hash[String, Zeitwerk::Loader]
       attr_reader :autoloads
 
       # This hash table addresses an edge case in which an autoload is ignored.
@@ -62,14 +62,13 @@ module Zeitwerk
       #   end
       #
       # @private
-      # @return [{String => (String, Zeitwerk::Loader)}]
+      # @sig Hash[String, [String, Zeitwerk::Loader]]
       attr_reader :inceptions
 
       # Registers a loader.
       #
       # @private
-      # @param loader [Zeitwerk::Loader]
-      # @return [void]
+      # @sig (Zeitwerk::Loader) -> void
       def register_loader(loader)
         loaders << loader
       end
@@ -78,8 +77,7 @@ module Zeitwerk
       # file. That is how Zeitwerk::Loader.for_gem is idempotent.
       #
       # @private
-      # @param root_file [String]
-      # @return [Zeitwerk::Loader]
+      # @sig (String) -> Zeitwerk::Loader
       def loader_for_gem(root_file)
         loaders_managing_gems[root_file] ||= begin
           Loader.new.tap do |loader|
@@ -91,32 +89,25 @@ module Zeitwerk
       end
 
       # @private
-      # @param loader [Zeitwerk::Loader]
-      # @param realpath [String]
-      # @return [void]
+      # @sig (Zeitwerk::Loader, String) -> String
       def register_autoload(loader, realpath)
         autoloads[realpath] = loader
       end
 
       # @private
-      # @param realpath [String]
-      # @return [void]
+      # @sig (String) -> void
       def unregister_autoload(realpath)
         autoloads.delete(realpath)
       end
 
       # @private
-      # @param cpath [String]
-      # @param realpath [String]
-      # @param loader [Zeitwerk::Loader]
-      # @return [void]
+      # @sig (String, String, Zeitwerk::Loader) -> void
       def register_inception(cpath, realpath, loader)
         inceptions[cpath] = [realpath, loader]
       end
 
       # @private
-      # @param cpath [String]
-      # @return [String, nil]
+      # @sig (String) -> String?
       def inception?(cpath)
         if pair = inceptions[cpath]
           pair.first
@@ -124,15 +115,13 @@ module Zeitwerk
       end
 
       # @private
-      # @param path [String]
-      # @return [Zeitwerk::Loader, nil]
+      # @sig (String) -> Zeitwerk::Loader?
       def loader_for(path)
         autoloads[path]
       end
 
       # @private
-      # @param loader [Zeitwerk::Loader]
-      # @return [void]
+      # @sig (Zeitwerk::Loader) -> void
       def on_unload(loader)
         autoloads.delete_if { |_path, object| object == loader }
         inceptions.delete_if { |_cpath, (_path, object)| object == loader }

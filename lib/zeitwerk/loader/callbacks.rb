@@ -4,8 +4,7 @@ module Zeitwerk::Loader::Callbacks
   # Invoked from our decorated Kernel#require when a managed file is autoloaded.
   #
   # @private
-  # @param file [String]
-  # @return [void]
+  # @sig (String) -> void
   def on_file_autoloaded(file)
     cref = autoloads.delete(file)
     to_unload[cpath(*cref)] = [file, cref] if reloading_enabled?
@@ -22,8 +21,7 @@ module Zeitwerk::Loader::Callbacks
   # autoloaded.
   #
   # @private
-  # @param dir [String]
-  # @return [void]
+  # @sig (String) -> void
   def on_dir_autoloaded(dir)
     # Module#autoload does not serialize concurrent requires, and we handle
     # directories ourselves, so the callback needs to account for concurrency.
@@ -59,8 +57,7 @@ module Zeitwerk::Loader::Callbacks
   # subdirectories, we descend into them now.
   #
   # @private
-  # @param namespace [Module]
-  # @return [void]
+  # @sig (Module) -> void
   def on_namespace_loaded(namespace)
     if subdirs = lazy_subdirs.delete(real_mod_name(namespace))
       subdirs.each do |subdir|

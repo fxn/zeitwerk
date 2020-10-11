@@ -14,24 +14,22 @@ module Zeitwerk
       # the file system, to the loader responsible for them.
       #
       # @private
-      # @return [{String => Zeitwerk::Loader}]
+      # @sig Hash[String, Zeitwerk::Loader]
       attr_reader :cpaths
 
       # @private
-      # @return [Mutex]
+      # @sig Mutex
       attr_reader :mutex
 
       # @private
-      # @return [TracePoint]
+      # @sig TracePoint
       attr_reader :tracer
 
       # Asserts `cpath` corresponds to an explicit namespace for which `loader`
       # is responsible.
       #
       # @private
-      # @param cpath [String]
-      # @param loader [Zeitwerk::Loader]
-      # @return [void]
+      # @sig (String, Zeitwerk::Loader) -> void
       def register(cpath, loader)
         mutex.synchronize do
           cpaths[cpath] = loader
@@ -42,19 +40,22 @@ module Zeitwerk
       end
 
       # @private
-      # @param loader [Zeitwerk::Loader]
-      # @return [void]
+      # @sig (Zeitwerk::Loader) -> void
       def unregister(loader)
         cpaths.delete_if { |_cpath, l| l == loader }
         disable_tracer_if_unneeded
       end
 
+      private
+
+      # @sig () -> void
       def disable_tracer_if_unneeded
         mutex.synchronize do
           tracer.disable if cpaths.empty?
         end
       end
 
+      # @sig (TracePoint) -> void
       def tracepoint_class_callback(event)
         # If the class is a singleton class, we won't do anything with it so we
         # can bail out immediately. This is several orders of magnitude faster

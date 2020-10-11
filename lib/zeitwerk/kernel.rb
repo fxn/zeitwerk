@@ -19,8 +19,7 @@ module Kernel
   # already existing ancestor chains.
   alias_method :zeitwerk_original_require, :require
 
-  # @param path [String]
-  # @return [Boolean]
+  # @sig (String) -> true | false
   def require(path)
     if loader = Zeitwerk::Registry.loader_for(path)
       if path.end_with?(".rb")
