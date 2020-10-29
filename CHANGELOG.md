@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2.4.1 (29 October 2020)
+
+* Use `__send__` instead of `send` internally.
+
 ## 2.4.0 (15 July 2020)
 
 * `Zeitwerk::Loader#push_dir` supports an optional `namespace` keyword argument. Pass a class or module object if you want the given root directory to be associated with it instead of `Object`. Said class or module object cannot be reloadable.
