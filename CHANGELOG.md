@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 2.4.2 (Unreleased)
+## 2.4.2 (27 November 2020)
 
 * Implements `Zeitwerk::Loader#on_load`, which allows you to configure blocks of code to be executed after a certain class or module have been loaded:
 
