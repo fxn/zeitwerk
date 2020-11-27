@@ -1,5 +1,23 @@
 # CHANGELOG
 
+## 2.4.2 (Unreleased)
+
+* Implements `Zeitwerk::Loader#on_load`, which allows you to configure blocks of code to be executed after a certain class or module have been loaded:
+
+      ```ruby
+      # config/environments/development.rb
+      loader.on_load("SomeApiClient") do
+        SomeApiClient.endpoint = "https://api.dev"
+      end
+
+      # config/environments/production.rb
+      loader.on_load("SomeApiClient") do
+        SomeApiClient.endpoint = "https://api.prod"
+      end
+      ```
+
+      See the [documentation](https://github.com/fxn/zeitwerk/blob/master/README.md#the-on_load-callback) for further details.
+
 ## 2.4.1 (29 October 2020)
 
 * Use `__send__` instead of `send` internally.

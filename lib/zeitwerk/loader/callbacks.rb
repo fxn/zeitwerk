@@ -6,15 +6,19 @@ module Zeitwerk::Loader::Callbacks
   # @private
   # @sig (String) -> void
   def on_file_autoloaded(file)
-    cref = autoloads.delete(file)
-    to_unload[cpath(*cref)] = [file, cref] if reloading_enabled?
+    cref  = autoloads.delete(file)
+    cpath = cpath(*cref)
+
+    to_unload[cpath] = [file, cref] if reloading_enabled?
     Zeitwerk::Registry.unregister_autoload(file)
 
     if logger && cdef?(*cref)
-      log("constant #{cpath(*cref)} loaded from file #{file}")
+      log("constant #{cpath} loaded from file #{file}")
     elsif !cdef?(*cref)
-      raise Zeitwerk::NameError.new("expected file #{file} to define constant #{cpath(*cref)}, but didn't", cref.last)
+      raise Zeitwerk::NameError.new("expected file #{file} to define constant #{cpath}, but didn't", cref.last)
     end
+
+    run_on_load_callbacks(cpath)
   end
 
   # Invoked from our decorated Kernel#require when a managed directory is
@@ -37,9 +41,10 @@ module Zeitwerk::Loader::Callbacks
     mutex2.synchronize do
       if cref = autoloads.delete(dir)
         autovivified_module = cref[0].const_set(cref[1], Module.new)
-        log("module #{autovivified_module.name} autovivified from directory #{dir}") if logger
+        cpath = autovivified_module.name
+        log("module #{cpath} autovivified from directory #{dir}") if logger
 
-        to_unload[autovivified_module.name] = [dir, cref] if reloading_enabled?
+        to_unload[cpath] = [dir, cref] if reloading_enabled?
 
         # We don't unregister `dir` in the registry because concurrent threads
         # wouldn't find a loader associated to it in Kernel#require and would
@@ -48,6 +53,8 @@ module Zeitwerk::Loader::Callbacks
         autoloaded_dirs << dir
 
         on_namespace_loaded(autovivified_module)
+
+        run_on_load_callbacks(cpath)
       end
     end
   end
@@ -64,5 +71,16 @@ module Zeitwerk::Loader::Callbacks
         set_autoloads_in_dir(subdir, namespace)
       end
     end
+  end
+
+  private
+
+  # @sig (String) -> void
+  def run_on_load_callbacks(cpath)
+    # Very common, do not even compute a hash code.
+    return if on_load_callbacks.empty?
+
+    callbacks = reloading_enabled? ? on_load_callbacks[cpath] : on_load_callbacks.delete(cpath)
+    callbacks.each(&:call) if callbacks
   end
 end

@@ -129,6 +129,9 @@ module Zeitwerk
     # @sig Set[String]
     attr_reader :eager_load_exclusions
 
+    # User-oriented callbacks to be fired when a constant is loaded.
+    attr_reader :on_load_callbacks
+
     # @private
     # @sig Mutex
     attr_reader :mutex
@@ -155,6 +158,7 @@ module Zeitwerk
       @to_unload              = {}
       @lazy_subdirs           = {}
       @eager_load_exclusions  = Set.new
+      @on_load_callbacks      = {}
 
       # TODO: find a better name for these mutexes.
       @mutex        = Mutex.new
@@ -259,6 +263,24 @@ module Zeitwerk
       mutex.synchronize do
         collapse_glob_patterns.merge(glob_patterns)
         collapse_dirs.merge(expand_glob_patterns(glob_patterns))
+      end
+    end
+
+    # Configure a block to be invoked once a certain constant path is loaded.
+    # Supports multiple callbacks, and if there are many, they are executed in
+    # the order in which they were defined.
+    #
+    #   loader.on_load("SomeApiClient") do
+    #     SomeApiClient.endpoint = "https://api.dev"
+    #   end
+    #
+    # @raise [TypeError]
+    # @sig (String) { () -> void } -> void
+    def on_load(cpath, &block)
+      raise TypeError, "on_load only accepts strings" unless cpath.is_a?(String)
+
+      mutex.synchronize do
+        (on_load_callbacks[cpath] ||= []) << block
       end
     end
 
