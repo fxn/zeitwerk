@@ -25,6 +25,7 @@
         - [Zeitwerk::Inflector](#zeitwerkinflector)
         - [Zeitwerk::GemInflector](#zeitwerkgeminflector)
         - [Custom inflector](#custom-inflector)
+    - [The on_load callback](#the-on_load-callback)
     - [Logging](#logging)
         - [Loader tag](#loader-tag)
     - [Ignoring parts of the project](#ignoring-parts-of-the-project)
@@ -501,6 +502,52 @@ class MyGem::Inflector < Zeitwerk::GemInflector
   # ...
 end
 ```
+
+<a id="markdown-the-on_load-callback" name="the-on_load-callback"></a>
+### The on_load callback
+
+The usual place to run something when a file is loaded is the file itself. However, sometimes you'd like to be called, and this is possible with the `on_load` callback.
+
+For example, let's imagine this class belongs to a Rails application:
+
+```ruby
+class SomeApiClient
+  class << self
+    attr_accessor :endpoint
+  end
+end
+```
+
+With `on_load`, it is easy to schedule code at boot time that initializes `endpoint` according to the configuration:
+
+```ruby
+# config/environments/development.rb
+loader.on_load("SomeApiClient") do
+  SomeApiClient.endpoint = "https://api.dev"
+end
+
+# config/environments/production.rb
+loader.on_load("SomeApiClient") do
+  SomeApiClient.endpoint = "https://api.prod"
+end
+```
+
+Uses cases:
+
+* Doing something with an autoloadable class or module in a Rails application during initialization, in a way that plays well with reloading. As in the previous example.
+* Delaying the execution of the block until the class is loaded for performance.
+* Delaying the execution of the block until the class is loaded because it follows the adapter pattern and better not to load the class if the user does not need it.
+* Etc.
+
+However, let me stress that the easiest way to accomplish that is to write whatever you have to do in the actual target file. `on_load` use cases are edgy, use it only if appropriate.
+
+`on_load` receives the name of the target class or module as a string. The given block is executed every time its corresponding file is loaded. That includes reloads.
+
+Multiple callbacks on the same target are supported, and they run in order of definition.
+
+The block is executed once the loader has loaded the target. In particular, if the target was already loaded when the callback is defined, the block won't run. But if you reload and load the target again, then it will. Normally, you'll want to define `on_load` callbacks before `setup`.
+
+Defining a callback for a target not managed by the receiver is not an error, the block simply won't ever be executed.
 
 <a id="markdown-logging" name="logging"></a>
 ### Logging

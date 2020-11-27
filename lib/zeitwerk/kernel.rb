@@ -28,6 +28,7 @@ module Kernel
         end
       else
         loader.on_dir_autoloaded(path)
+        true
       end
     else
       zeitwerk_original_require(path).tap do |required|
