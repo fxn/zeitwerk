@@ -8,13 +8,13 @@
   # config/environments/development.rb
   loader.on_load("SomeApiClient") do
     SomeApiClient.endpoint = "https://api.dev"
-  
+
   # config/environments/production.rb
   loader.on_load("SomeApiClient") do
     SomeApiClient.endpoint = "https://api.prod"
   end
   ```
-  
+
   See the [documentation](https://github.com/fxn/zeitwerk/blob/master/README.md#the-on_load-callback) for further details.
 
 ## 2.4.1 (29 October 2020)
