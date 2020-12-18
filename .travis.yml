@@ -1,4 +1,7 @@
 language: ruby
+arch:
+  - amd64
+  - ppc64le
 rvm:
   - 2.4.4
   - 2.4
@@ -13,3 +16,9 @@ matrix:
   allow_failures:
     - rvm: jruby-head
     - rvm: truffleruby
+  exclude:
+    - arch: ppc64le
+      rvm: truffleruby
+    - arch: ppc64le
+      rvm: truffleruby-head
+      
