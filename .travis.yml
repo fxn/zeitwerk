@@ -15,11 +15,12 @@ rvm:
   - truffleruby-head
 matrix:
   allow_failures:
+    # ruby-head is here because of https://github.com/seattlerb/minitest/pull/862,
+    # thanks to @bogdanvlviv for the pointer.
+    - rvm: ruby-head
     - rvm: jruby-head
-    - rvm: truffleruby
   exclude:
     - arch: ppc64le
       rvm: truffleruby
     - arch: ppc64le
       rvm: truffleruby-head
-
