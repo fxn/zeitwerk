@@ -18,7 +18,6 @@ matrix:
     # thanks to @bogdanvlviv for the pointer.
     - rvm: ruby-head
     - rvm: jruby-head
-    - rvm: truffleruby
   exclude:
     - arch: ppc64le
       rvm: truffleruby
