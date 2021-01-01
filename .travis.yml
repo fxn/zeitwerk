@@ -8,6 +8,7 @@ rvm:
   - 2.5
   - 2.6
   - 2.7
+  - 3.0
   - ruby-head
   - jruby-head
   - truffleruby
@@ -21,4 +22,4 @@ matrix:
       rvm: truffleruby
     - arch: ppc64le
       rvm: truffleruby-head
-      
+
