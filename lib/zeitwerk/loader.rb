@@ -717,6 +717,8 @@ module Zeitwerk
 
     # @sig (Module, Symbol) -> String
     if Symbol.method_defined?(:name)
+      # Symbol#name was introduced in Ruby 3.0. It returns always the same
+      # frozen object, so we may save a few string allocations.
       def cpath(parent, cname)
         Object == parent ? cname.name : "#{real_mod_name(parent)}::#{cname.name}"
       end
