@@ -717,7 +717,7 @@ module Zeitwerk
 
     # @sig (Module, Symbol) -> String
     def cpath(parent, cname)
-      parent.equal?(Object) ? cname.to_s : "#{real_mod_name(parent)}::#{cname}"
+      Object == parent ? cname.to_s : "#{real_mod_name(parent)}::#{cname}"
     end
 
     # @sig (String) { (String, String) -> void } -> void
