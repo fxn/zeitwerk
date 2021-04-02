@@ -38,4 +38,16 @@ class TesPushDir < LoaderTest
     e = assert_raises(Zeitwerk::Error) { loader.push_dir(".", namespace: :foo) }
     assert_equal ":foo is not a class or module object, should be", e.message
   end
+
+  test "resolve the real path even with resolve_symlinks = false" do
+    files = [["real/x.rb", "X = true"]]
+    with_files(files) do
+      FileUtils.ln_s("real", "symlink")
+      loader.resolve_symlinks = false
+      loader.push_dir("symlink")
+      loader.setup
+
+      assert_equal File.realpath("real/x.rb"), Object.autoload?(:X)
+    end
+  end
 end

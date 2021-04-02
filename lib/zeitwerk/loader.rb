@@ -18,6 +18,9 @@ module Zeitwerk
     # @sig #call | #debug | nil
     attr_accessor :logger
 
+    # @sig Boolean
+    attr_accessor :resolve_symlinks
+
     # Absolute paths of the root directories. Stored in a hash to preserve
     # order, easily handle duplicates, and also be able to have a fast lookup,
     # needed for detecting nested paths.
@@ -159,6 +162,7 @@ module Zeitwerk
       @lazy_subdirs           = {}
       @eager_load_exclusions  = Set.new
       @on_load_callbacks      = {}
+      @resolve_symlinks       = true
 
       # TODO: find a better name for these mutexes.
       @mutex        = Mutex.new
@@ -202,11 +206,17 @@ module Zeitwerk
       end
 
       abspath = File.expand_path(path)
+      begin
+        abspath = File.realpath(abspath)
+      rescue Errno::ENOENT
+        raise Error, "the root directory #{abspath} does not exist"
+      end
+
       if dir?(abspath)
         raise_if_conflicting_directory(abspath)
         root_dirs[abspath] = namespace
       else
-        raise Error, "the root directory #{abspath} does not exist"
+        raise Error, "#{abspath} is not a directory"
       end
     end
 
@@ -405,7 +415,7 @@ module Zeitwerk
             next if eager_load_exclusions.member?(abspath)
 
             if ruby?(abspath)
-              if cref = autoloads[File.realpath(abspath)]
+              if cref = autoloads[realpath(abspath)]
                 cref[0].const_get(cref[1], false)
               end
             elsif dir?(abspath) && !root_dirs.key?(abspath)
@@ -632,7 +642,7 @@ module Zeitwerk
       #
       # We freeze realpath because that saves allocations in Module#autoload.
       # See #125.
-      realpath = File.realpath(abspath).freeze
+      realpath = realpath(abspath).freeze
       parent.autoload(cname, realpath)
       if logger
         if ruby?(realpath)
@@ -788,6 +798,15 @@ module Zeitwerk
     # @sig (String) -> void
     def register_explicit_namespace(cpath)
       ExplicitNamespace.register(cpath, self)
+    end
+
+    # @sig (String) -> String
+    def realpath(path)
+      if @resolve_symlinks
+        File.realpath(path)
+      else
+        path
+      end
     end
 
     # @sig (String) -> void
