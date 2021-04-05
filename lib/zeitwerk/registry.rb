@@ -90,20 +90,20 @@ module Zeitwerk
 
       # @private
       # @sig (Zeitwerk::Loader, String) -> String
-      def register_autoload(loader, realpath)
-        autoloads[realpath] = loader
+      def register_autoload(loader, abspath)
+        autoloads[abspath] = loader
       end
 
       # @private
       # @sig (String) -> void
-      def unregister_autoload(realpath)
-        autoloads.delete(realpath)
+      def unregister_autoload(abspath)
+        autoloads.delete(abspath)
       end
 
       # @private
       # @sig (String, String, Zeitwerk::Loader) -> void
-      def register_inception(cpath, realpath, loader)
-        inceptions[cpath] = [realpath, loader]
+      def register_inception(cpath, abspath, loader)
+        inceptions[cpath] = [abspath, loader]
       end
 
       # @private

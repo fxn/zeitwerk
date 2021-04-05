@@ -12,7 +12,8 @@ module Kernel
   # On the other hand, if you publish a new version of a gem that is now managed
   # by Zeitwerk, client code can reference directly your classes and modules and
   # should not require anything. But if someone has legacy require calls around,
-  # they will work as expected, and in a compatible way.
+  # they will work as expected, and in a compatible way. This feature is by now
+  # EXPERIMENTAL and UNDOCUMENTED.
   #
   # We cannot decorate with prepend + super because Kernel has already been
   # included in Object, and changes in ancestors don't get propagated into
@@ -33,9 +34,9 @@ module Kernel
     else
       zeitwerk_original_require(path).tap do |required|
         if required
-          realpath = $LOADED_FEATURES.last
-          if loader = Zeitwerk::Registry.loader_for(realpath)
-            loader.on_file_autoloaded(realpath)
+          abspath = $LOADED_FEATURES.last
+          if loader = Zeitwerk::Registry.loader_for(abspath)
+            loader.on_file_autoloaded(abspath)
           end
         end
       end

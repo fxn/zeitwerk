@@ -28,7 +28,7 @@ Note that Zeitwerk does not deal with file or directory objects, only with paths
 * Internally, you have to use exclusively absolute file names. In particular, any `autoload` or `require` calls have to be issued using absolute paths to avoid `$LOAD_PATH` walks.
 * It is forbidden to do any sort of directory lookups resolving relative file names.
 * The only directory walks allowed are the one needed to set autoloads. One pass, and as lazy as possible (do not descend into subdirectories until necessary).
-* File and directory names should be kept as entered as much as possible so that logging prints what the user expects. Convert to real paths only in code that needs coordination with `Kernel#require`.
+* Root paths are converted to real paths to play well with the experimental `Kernel#require` decoration.
 
 ## Class and module names
 

@@ -292,4 +292,21 @@ class TestRubyCompatibility < LoaderTest
       end
     end
   end
+
+  # We rely on this fact when checking $LOADED_FEATURES in Kernel#require, and
+  # compute the real path of root directories due to this.
+  test "$LOADED_FEATURES stores the real path of the root directory part" do
+    on_teardown { $LOADED_FEATURES.pop }
+
+    files = [["real/real_x.rb", ""]]
+    with_files(files) do
+      FileUtils.ln_s("real", "sym")
+      FileUtils.ln_s(File.expand_path("real/real_x.rb"), "sym/sym_x.rb")
+
+      with_load_path("sym") do
+        assert require("sym_x")
+        assert $LOADED_FEATURES.last.end_with?("real/sym_x.rb")
+      end
+    end
+  end
 end

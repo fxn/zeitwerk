@@ -196,8 +196,12 @@ module Zeitwerk
 
       abspath = File.expand_path(path)
       if dir?(abspath)
-        raise_if_conflicting_directory(abspath)
-        root_dirs[abspath] = namespace
+        # Ruby resolves relative requires against $LOAD_PATH directories using
+        # their real path. We convert to real paths to be able to match them in
+        # $LOADED_FEATURES.
+        realpath = File.realpath(abspath)
+        raise_if_conflicting_directory(realpath)
+        root_dirs[realpath] = namespace
       else
         raise Error, "the root directory #{abspath} does not exist"
       end
@@ -299,21 +303,21 @@ module Zeitwerk
         # is enough.
         unloaded_files = Set.new
 
-        autoloads.each do |realpath, (parent, cname)|
+        autoloads.each do |abspath, (parent, cname)|
           if parent.autoload?(cname)
             unload_autoload(parent, cname)
           else
             # Could happen if loaded with require_relative. That is unsupported,
             # and the constant path would escape unloadable_cpath? This is just
             # defensive code to clean things up as much as we are able to.
-            unload_cref(parent, cname)   if cdef?(parent, cname)
-            unloaded_files.add(realpath) if ruby?(realpath)
+            unload_cref(parent, cname)  if cdef?(parent, cname)
+            unloaded_files.add(abspath) if ruby?(abspath)
           end
         end
 
-        to_unload.each_value do |(realpath, (parent, cname))|
-          unload_cref(parent, cname)   if cdef?(parent, cname)
-          unloaded_files.add(realpath) if ruby?(realpath)
+        to_unload.each_value do |(abspath, (parent, cname))|
+          unload_cref(parent, cname)  if cdef?(parent, cname)
+          unloaded_files.add(abspath) if ruby?(abspath)
         end
 
         unless unloaded_files.empty?
@@ -385,7 +389,7 @@ module Zeitwerk
             next if eager_load_exclusions.member?(abspath)
 
             if ruby?(abspath)
-              if cref = autoloads[File.realpath(abspath)]
+              if cref = autoloads[abspath]
                 cref[0].const_get(cref[1], false)
               end
             elsif dir?(abspath) && !root_dirs.key?(abspath)
@@ -606,28 +610,21 @@ module Zeitwerk
 
     # @sig (Module, Symbol, String) -> void
     def set_autoload(parent, cname, abspath)
-      # $LOADED_FEATURES stores real paths since Ruby 2.4.4. We set and save the
-      # real path to be able to delete it from $LOADED_FEATURES on unload, and to
-      # be able to do a lookup later in Kernel#require for manual require calls.
-      #
-      # We freeze realpath because that saves allocations in Module#autoload.
-      # See #125.
-      realpath = File.realpath(abspath).freeze
-      parent.autoload(cname, realpath)
+      parent.autoload(cname, abspath)
       if logger
-        if ruby?(realpath)
-          log("autoload set for #{cpath(parent, cname)}, to be loaded from #{realpath}")
+        if ruby?(abspath)
+          log("autoload set for #{cpath(parent, cname)}, to be loaded from #{abspath}")
         else
-          log("autoload set for #{cpath(parent, cname)}, to be autovivified from #{realpath}")
+          log("autoload set for #{cpath(parent, cname)}, to be autovivified from #{abspath}")
         end
       end
 
-      autoloads[realpath] = [parent, cname]
-      Registry.register_autoload(self, realpath)
+      autoloads[abspath] = [parent, cname]
+      Registry.register_autoload(self, abspath)
 
       # See why in the documentation of Zeitwerk::Registry.inceptions.
       unless parent.autoload?(cname)
-        Registry.register_inception(cpath(parent, cname), realpath, self)
+        Registry.register_inception(cpath(parent, cname), abspath, self)
       end
     end
 
