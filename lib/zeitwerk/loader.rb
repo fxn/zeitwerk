@@ -33,12 +33,6 @@ module Zeitwerk
     # @sig Hash[String, true]
     attr_reader :root_dirs
 
-    # Absolute paths of files or directories that have to be preloaded.
-    #
-    # @private
-    # @sig Array[String]
-    attr_reader :preloads
-
     # Absolute paths of files, directories, or glob patterns to be totally
     # ignored.
     #
@@ -148,7 +142,6 @@ module Zeitwerk
       @logger    = self.class.default_logger
 
       @root_dirs              = {}
-      @preloads               = []
       @ignored_glob_patterns  = Set.new
       @ignored_paths          = Set.new
       @collapse_glob_patterns = Set.new
@@ -232,18 +225,6 @@ module Zeitwerk
       @reloading_enabled
     end
 
-    # Files or directories to be preloaded instead of lazy loaded.
-    #
-    # @sig (*(String | Pathname | Array[String | Pathname])) -> void
-    def preload(*paths)
-      mutex.synchronize do
-        expand_paths(paths).each do |abspath|
-          preloads << abspath
-          do_preload_abspath(abspath) if @setup
-        end
-      end
-    end
-
     # Configure files, directories, or glob patterns to be totally ignored.
     #
     # @sig (*(String | Pathname | Array[String | Pathname])) -> void
@@ -284,7 +265,7 @@ module Zeitwerk
       end
     end
 
-    # Sets autoloads in the root namespace and preloads files, if any.
+    # Sets autoloads in the root namespace.
     #
     # @sig () -> void
     def setup
@@ -294,7 +275,6 @@ module Zeitwerk
         actual_root_dirs.each do |root_dir, namespace|
           set_autoloads_in_dir(root_dir, namespace)
         end
-        do_preload
 
         @setup = true
       end
@@ -681,38 +661,6 @@ module Zeitwerk
       def strict_autoload_path(parent, cname)
         parent.autoload?(cname, false)
       end
-    end
-
-    # This method is called this way because I prefer `preload` to be the method
-    # name to configure preloads in the public interface.
-    #
-    # @sig () -> void
-    def do_preload
-      preloads.each do |abspath|
-        do_preload_abspath(abspath)
-      end
-    end
-
-    # @sig (String) -> void
-    def do_preload_abspath(abspath)
-      if ruby?(abspath)
-        do_preload_file(abspath)
-      elsif dir?(abspath)
-        do_preload_dir(abspath)
-      end
-    end
-
-    # @sig (String) -> void
-    def do_preload_dir(dir)
-      ls(dir) do |_basename, abspath|
-        do_preload_abspath(abspath)
-      end
-    end
-
-    # @sig (String) -> bool
-    def do_preload_file(file)
-      log("preloading #{file}") if logger
-      require file
     end
 
     # @sig (Module, Symbol) -> String

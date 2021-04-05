@@ -125,18 +125,6 @@ class TestLogging < LoaderTest
     end
   end
 
-  test "logs preloads" do
-    files = [["x.rb", "X = true"]]
-    with_files(files) do
-      loader.push_dir(".")
-      loader.preload("x.rb")
-
-      assert_logged(/preloading #{File.realpath("x.rb")}/) do
-        loader.setup
-      end
-    end
-  end
-
   test "logs unloads for autoloads" do
     files = [["x.rb", "X = true"]]
     with_files(files) do

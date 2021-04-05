@@ -1,8 +1,8 @@
 require "test_helper"
 
-# Rails applications are expected to preload tree leafs in STIs. Using requires
-# is the old school way to address this and it is somewhat tricky. Let's have a
-# test to make sure the circularity works.
+# Rails applications are expected to preload STIs. Using requires is the old
+# school way to address this and it is somewhat tricky. Let's have a test to
+# make sure the circularity works.
 class TestOldSchoolWorkaroundSTI < LoaderTest
   def files
     [
