@@ -533,7 +533,7 @@ module Zeitwerk
       ls(dir) do |basename, abspath|
         begin
           if ruby?(basename)
-            basename[-3..-1] = ''
+            basename.delete_suffix!(".rb")
             cname = inflector.camelize(basename, abspath).to_sym
             autoload_file(parent, cname, abspath)
           elsif dir?(abspath)
