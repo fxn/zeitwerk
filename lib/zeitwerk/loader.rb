@@ -730,8 +730,8 @@ module Zeitwerk
 
     # @sig (String) { (String, String) -> void } -> void
     def ls(dir)
-      Dir.foreach(dir) do |basename|
-        next if basename.start_with?(".")
+      Dir.each_child(dir) do |basename|
+        next if hidden?(basename)
 
         abspath = File.join(dir, basename)
         next if ignored_paths.member?(abspath)
@@ -740,6 +740,10 @@ module Zeitwerk
         # File methods. See #125.
         yield basename, abspath.freeze
       end
+    end
+
+    def hidden?(basename)
+      basename.start_with?(".")
     end
 
     # @sig (String) -> bool
