@@ -30,6 +30,17 @@ class TestConflictingDirectory < LoaderTest
     assert_equal conflicting_directory_message(dir), e.message
   end
 
+  test "raises if an existing loader manages the same root dir (symlink)" do
+    sym = File.expand_path("sym", dir)
+    FileUtils.ln_s(dir, sym)
+    existing_loader.push_dir(dir)
+
+    e = assert_raises(Zeitwerk::Error) { loader.push_dir(sym) }
+    assert_equal conflicting_directory_message(dir), e.message
+  ensure
+    FileUtils.rm_f(sym)
+  end
+
   test "raises if an existing loader manages a parent directory" do
     existing_loader.push_dir(parent)
 
