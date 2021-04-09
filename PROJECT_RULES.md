@@ -47,7 +47,7 @@ Note that Zeitwerk does not deal with file or directory objects, only with paths
 Documented public methods conform the public interface. In particular:
 
 * Public methods tagged as `@private` do not belong to the public interface.
-* Undocumented public methods do not belong to the public interface. They are probably exploratory and may change or be deleted without warning. These are private interfaces in practice.
+* Undocumented public methods do not belong to the public interface. They are probably exploratory and may change or be deleted without warning. These are private interface in practice.
 * Undocumented public methods can be used in the Rails integration. We control both repositories, and Rails usage may help refine the actual public interface.
 
 Any release can change the private interface, including patch releases.
