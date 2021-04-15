@@ -196,12 +196,8 @@ module Zeitwerk
 
       abspath = File.expand_path(path)
       if dir?(abspath)
-        # Ruby resolves relative requires against $LOAD_PATH directories using
-        # their real path. We convert to real paths to be able to match them in
-        # $LOADED_FEATURES.
-        realpath = File.realpath(abspath)
-        raise_if_conflicting_directory(realpath)
-        root_dirs[realpath] = namespace
+        raise_if_conflicting_directory(abspath)
+        root_dirs[abspath] = namespace
       else
         raise Error, "the root directory #{abspath} does not exist"
       end

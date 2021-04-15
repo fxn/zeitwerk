@@ -34,6 +34,23 @@ class TestRubyCompatibility < LoaderTest
     end
   end
 
+  # Zeitwerk sets autoloads using absolute paths, and the root dirs are joined
+  # as given. Thanks to this property, we are able to identify the files we
+  # manage in our decorated Kernel#require.
+  test "absolute paths passed to require end up in $LOADED_FEATURES as is" do
+    on_teardown { $LOADED_FEATURES.pop }
+
+    files = [["real/real_x.rb", ""]]
+    with_files(files) do
+      FileUtils.ln_s("real", "sym")
+      FileUtils.ln_s(File.expand_path("real/real_x.rb"), "sym/sym_x.rb")
+
+      sym_x = File.expand_path("sym/sym_x.rb")
+      assert require(sym_x)
+      assert $LOADED_FEATURES.last == sym_x
+    end
+  end
+
   # Zeitwerk has to be called as soon as explicit namespaces are defined, to be
   # able to configure autoloads for their children before the class or module
   # body is interpreted. If explicit namespaces are found, Zeitwerk sets a trace
@@ -75,7 +92,7 @@ class TestRubyCompatibility < LoaderTest
       loader.setup
 
       assert Admin
-      assert !$LOADED_FEATURES.include?(File.realpath("admin"))
+      assert !$LOADED_FEATURES.include?(File.expand_path("admin"))
     end
   end
 
@@ -214,7 +231,7 @@ class TestRubyCompatibility < LoaderTest
       EOS
      ["bar.rb", <<-EOS]
        Bar = true
-       Object.autoload(:Foo, File.realpath('foo.rb'))
+       Object.autoload(:Foo, File.expand_path('foo.rb'))
        $trc_inception = !Object.autoload?(:Foo)
      EOS
     ]
@@ -288,24 +305,7 @@ class TestRubyCompatibility < LoaderTest
       with_load_path(".") do
         assert_equal true, require(Pathname.new("x"))
         assert_equal 1, X
-        assert_equal File.realpath("x.rb"), $LOADED_FEATURES.last
-      end
-    end
-  end
-
-  # We rely on this fact when checking $LOADED_FEATURES in Kernel#require, and
-  # compute the real path of root directories due to this.
-  test "$LOADED_FEATURES stores the real path of the root directory part" do
-    on_teardown { $LOADED_FEATURES.pop }
-
-    files = [["real/real_x.rb", ""]]
-    with_files(files) do
-      FileUtils.ln_s("real", "sym")
-      FileUtils.ln_s(File.expand_path("real/real_x.rb"), "sym/sym_x.rb")
-
-      with_load_path("sym") do
-        assert require("sym_x")
-        assert $LOADED_FEATURES.last.end_with?("real/sym_x.rb")
+        assert_equal File.expand_path("x.rb"), $LOADED_FEATURES.last
       end
     end
   end

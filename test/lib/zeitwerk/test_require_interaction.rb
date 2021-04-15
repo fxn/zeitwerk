@@ -208,37 +208,4 @@ class TestRequireInteraction < LoaderTest
       end
     end
   end
-
-  test "symlinks in autoloaded files set by Zeitwerk" do
-    files = [["real/app/models/user.rb", "class User; end"]]
-    with_files(files) do
-      FileUtils.ln_s("real", "symlink")
-      loader.push_dir("symlink/app/models")
-      loader.setup
-
-      with_load_path("symlink/app/models") do
-        assert User
-        assert_not_required "user"
-
-        loader.reload
-
-        assert_required "user"
-      end
-    end
-  end
-
-  test "symlinks in autoloaded files resolved by Ruby" do
-    files = [["real/app/models/user.rb", "class User; end"]]
-    with_files(files) do
-      FileUtils.ln_s("real", "symlink")
-      loader.push_dir("symlink/app/models")
-      loader.setup
-
-      with_load_path("symlink/app/models") do
-        assert_required "user"
-        loader.reload
-        assert_required "user"
-      end
-    end
-  end
 end

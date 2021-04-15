@@ -67,7 +67,7 @@ class TestLogging < LoaderTest
     files = [["x.rb", "X = true"]]
     with_files(files) do
       with_load_path(".") do
-        assert_logged(/constant X loaded from file #{File.realpath("x.rb")}/) do
+        assert_logged(/constant X loaded from file #{File.expand_path("x.rb")}/) do
           loader.push_dir(".")
           loader.setup
 
@@ -81,7 +81,7 @@ class TestLogging < LoaderTest
     files = [["x.rb", "X = true"]]
     with_files(files) do
       with_load_path(".") do
-        assert_logged(/constant X loaded from file #{File.realpath("x.rb")}/) do
+        assert_logged(/constant X loaded from file #{File.expand_path("x.rb")}/) do
           loader.push_dir(".")
           loader.setup
 
@@ -95,7 +95,7 @@ class TestLogging < LoaderTest
     files = [["admin/user.rb", "class Admin::User; end"]]
     with_files(files) do
       with_load_path(".") do
-        assert_logged(/module Admin autovivified from directory #{File.realpath("admin")}/) do
+        assert_logged(/module Admin autovivified from directory #{File.expand_path("admin")}/) do
           loader.push_dir(".")
           loader.setup
 
@@ -108,7 +108,7 @@ class TestLogging < LoaderTest
   test "logs autoload configured for files" do
     files = [["x.rb", "X = true"]]
     with_files(files) do
-      assert_logged("autoload set for X, to be loaded from #{File.realpath("x.rb")}") do
+      assert_logged("autoload set for X, to be loaded from #{File.expand_path("x.rb")}") do
         loader.push_dir(".")
         loader.setup
       end
@@ -118,7 +118,7 @@ class TestLogging < LoaderTest
   test "logs autoload configured for directories" do
     files = [["admin/user.rb", "class Admin::User; end"]]
     with_files(files) do
-      assert_logged("autoload set for Admin, to be autovivified from #{File.realpath("admin")}") do
+      assert_logged("autoload set for Admin, to be autovivified from #{File.expand_path("admin")}") do
         loader.push_dir(".")
         loader.setup
       end
