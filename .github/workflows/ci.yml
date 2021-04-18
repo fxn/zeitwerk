@@ -23,7 +23,6 @@ jobs:
           - "truffleruby"
           - "truffleruby-head"
     runs-on: ${{ matrix.os }}
-    continue-on-error: ${{ contains(matrix.ruby-version, 'jruby') }}
     steps:
       - uses: "actions/checkout@v2"
       - uses: "ruby/setup-ruby@v1"
