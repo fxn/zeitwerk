@@ -1,0 +1,44 @@
+name: "CI"
+on:
+  push:
+    branches:
+      - "main"
+  pull_request:
+    branches:
+      - "main"
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - "ubuntu-latest"
+          - "macos-latest"
+        ruby-version:
+          - "2.5"
+          - "2.6"
+          - "2.7"
+          - "3.0"
+          - "head"
+          - "truffleruby"
+          - "truffleruby-head"
+    runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ contains(matrix.ruby-version, 'jruby') }}
+    steps:
+      - uses: "actions/checkout@v2"
+      - uses: "ruby/setup-ruby@v1"
+        with:
+          ruby-version: ${{ matrix.ruby-version }}
+          bundler-cache: true
+      - run: "bundle exec rake"
+  # JRuby does not support Zeitwerk yet, not worth doing the full matrix.
+  test-jruby:
+    runs-on: "ubuntu-latest"
+    continue-on-error: true
+    steps:
+      - uses: "actions/checkout@v2"
+      - uses: "ruby/setup-ruby@v1"
+        with:
+          ruby-version: "jruby-head"
+          bundler-cache: true
+      - run: "bundle exec rake"
