@@ -17,7 +17,7 @@ module Zeitwerk
       # @sig Hash[String, Zeitwerk::Loader]
       attr_reader :loaders_managing_gems
 
-      # Maps real paths to the loaders responsible for them.
+      # Maps absolute paths to the loaders responsible for them.
       #
       # This information is used by our decorated `Kernel#require` to be able to
       # invoke callbacks and autovivify modules.
