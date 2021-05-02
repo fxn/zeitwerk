@@ -8,7 +8,7 @@ class TestIgnore < LoaderTest
       loader.push_dir(".")
       loader.ignore(".")
 
-      assert_empty loader.autoloads
+      assert !Object.autoload?(:X)
       assert_raises(NameError) { ::X }
     end
   end
@@ -23,7 +23,9 @@ class TestIgnore < LoaderTest
       loader.ignore("y.rb")
       loader.setup
 
-      assert_equal 1, loader.autoloads.size
+      assert Object.autoload?(:X)
+      assert !Object.autoload?(:Y)
+
       assert ::X
       assert_raises(NameError) { ::Y }
     end
@@ -41,7 +43,9 @@ class TestIgnore < LoaderTest
       loader.ignore("m")
       loader.setup
 
-      assert_equal 1, loader.autoloads.size
+      assert Object.autoload?(:X)
+      assert !Object.autoload?(:M)
+
       assert ::X
       assert_raises(NameError) { ::M }
     end

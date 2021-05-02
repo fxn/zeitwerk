@@ -29,6 +29,23 @@ class TestShadowed < LoaderTest
     end
   end
 
+  test "autoloads from a shadowed implicit namespace managed by another loader" do
+    files = [["a/m/x.rb", "M::X = true"], ["b/m/y.rb", "M::Y = true"]]
+    with_files(files) do
+      new_loader(dirs: "a")
+      loader = new_loader(dirs: "b")
+
+      mod = M
+
+      assert M::X
+      assert M::Y
+      loader.reload
+      assert_same mod, M
+      assert M::X
+      assert M::Y
+    end
+  end
+
   test "autoloads from a shadowed explicit namespace" do
     on_teardown { remove_const :M }
 
@@ -40,6 +57,34 @@ class TestShadowed < LoaderTest
       ["m/x.rb", "M::X = true"]
     ]
     with_setup(files) do
+      assert M::X
+      loader.reload
+      assert_same mod, M
+      assert M::X
+    end
+  end
+
+  test "autoloads from a shadowed explicit namespace (autoload)" do
+    on_teardown do
+      remove_const :M
+      $LOADED_FEATURES.delete_if do |lf|
+        lf.end_with?("/a/m.rb")
+      end
+    end
+
+    files = [
+      ["a/m.rb", "class M; end"],
+      ["b/m/x.rb", "M::X = true"]
+    ]
+    with_files(files) do
+      # External code has an autoload defined, could be another loader or not,
+      # does not matter.
+      Object.autoload(:M, "#{Dir.pwd}/a/m.rb")
+
+      loader.push_dir("b")
+      loader.setup
+
+      mod = M
       assert M::X
       loader.reload
       assert_same mod, M

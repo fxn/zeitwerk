@@ -6,6 +6,7 @@ require "securerandom"
 module Zeitwerk
   class Loader
     require_relative "loader/callbacks"
+
     include Callbacks
     include RealModName
 
@@ -61,16 +62,8 @@ module Zeitwerk
     # @sig Set[String]
     attr_reader :collapse_dirs
 
-    # Maps absolute paths for which an autoload has been set ---and not
-    # executed--- to their corresponding parent class or module and constant
-    # name.
-    #
-    #   "/Users/fxn/blog/app/models/user.rb"          => [Object, :User],
-    #   "/Users/fxn/blog/app/models/hotel/pricing.rb" => [Hotel, :Pricing]
-    #   ...
-    #
     # @private
-    # @sig Hash[String, [Module, Symbol]]
+    # @sig Zeitwerk::Autoloads
     attr_reader :autoloads
 
     # We keep track of autoloaded directories to remove them from the registry
@@ -146,7 +139,7 @@ module Zeitwerk
       @ignored_paths          = Set.new
       @collapse_glob_patterns = Set.new
       @collapse_dirs          = Set.new
-      @autoloads              = {}
+      @autoloads              = Autoloads.new
       @autoloaded_dirs        = []
       @to_unload              = {}
       @lazy_subdirs           = {}
@@ -299,7 +292,7 @@ module Zeitwerk
         # is enough.
         unloaded_files = Set.new
 
-        autoloads.each do |abspath, (parent, cname)|
+        autoloads.each do |(parent, cname), abspath|
           if parent.autoload?(cname)
             unload_autoload(parent, cname)
           else
@@ -385,7 +378,7 @@ module Zeitwerk
             next if eager_load_exclusions.member?(abspath)
 
             if ruby?(abspath)
-              if cref = autoloads[abspath]
+              if cref = autoloads.cref_for(abspath)
                 cref[0].const_get(cref[1], false)
               end
             elsif dir?(abspath) && !root_dirs.key?(abspath)
@@ -553,7 +546,7 @@ module Zeitwerk
 
     # @sig (Module, Symbol, String) -> void
     def autoload_subdir(parent, cname, subdir)
-      if autoload_path = autoload_for?(parent, cname)
+      if autoload_path = autoloads.abspath_for(parent, cname)
         cpath = cpath(parent, cname)
         register_explicit_namespace(cpath) if ruby?(autoload_path)
         # We do not need to issue another autoload, the existing one is enough
@@ -567,13 +560,14 @@ module Zeitwerk
       else
         # For whatever reason the constant that corresponds to this namespace has
         # already been defined, we have to recurse.
+        log("the namespace #{cpath(parent, cname)} already exists, descending into #{subdir}") if logger
         set_autoloads_in_dir(subdir, parent.const_get(cname))
       end
     end
 
     # @sig (Module, Symbol, String) -> void
     def autoload_file(parent, cname, file)
-      if autoload_path = autoload_for?(parent, cname)
+      if autoload_path = strict_autoload_path(parent, cname) || Registry.inception?(cpath(parent, cname))
         # First autoload for a Ruby file wins, just ignore subsequent ones.
         if ruby?(autoload_path)
           log("file #{file} is ignored because #{autoload_path} has precedence") if logger
@@ -600,13 +594,14 @@ module Zeitwerk
       autoloads.delete(dir)
       Registry.unregister_autoload(dir)
 
-      set_autoload(parent, cname, file)
+      autoloads.define(parent, cname, file)
       register_explicit_namespace(cpath(parent, cname))
     end
 
     # @sig (Module, Symbol, String) -> void
     def set_autoload(parent, cname, abspath)
-      parent.autoload(cname, abspath)
+      autoloads.define(parent, cname, abspath)
+
       if logger
         if ruby?(abspath)
           log("autoload set for #{cpath(parent, cname)}, to be loaded from #{abspath}")
@@ -615,18 +610,12 @@ module Zeitwerk
         end
       end
 
-      autoloads[abspath] = [parent, cname]
       Registry.register_autoload(self, abspath)
 
       # See why in the documentation of Zeitwerk::Registry.inceptions.
       unless parent.autoload?(cname)
         Registry.register_inception(cpath(parent, cname), abspath, self)
       end
-    end
-
-    # @sig (Module, Symbol) -> String?
-    def autoload_for?(parent, cname)
-      strict_autoload_path(parent, cname) || Registry.inception?(cpath(parent, cname))
     end
 
     # The autoload? predicate takes into account the ancestor chain of the
