@@ -79,7 +79,7 @@ class TestShadowed < LoaderTest
     with_files(files) do
       # External code has an autoload defined, could be another loader or not,
       # does not matter.
-      Object.autoload(:M, "#{Dir.pwd}/a/m.rb")
+      Object.autoload(:M, File.expand_path("a/m.rb"))
 
       loader.push_dir("b")
       loader.setup
