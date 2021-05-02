@@ -67,9 +67,7 @@ class TestShadowed < LoaderTest
   test "autoloads from a shadowed explicit namespace (autoload)" do
     on_teardown do
       remove_const :M
-      $LOADED_FEATURES.delete_if do |lf|
-        lf.end_with?("/a/m.rb")
-      end
+      delete_loaded_feature "a/m.rb"
     end
 
     files = [
