@@ -61,7 +61,7 @@ module Zeitwerk
     # @sig Set[String]
     attr_reader :collapse_dirs
 
-    # Maps real absolute paths for which an autoload has been set ---and not
+    # Maps absolute paths for which an autoload has been set ---and not
     # executed--- to their corresponding parent class or module and constant
     # name.
     #
@@ -87,8 +87,8 @@ module Zeitwerk
     #
     #   "Admin::Role" => [".../admin/role.rb", [Admin, :Role]]
     #
-    # The cpath as key helps implementing unloadable_cpath? The real file name
-    # is stored in order to be able to delete it from $LOADED_FEATURES, and the
+    # The cpath as key helps implementing unloadable_cpath? The file name is
+    # stored in order to be able to delete it from $LOADED_FEATURES, and the
     # pair [Module, Symbol] is used to remove_const the constant from the class
     # or module object.
     #
