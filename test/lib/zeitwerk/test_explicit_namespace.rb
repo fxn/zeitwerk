@@ -106,11 +106,7 @@ class TestExplicitNamespace < LoaderTest
       ["a/m/x.rb", "M::X = true"],
       ["b/m.rb", "module M; end"]
     ]
-    with_files(files) do
-      loader.push_dir("a")
-      loader.push_dir("b")
-      loader.setup
-
+    with_setup(files, dirs: ["a", "b"]) do
       assert_nil Zeitwerk::Registry.loader_for(File.expand_path("a/m"))
       assert_same loader, Zeitwerk::Registry.loader_for(File.expand_path("b/m.rb"))
     end
