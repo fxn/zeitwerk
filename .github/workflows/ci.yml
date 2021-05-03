@@ -30,14 +30,3 @@ jobs:
           ruby-version: ${{ matrix.ruby-version }}
           bundler-cache: true
       - run: "bundle exec rake"
-  # JRuby does not support Zeitwerk yet, not worth doing the full matrix.
-  test-jruby:
-    runs-on: "ubuntu-latest"
-    continue-on-error: true
-    steps:
-      - uses: "actions/checkout@v2"
-      - uses: "ruby/setup-ruby@v1"
-        with:
-          ruby-version: "jruby-head"
-          bundler-cache: true
-      - run: "bundle exec rake"
