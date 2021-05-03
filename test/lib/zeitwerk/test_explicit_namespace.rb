@@ -99,6 +99,23 @@ class TestExplicitNamespace < LoaderTest
     end
   end
 
+  test "namespace promotion updates the registry" do
+    # We use two root directories to make sure the loader visits the implicit
+    # a/m first, and the explicit b/m.rb after it.
+    files = [
+      ["a/m/x.rb", "M::X = true"],
+      ["b/m.rb", "module M; end"]
+    ]
+    with_files(files) do
+      loader.push_dir("a")
+      loader.push_dir("b")
+      loader.setup
+
+      assert_nil Zeitwerk::Registry.loader_for(File.expand_path("a/m"))
+      assert_same loader, Zeitwerk::Registry.loader_for(File.expand_path("b/m.rb"))
+    end
+  end
+
   # As of this writing, a tracer on the :class event does not seem to have any
   # performance penalty in an ordinary code base. But I prefer to precisely
   # control that we use a tracer only if needed in case this issue
