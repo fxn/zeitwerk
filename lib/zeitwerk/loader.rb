@@ -594,7 +594,7 @@ module Zeitwerk
       autoloads.delete(dir)
       Registry.unregister_autoload(dir)
 
-      autoloads.define(parent, cname, file)
+      set_autoload(parent, cname, file)
       register_explicit_namespace(cpath(parent, cname))
     end
 
