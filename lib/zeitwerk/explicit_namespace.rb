@@ -62,10 +62,10 @@ module Zeitwerk
         # than accessing its name.
         return if event.self.singleton_class?
 
-        # If we reach this point, the class/module has a name, because Ruby does
-        # not trigger the :class event on Class.new or Module.new. Therefore,
-        # there is no point in checking if the class/module is anonymous to save
-        # some hash work.
+        # It might be tempting to return if name.nil?, to avoid the computation
+        # of a hash code and delete call. But Ruby does not trigger the :class
+        # event on Class.new or Module.new, so that would incur in an extra call
+        # for nothing.
         #
         # On the other hand, if we were called, cpaths is not empty. Otherwise
         # the tracer is disabled. So we do need to go ahead with the hash code
