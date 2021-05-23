@@ -62,8 +62,14 @@ module Zeitwerk
         # than accessing its name.
         return if event.self.singleton_class?
 
-        # Note that it makes sense to compute the hash code unconditionally,
-        # because the trace point is disabled if cpaths is empty.
+        # If we reach this point, the class/module has a name, because Ruby does
+        # not trigger the :class event on Class.new or Module.new. Therefore,
+        # there is no point in checking if the class/module is anonymous to save
+        # some hash work.
+        #
+        # On the other hand, if we were called, cpaths is not empty. Otherwise
+        # the tracer is disabled. So we do need to go ahead with the hash code
+        # computation and delete call.
         if loader = cpaths.delete(real_mod_name(event.self))
           loader.on_namespace_loaded(event.self)
           disable_tracer_if_unneeded
