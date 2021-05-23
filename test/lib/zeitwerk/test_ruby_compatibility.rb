@@ -271,10 +271,12 @@ class TestRubyCompatibility < LoaderTest
   end
 
   # Computing hash codes is costly and we want the tracer to be as efficient as
-  # possible. The callback doesn't short-circuit anonymous classes and modules
-  # because Class.new and Module.new do not trigger it, but if in the future
-  # they do we could benchmark if we should change event.self.name before the
-  # deletion call.
+  # possible. The TP callback doesn't short-circuit anonymous classes/modules
+  # because Class.new/Module.new do not trigger the :class event. We leverage
+  # this property to save a nil? call.
+  #
+  # However, if that changes in future versions of Ruby, this test would tell us
+  # and we could revisit the callback implementation.
   test "trace points on the :class events don't get called on Class.new and Module.new" do
     on_teardown { @tracer.disable }
 
