@@ -6,61 +6,11 @@ require "securerandom"
 module Zeitwerk
   class Loader
     require_relative "loader/callbacks"
+    require_relative "loader/config"
 
-    include Callbacks
     include RealModName
-
-    # @sig String
-    attr_reader :tag
-
-    # @sig #camelize
-    attr_accessor :inflector
-
-    # @sig #call | #debug | nil
-    attr_accessor :logger
-
-    # Absolute paths of the root directories. Stored in a hash to preserve
-    # order, easily handle duplicates, and also be able to have a fast lookup,
-    # needed for detecting nested paths.
-    #
-    #   "/Users/fxn/blog/app/assets"   => true,
-    #   "/Users/fxn/blog/app/channels" => true,
-    #   ...
-    #
-    # This is a private collection maintained by the loader. The public
-    # interface for it is `push_dir` and `dirs`.
-    #
-    # @private
-    # @sig Hash[String, true]
-    attr_reader :root_dirs
-
-    # Absolute paths of files, directories, or glob patterns to be totally
-    # ignored.
-    #
-    # @private
-    # @sig Set[String]
-    attr_reader :ignored_glob_patterns
-
-    # The actual collection of absolute file and directory names at the time the
-    # ignored glob patterns were expanded. Computed on setup, and recomputed on
-    # reload.
-    #
-    # @private
-    # @sig Set[String]
-    attr_reader :ignored_paths
-
-    # Absolute paths of directories or glob patterns to be collapsed.
-    #
-    # @private
-    # @sig Set[String]
-    attr_reader :collapse_glob_patterns
-
-    # The actual collection of absolute directory names at the time the collapse
-    # glob patterns were expanded. Computed on setup, and recomputed on reload.
-    #
-    # @private
-    # @sig Set[String]
-    attr_reader :collapse_dirs
+    include Callbacks
+    include Config
 
     # @private
     # @sig Zeitwerk::Autoloads
@@ -110,15 +60,6 @@ module Zeitwerk
     # @sig Hash[String, Array[String]]
     attr_reader :lazy_subdirs
 
-    # Absolute paths of files or directories not to be eager loaded.
-    #
-    # @private
-    # @sig Set[String]
-    attr_reader :eager_load_exclusions
-
-    # User-oriented callbacks to be fired when a constant is loaded.
-    attr_reader :on_load_callbacks
-
     # @private
     # @sig Mutex
     attr_reader :mutex
@@ -128,134 +69,18 @@ module Zeitwerk
     attr_reader :mutex2
 
     def initialize
-      @initialized_at = Time.now
+      super
 
-      @tag       = SecureRandom.hex(3)
-      @inflector = Inflector.new
-      @logger    = self.class.default_logger
-
-      @root_dirs              = {}
-      @ignored_glob_patterns  = Set.new
-      @ignored_paths          = Set.new
-      @collapse_glob_patterns = Set.new
-      @collapse_dirs          = Set.new
-      @autoloads              = Autoloads.new
-      @autoloaded_dirs        = []
-      @to_unload              = {}
-      @lazy_subdirs           = {}
-      @eager_load_exclusions  = Set.new
-      @on_load_callbacks      = {}
-
-      # TODO: find a better name for these mutexes.
-      @mutex        = Mutex.new
-      @mutex2       = Mutex.new
-      @setup        = false
-      @eager_loaded = false
-
-      @reloading_enabled = false
+      @autoloads       = Autoloads.new
+      @autoloaded_dirs = []
+      @to_unload       = {}
+      @lazy_subdirs    = Hash.new { |h, cpath| h[cpath] = [] }
+      @mutex           = Mutex.new
+      @mutex2          = Mutex.new
+      @setup           = false
+      @eager_loaded    = false
 
       Registry.register_loader(self)
-    end
-
-    # Sets a tag for the loader, useful for logging.
-    #
-    # @param tag [#to_s]
-    # @sig (#to_s) -> void
-    def tag=(tag)
-      @tag = tag.to_s
-    end
-
-    # Absolute paths of the root directories. This is a read-only collection,
-    # please push here via `push_dir`.
-    #
-    # @sig () -> Array[String]
-    def dirs
-      root_dirs.keys.freeze
-    end
-
-    # Pushes `path` to the list of root directories.
-    #
-    # Raises `Zeitwerk::Error` if `path` does not exist, or if another loader in
-    # the same process already manages that directory or one of its ascendants
-    # or descendants.
-    #
-    # @raise [Zeitwerk::Error]
-    # @sig (String | Pathname, Module) -> void
-    def push_dir(path, namespace: Object)
-      # Note that Class < Module.
-      unless namespace.is_a?(Module)
-        raise Error, "#{namespace.inspect} is not a class or module object, should be"
-      end
-
-      abspath = File.expand_path(path)
-      if dir?(abspath)
-        raise_if_conflicting_directory(abspath)
-        root_dirs[abspath] = namespace
-      else
-        raise Error, "the root directory #{abspath} does not exist"
-      end
-    end
-
-    # You need to call this method before setup in order to be able to reload.
-    # There is no way to undo this, either you want to reload or you don't.
-    #
-    # @raise [Zeitwerk::Error]
-    # @sig () -> void
-    def enable_reloading
-      mutex.synchronize do
-        break if @reloading_enabled
-
-        if @setup
-          raise Error, "cannot enable reloading after setup"
-        else
-          @reloading_enabled = true
-        end
-      end
-    end
-
-    # @sig () -> bool
-    def reloading_enabled?
-      @reloading_enabled
-    end
-
-    # Configure files, directories, or glob patterns to be totally ignored.
-    #
-    # @sig (*(String | Pathname | Array[String | Pathname])) -> void
-    def ignore(*glob_patterns)
-      glob_patterns = expand_paths(glob_patterns)
-      mutex.synchronize do
-        ignored_glob_patterns.merge(glob_patterns)
-        ignored_paths.merge(expand_glob_patterns(glob_patterns))
-      end
-    end
-
-    # Configure directories or glob patterns to be collapsed.
-    #
-    # @sig (*(String | Pathname | Array[String | Pathname])) -> void
-    def collapse(*glob_patterns)
-      glob_patterns = expand_paths(glob_patterns)
-      mutex.synchronize do
-        collapse_glob_patterns.merge(glob_patterns)
-        collapse_dirs.merge(expand_glob_patterns(glob_patterns))
-      end
-    end
-
-    # Configure a block to be invoked once a certain constant path is loaded.
-    # Supports multiple callbacks, and if there are many, they are executed in
-    # the order in which they were defined.
-    #
-    #   loader.on_load("SomeApiClient") do
-    #     SomeApiClient.endpoint = "https://api.dev"
-    #   end
-    #
-    # @raise [TypeError]
-    # @sig (String) { () -> void } -> void
-    def on_load(cpath, &block)
-      raise TypeError, "on_load only accepts strings" unless cpath.is_a?(String)
-
-      mutex.synchronize do
-        (on_load_callbacks[cpath] ||= []) << block
-      end
     end
 
     # Sets autoloads in the root namespace.
@@ -368,21 +193,21 @@ module Zeitwerk
 
         queue = []
         actual_root_dirs.each do |root_dir, namespace|
-          queue << [namespace, root_dir] unless eager_load_exclusions.member?(root_dir)
+          queue << [namespace, root_dir] unless excluded_from_eager_load?(root_dir)
         end
 
         while to_eager_load = queue.shift
           namespace, dir = to_eager_load
 
           ls(dir) do |basename, abspath|
-            next if eager_load_exclusions.member?(abspath)
+            next if excluded_from_eager_load?(abspath)
 
             if ruby?(abspath)
               if cref = autoloads.cref_for(abspath)
                 cref[0].const_get(cref[1], false)
               end
             elsif dir?(abspath) && !root_dirs.key?(abspath)
-              if collapse_dirs.member?(abspath)
+              if collapse?(abspath)
                 queue << [namespace, abspath]
               else
                 cname = inflector.camelize(basename, abspath)
@@ -401,14 +226,6 @@ module Zeitwerk
       end
     end
 
-    # Let eager load ignore the given files or directories. The constants
-    # defined in those files are still autoloadable.
-    #
-    # @sig (*(String | Pathname | Array[String | Pathname])) -> void
-    def do_not_eager_load(*paths)
-      mutex.synchronize { eager_load_exclusions.merge(expand_paths(paths)) }
-    end
-
     # Says if the given constant path would be unloaded on reload. This
     # predicate returns `false` if reloading is disabled.
     #
@@ -423,28 +240,6 @@ module Zeitwerk
     # @sig () -> Array[String]
     def unloadable_cpaths
       to_unload.keys.freeze
-    end
-
-    # Logs to `$stdout`, handy shortcut for debugging.
-    #
-    # @sig () -> void
-    def log!
-      @logger = ->(msg) { puts msg }
-    end
-
-    # @private
-    # @sig (String) -> bool
-    def manages?(dir)
-      dir = dir + "/"
-      ignored_paths.each do |ignored_path|
-        return false if dir.start_with?(ignored_path + "/")
-      end
-
-      root_dirs.each_key do |root_dir|
-        return true if root_dir.start_with?(dir) || dir.start_with?(root_dir + "/")
-      end
-
-      false
     end
 
     # --- Class methods ---------------------------------------------------------------------------
@@ -494,13 +289,6 @@ module Zeitwerk
 
     private # -------------------------------------------------------------------------------------
 
-    # @sig () -> Array[String]
-    def actual_root_dirs
-      root_dirs.reject do |root_dir, _namespace|
-        !dir?(root_dir) || ignored_paths.member?(root_dir)
-      end
-    end
-
     # @sig (String, Module) -> void
     def set_autoloads_in_dir(dir, parent)
       ls(dir) do |basename, abspath|
@@ -516,9 +304,9 @@ module Zeitwerk
             # To resolve the ambiguity file name -> constant path this introduces,
             # the `app/models/concerns` directory is totally ignored as a namespace,
             # it counts only as root. The guard checks that.
-            unless root_dirs.key?(abspath)
+            unless root_dir?(abspath)
               cname = inflector.camelize(basename, abspath).to_sym
-              if collapse_dirs.member?(abspath)
+              if collapse?(abspath)
                 set_autoloads_in_dir(abspath, parent)
               else
                 autoload_subdir(parent, cname, abspath)
@@ -552,10 +340,10 @@ module Zeitwerk
         # We do not need to issue another autoload, the existing one is enough
         # no matter if it is for a file or a directory. Just remember the
         # subdirectory has to be visited if the namespace is used.
-        (lazy_subdirs[cpath] ||= []) << subdir
+        lazy_subdirs[cpath] << subdir
       elsif !cdef?(parent, cname)
         # First time we find this namespace, set an autoload for it.
-        (lazy_subdirs[cpath(parent, cname)] ||= []) << subdir
+        lazy_subdirs[cpath(parent, cname)] << subdir
         set_autoload(parent, cname, subdir)
       else
         # For whatever reason the constant that corresponds to this namespace has
@@ -684,28 +472,6 @@ module Zeitwerk
     # @sig (String) -> bool
     def dir?(path)
       File.directory?(path)
-    end
-
-    # @sig (String | Pathname | Array[String | Pathname]) -> Array[String]
-    def expand_paths(paths)
-      paths.flatten.map! { |path| File.expand_path(path) }
-    end
-
-    # @sig (Array[String]) -> Array[String]
-    def expand_glob_patterns(glob_patterns)
-      # Note that Dir.glob works with regular file names just fine. That is,
-      # glob patterns technically need no wildcards.
-      glob_patterns.flat_map { |glob_pattern| Dir.glob(glob_pattern) }
-    end
-
-    # @sig () -> void
-    def recompute_ignored_paths
-      ignored_paths.replace(expand_glob_patterns(ignored_glob_patterns))
-    end
-
-    # @sig () -> void
-    def recompute_collapse_dirs
-      collapse_dirs.replace(expand_glob_patterns(collapse_glob_patterns))
     end
 
     # @sig (String) -> void
