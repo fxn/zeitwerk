@@ -427,5 +427,17 @@ module Zeitwerk
         end
       end
     end
+
+    # @sig (Module, Symbol) -> void
+    def unload_autoload(parent, cname)
+      parent.__send__(:remove_const, cname)
+      log("autoload for #{cpath(parent, cname)} removed") if logger
+    end
+
+    # @sig (Module, Symbol) -> void
+    def unload_cref(parent, cname)
+      parent.__send__(:remove_const, cname)
+      log("#{cpath(parent, cname)} unloaded") if logger
+    end
   end
 end
