@@ -522,13 +522,13 @@ With `on_load`, it is easy to schedule code at boot time that initializes `endpo
 
 ```ruby
 # config/environments/development.rb
-loader.on_load("SomeApiClient") do
-  SomeApiClient.endpoint = "https://api.dev"
+loader.on_load("SomeApiClient") do |klass|
+  klass.endpoint = "https://api.dev"
 end
 
 # config/environments/production.rb
-loader.on_load("SomeApiClient") do
-  SomeApiClient.endpoint = "https://api.prod"
+loader.on_load("SomeApiClient") do |klass|
+  klass.endpoint = "https://api.prod"
 end
 ```
 
@@ -548,6 +548,18 @@ Multiple callbacks on the same target are supported, and they run in order of de
 The block is executed once the loader has loaded the target. In particular, if the target was already loaded when the callback is defined, the block won't run. But if you reload and load the target again, then it will. Normally, you'll want to define `on_load` callbacks before `setup`.
 
 Defining a callback for a target not managed by the receiver is not an error, the block simply won't ever be executed.
+
+It is also possible to be called when any constant is loaded by the loader:
+
+```ruby
+loader.on_load do |obj|
+  # ...
+end
+```
+
+Multiple callbacks like these are supported, and they run in order of definition.
+
+If both types of callbacks are defined, the specific ones run first.
 
 <a id="markdown-logging" name="logging"></a>
 ### Logging

@@ -18,7 +18,7 @@ module Zeitwerk::Loader::Callbacks
       raise Zeitwerk::NameError.new("expected file #{file} to define constant #{cpath}, but didn't", cref.last)
     end
 
-    run_on_load_callbacks(cpath)
+    run_on_load_callbacks(cpath, cget(*cref)) unless on_load_callbacks.empty?
   end
 
   # Invoked from our decorated Kernel#require when a managed directory is
@@ -54,7 +54,7 @@ module Zeitwerk::Loader::Callbacks
 
         on_namespace_loaded(autovivified_module)
 
-        run_on_load_callbacks(cpath)
+        run_on_load_callbacks(cpath, autovivified_module) unless on_load_callbacks.empty?
       end
     end
   end
@@ -75,12 +75,13 @@ module Zeitwerk::Loader::Callbacks
 
   private
 
-  # @sig (String) -> void
-  def run_on_load_callbacks(cpath)
-    # Very common, do not even compute a hash code.
-    return if on_load_callbacks.empty?
-
+  # @sig (String, Object) -> void
+  def run_on_load_callbacks(cpath, obj)
+    # Order matters. If present, run the most specific one.
     callbacks = reloading_enabled? ? on_load_callbacks[cpath] : on_load_callbacks.delete(cpath)
-    callbacks.each(&:call) if callbacks
+    callbacks.each { |c| c.call(obj) } if callbacks
+
+    callbacks = on_load_callbacks[:ANY]
+    callbacks.each { |c| c.call(obj) } if callbacks
   end
 end

@@ -206,14 +206,14 @@ module Zeitwerk
 
             if ruby?(abspath)
               if cref = autoloads.cref_for(abspath)
-                cref[0].const_get(cref[1], false)
+                cget(*cref)
               end
             elsif dir?(abspath) && !root_dirs.key?(abspath)
               if collapse?(abspath)
                 queue << [namespace, abspath]
               else
                 cname = inflector.camelize(basename, abspath)
-                queue << [namespace.const_get(cname, false), abspath]
+                queue << [cget(namespace, cname), abspath]
               end
             end
           end
@@ -351,7 +351,7 @@ module Zeitwerk
         # For whatever reason the constant that corresponds to this namespace has
         # already been defined, we have to recurse.
         log("the namespace #{cpath(parent, cname)} already exists, descending into #{subdir}") if logger
-        set_autoloads_in_dir(subdir, parent.const_get(cname))
+        set_autoloads_in_dir(subdir, cget(parent, cname))
       end
     end
 

@@ -86,4 +86,10 @@ module Zeitwerk::Loader::Helpers
   def cdef?(parent, cname)
     parent.const_defined?(cname, false)
   end
+
+  # @raise [NameError]
+  # @sig (Module, Symbol) -> Object
+  def cget(parent, cname)
+    parent.const_get(cname, false)
+  end
 end

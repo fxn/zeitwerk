@@ -57,7 +57,7 @@ module Zeitwerk::Loader::Config
   # User-oriented callbacks to be fired when a constant is loaded.
   #
   # @private
-  # @sig Hash[String, Array[{ () -> void }]]
+  # @sig Hash[String | Symbol, Array[{ (Object) -> void }]]
   attr_reader :on_load_callbacks
 
   # @sig #call | #debug | nil
@@ -78,7 +78,7 @@ module Zeitwerk::Loader::Config
     @collapse_dirs          = Set.new
     @eager_load_exclusions  = Set.new
     @reloading_enabled      = false
-    @on_load_callbacks      = Hash.new { |h, cpath| h[cpath] = [] }
+    @on_load_callbacks      = {}
     @logger                 = self.class.default_logger
     @tag                    = SecureRandom.hex(3)
   end
@@ -178,17 +178,23 @@ module Zeitwerk::Loader::Config
   # Supports multiple callbacks, and if there are many, they are executed in
   # the order in which they were defined.
   #
-  #   loader.on_load("SomeApiClient") do
-  #     SomeApiClient.endpoint = "https://api.dev"
+  #   loader.on_load("SomeApiClient") do |klass|
+  #     klass.endpoint = "https://api.dev"
+  #   end
+  #
+  # Can also be configured for any constant loaded:
+  #
+  #   loader.on_load do |mod|
+  #     # ...
   #   end
   #
   # @raise [TypeError]
-  # @sig (String) { () -> void } -> void
-  def on_load(cpath, &block)
-    raise TypeError, "on_load only accepts strings" unless cpath.is_a?(String)
+  # @sig (String?) { (Object) -> void } -> void
+  def on_load(cpath = :ANY, &block)
+    raise TypeError, "on_load only accepts strings" unless cpath.is_a?(String) || cpath == :ANY
 
     mutex.synchronize do
-      on_load_callbacks[cpath] << block
+      (on_load_callbacks[cpath] ||= []) << block
     end
   end
 

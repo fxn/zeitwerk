@@ -55,6 +55,55 @@ class TestOnLoad < LoaderTest
     end
   end
 
+  test "on_load gets the corresponding value passed" do
+    with_setup([["x.rb", "X = 1"]]) do
+      x = 0; loader.on_load("X") { |obj| x = obj }
+
+      assert X
+      assert_equal 1, x
+    end
+  end
+
+  test "on_load for :ANY is called for files" do
+    with_setup([["x.rb", "X = 1"]]) do
+      x = 0; loader.on_load { |obj| x = obj }
+
+      assert X
+      assert_equal 1, x
+    end
+  end
+
+  test "on_load for :ANY is called for autovivified modules" do
+    with_setup([["x/a.rb", "X::A = 1"]]) do
+      x = nil; loader.on_load { |obj| x = obj }
+
+      assert X
+      assert_equal X, x
+    end
+  end
+
+  test "multiple on_load for :ANY are called in order" do
+    with_setup([["x.rb", "X = 1"]]) do
+      x = []
+      loader.on_load { x << 1 }
+      loader.on_load { x << 2 }
+
+      assert X
+      assert_equal [1, 2], x
+    end
+  end
+
+  test "if there are specific and :ANY on_loads, the specific one runs first" do
+    with_setup([["x.rb", "X = 1"]]) do
+      x = []
+      loader.on_load { x << 2 }
+      loader.on_load("X") { x << 1 }
+
+      assert X
+      assert_equal [1, 2], x
+    end
+  end
+
   test "on_load survives reloads" do
     with_setup([["a.rb", "class A; end"]]) do
       x = 0; loader.on_load("A") { x += 1 }
