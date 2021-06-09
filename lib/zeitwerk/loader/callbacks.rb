@@ -76,12 +76,12 @@ module Zeitwerk::Loader::Callbacks
   private
 
   # @sig (String, Object) -> void
-  def run_on_load_callbacks(cpath, obj)
+  def run_on_load_callbacks(cpath, value)
     # Order matters. If present, run the most specific one.
     callbacks = reloading_enabled? ? on_load_callbacks[cpath] : on_load_callbacks.delete(cpath)
-    callbacks.each { |c| c.call(obj) } if callbacks
+    callbacks.each { |c| c.call(value) } if callbacks
 
     callbacks = on_load_callbacks[:ANY]
-    callbacks.each { |c| c.call(obj) } if callbacks
+    callbacks.each { |c| c.call(cpath, value) } if callbacks
   end
 end

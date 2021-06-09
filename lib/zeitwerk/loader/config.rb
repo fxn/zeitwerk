@@ -57,7 +57,8 @@ module Zeitwerk::Loader::Config
   # User-oriented callbacks to be fired when a constant is loaded.
   #
   # @private
-  # @sig Hash[String | Symbol, Array[{ (Object) -> void }]]
+  # @sig Hash[String, Array[{ (Object) -> void }]]
+  #      Hash[Symbol, Array[{ (String, Object) -> void }]]
   attr_reader :on_load_callbacks
 
   # @sig #call | #debug | nil
@@ -184,7 +185,7 @@ module Zeitwerk::Loader::Config
   #
   # Can also be configured for any constant loaded:
   #
-  #   loader.on_load do |mod|
+  #   loader.on_load do |cpath, value|
   #     # ...
   #   end
   #

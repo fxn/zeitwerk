@@ -541,7 +541,7 @@ Uses cases:
 
 However, let me stress that the easiest way to accomplish that is to write whatever you have to do in the actual target file. `on_load` use cases are edgy, use it only if appropriate.
 
-`on_load` receives the name of the target class or module as a string. The given block is executed every time its corresponding file is loaded. That includes reloads.
+`on_load` gets a target constant path as a string (e.g., "User", or "Service::NotificationsGateway"). When fired, its block receives the stored value. The callback is executed every time the target is loaded. That includes reloads.
 
 Multiple callbacks on the same target are supported, and they run in order of definition.
 
@@ -549,13 +549,15 @@ The block is executed once the loader has loaded the target. In particular, if t
 
 Defining a callback for a target not managed by the receiver is not an error, the block simply won't ever be executed.
 
-It is also possible to be called when any constant is loaded by the loader:
+It is also possible to be called when any constant managed by the loader is loaded:
 
 ```ruby
-loader.on_load do |obj|
+loader.on_load do |cpath, value|
   # ...
 end
 ```
+
+The block gets the constant path as a string (e.g., "User", or "Foo::VERSION"), and the value it stores (e.g., the class object stored in `User`, or "2.5.0").
 
 Multiple callbacks like these are supported, and they run in order of definition.
 

@@ -66,19 +66,43 @@ class TestOnLoad < LoaderTest
 
   test "on_load for :ANY is called for files" do
     with_setup([["x.rb", "X = 1"]]) do
-      x = 0; loader.on_load { |obj| x = obj }
+      a = b = nil
+      loader.on_load do |cpath, value|
+        a = cpath
+        b = value
+      end
 
       assert X
-      assert_equal 1, x
+      assert_equal "X", a
+      assert_equal 1, b
     end
   end
 
   test "on_load for :ANY is called for autovivified modules" do
     with_setup([["x/a.rb", "X::A = 1"]]) do
-      x = nil; loader.on_load { |obj| x = obj }
+      a = b = nil
+      loader.on_load do |cpath, value|
+        a = cpath
+        b = value
+      end
 
       assert X
-      assert_equal X, x
+      assert_equal "X", a
+      assert_equal X, b
+    end
+  end
+
+  test "on_load for :ANY gets passed constant paths" do
+    with_setup([["x/a.rb", "X::A = 1"]]) do
+      a = b = nil
+      loader.on_load do |cpath, value|
+        a = cpath
+        b = value
+      end
+
+      assert X::A
+      assert_equal "X::A", a
+      assert_equal X::A, b
     end
   end
 
