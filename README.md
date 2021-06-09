@@ -532,14 +532,11 @@ loader.on_load("SomeApiClient") do |klass, _abspath|
 end
 ```
 
-Uses cases:
+Some uses cases:
 
 * Doing something with an autoloadable class or module in a Rails application during initialization, in a way that plays well with reloading. As in the previous example.
 * Delaying the execution of the block until the class is loaded for performance.
 * Delaying the execution of the block until the class is loaded because it follows the adapter pattern and better not to load the class if the user does not need it.
-* Etc.
-
-However, let me stress that the easiest way to accomplish that is to write whatever you have to do in the actual target file. `on_load` use cases are edgy, use it only if appropriate.
 
 `on_load` gets a target constant path as a string (e.g., "User", or "Service::NotificationsGateway"). When fired, its block receives the stored value, and the absolute path to the corresponding file or directory as a string. The callback is executed every time the target is loaded. That includes reloads.
 
