@@ -522,12 +522,12 @@ With `on_load`, it is easy to schedule code at boot time that initializes `endpo
 
 ```ruby
 # config/environments/development.rb
-loader.on_load("SomeApiClient") do |klass|
+loader.on_load("SomeApiClient") do |klass, _abspath|
   klass.endpoint = "https://api.dev"
 end
 
 # config/environments/production.rb
-loader.on_load("SomeApiClient") do |klass|
+loader.on_load("SomeApiClient") do |klass, _abspath|
   klass.endpoint = "https://api.prod"
 end
 ```
@@ -541,7 +541,7 @@ Uses cases:
 
 However, let me stress that the easiest way to accomplish that is to write whatever you have to do in the actual target file. `on_load` use cases are edgy, use it only if appropriate.
 
-`on_load` gets a target constant path as a string (e.g., "User", or "Service::NotificationsGateway"). When fired, its block receives the stored value. The callback is executed every time the target is loaded. That includes reloads.
+`on_load` gets a target constant path as a string (e.g., "User", or "Service::NotificationsGateway"). When fired, its block receives the stored value, and the absolute path to the corresponding file or directory as a string. The callback is executed every time the target is loaded. That includes reloads.
 
 Multiple callbacks on the same target are supported, and they run in order of definition.
 
@@ -552,14 +552,16 @@ Defining a callback for a target not managed by the receiver is not an error, th
 It is also possible to be called when any constant managed by the loader is loaded:
 
 ```ruby
-loader.on_load do |cpath, value|
+loader.on_load do |cpath, value, abspath|
   # ...
 end
 ```
 
-The block gets the constant path as a string (e.g., "User", or "Foo::VERSION"), and the value it stores (e.g., the class object stored in `User`, or "2.5.0").
+The block gets the constant path as a string (e.g., "User", or "Foo::VERSION"), the value it stores (e.g., the class object stored in `User`, or "2.5.0"), and the absolute path to the corresponding file or directory as a string.
 
 Multiple callbacks like these are supported, and they run in order of definition.
+
+There are use cases for this last catch-all callback, but they are rare. If you just need to understand how things are being loaded for debugging purposes, please remember that `Zeitwerk::Loader#log!` logs plenty of information.
 
 If both types of callbacks are defined, the specific ones run first.
 

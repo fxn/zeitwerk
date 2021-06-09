@@ -83,4 +83,8 @@ class LoaderTest < Minitest::Test
       end
     end
   end
+
+  def assert_abspath(expected, actual)
+    assert_equal(File.expand_path(expected, TMP_DIR), actual)
+  end
 end

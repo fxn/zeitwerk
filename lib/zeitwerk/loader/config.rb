@@ -57,8 +57,8 @@ module Zeitwerk::Loader::Config
   # User-oriented callbacks to be fired when a constant is loaded.
   #
   # @private
-  # @sig Hash[String, Array[{ (Object) -> void }]]
-  #      Hash[Symbol, Array[{ (String, Object) -> void }]]
+  # @sig Hash[String, Array[{ (Object, String) -> void }]]
+  #      Hash[Symbol, Array[{ (String, Object, String) -> void }]]
   attr_reader :on_load_callbacks
 
   # @sig #call | #debug | nil
@@ -179,18 +179,19 @@ module Zeitwerk::Loader::Config
   # Supports multiple callbacks, and if there are many, they are executed in
   # the order in which they were defined.
   #
-  #   loader.on_load("SomeApiClient") do |klass|
+  #   loader.on_load("SomeApiClient") do |klass, _abspath|
   #     klass.endpoint = "https://api.dev"
   #   end
   #
   # Can also be configured for any constant loaded:
   #
-  #   loader.on_load do |cpath, value|
+  #   loader.on_load do |cpath, value, abspath|
   #     # ...
   #   end
   #
   # @raise [TypeError]
-  # @sig (String?) { (Object) -> void } -> void
+  # @sig (String) { (Object, String) -> void } -> void
+  #      (:ANY) { (String, Object, String) -> void } -> void
   def on_load(cpath = :ANY, &block)
     raise TypeError, "on_load only accepts strings" unless cpath.is_a?(String) || cpath == :ANY
 

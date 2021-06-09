@@ -55,54 +55,46 @@ class TestOnLoad < LoaderTest
     end
   end
 
-  test "on_load gets the corresponding value passed" do
+  test "on_load gets the expected arguments passed" do
     with_setup([["x.rb", "X = 1"]]) do
-      x = 0; loader.on_load("X") { |obj| x = obj }
+      args = []; loader.on_load("X") { |*a| args = a }
 
       assert X
-      assert_equal 1, x
+      assert_equal 1, args[0]
+      assert_abspath "x.rb", args[1]
     end
   end
 
-  test "on_load for :ANY is called for files" do
+  test "on_load for :ANY is called for files with the expected arguments" do
     with_setup([["x.rb", "X = 1"]]) do
-      a = b = nil
-      loader.on_load do |cpath, value|
-        a = cpath
-        b = value
-      end
+      args = []; loader.on_load { |*a| args = a }
 
       assert X
-      assert_equal "X", a
-      assert_equal 1, b
+      assert_equal "X", args[0]
+      assert_equal 1, args[1]
+      assert_abspath "x.rb", args[2]
     end
   end
 
-  test "on_load for :ANY is called for autovivified modules" do
+  test "on_load for :ANY is called for autovivified modules with the expected arguments" do
     with_setup([["x/a.rb", "X::A = 1"]]) do
-      a = b = nil
-      loader.on_load do |cpath, value|
-        a = cpath
-        b = value
-      end
+      args = []; loader.on_load { |*a| args = a }
 
       assert X
-      assert_equal "X", a
-      assert_equal X, b
+      assert_equal "X", args[0]
+      assert_equal X, args[1]
+      assert_abspath "x", args[2]
     end
   end
 
-  test "on_load for :ANY gets passed constant paths" do
+  test "on_load for :ANY is called for namespaced constants with the expected arguments" do
     with_setup([["x/a.rb", "X::A = 1"]]) do
-      a = b = nil
-      loader.on_load do |cpath, value|
-        a = cpath
-        b = value
-      end
+      args = []; loader.on_load { |*a| args = a }
 
       assert X::A
-      assert_equal "X::A", a
-      assert_equal X::A, b
+      assert_equal "X::A", args[0]
+      assert_equal X::A, args[1]
+      assert_abspath "x/a.rb", args[2]
     end
   end
 
