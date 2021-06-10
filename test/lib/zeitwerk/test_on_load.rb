@@ -134,6 +134,46 @@ class TestOnLoad < LoaderTest
     end
   end
 
+  test "on_load for namespaces gets called with child constants available (implicit)" do
+    with_setup([["x/a.rb", "X::A = 1"]]) do
+      ok = false
+      loader.on_load("X") { ok = X.const_defined?(:A) }
+
+      assert X
+      assert ok
+    end
+  end
+
+  test "on_load for namespaces gets called with child constants available (explicit)" do
+    with_setup([["x.rb", "module X; end"], ["x/a.rb", "X::A = 1"]]) do
+      ok = false
+      loader.on_load("X") { ok = X.const_defined?(:A) }
+
+      assert X
+      assert ok
+    end
+  end
+
+  test "on_load :ANY for namespaces gets called with child constants available (implicit)" do
+    with_setup([["x/a.rb", "X::A = 1"]]) do
+      ok = false
+      loader.on_load { |cpath| ok = X.const_defined?(:A) if cpath == "X" }
+
+      assert X
+      assert ok
+    end
+  end
+
+  test "on_load :ANY for namespaces gets called with child constants available (explicit)" do
+    with_setup([["x.rb", "module X; end"], ["x/a.rb", "X::A = 1"]]) do
+      ok = false
+      loader.on_load { |cpath| ok = X.const_defined?(:A) if cpath == "X" }
+
+      assert X
+      assert ok
+    end
+  end
+
   test "if reloading is disabled, we deplete the hash (performance test)" do
     on_teardown do
       remove_const :A
