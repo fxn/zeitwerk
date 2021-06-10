@@ -1,5 +1,47 @@
 # CHANGELOG
 
+## 2.5.0 (Unreleased)
+
+* There is a new catch-all `Zeitwerk::Loader#on_load` that takes no argument:
+
+  ```ruby
+  loader.on_load do |cpath, value, abspath|
+    # ...
+  end
+  ```
+
+  That one is triggered for all constants loaded by the receiver. Check the docs for usage.
+
+  Please, remember that if you want to trace the activity of a loader, `Zeitwerk::Loader#log!` logs plenty of information.
+
+* The block of the existing `Zeitwerk::Loader#on_load` receives also the value stored in the constant, and the absolute path to its corresponding file or directory:
+
+  ```ruby
+  loader.on_load("Service::NotificationsGateway") do |klass, abspath|
+    # ...
+  end
+  ```
+
+  Remember that blocks can be defined to take less arguments than passed. So this change is backwards compatible. If you had
+
+  ```ruby
+  loader.on_load("Service::NotificationsGateway") do
+    Service::NotificationsGateway.endpoint = ...
+  end
+  ```
+
+  That works.
+
+* Detects external namespaces defined with `Module#autoload`. If your project reopens a 3rd party namespace, Zeitwerk detects it and does not consider the namespace to be managed by the loader (automatic descend, ignored for reloads, etc.). However, the loader did not do that if the namespace had only an autoload in the 3rd party code yet to be executed. Now it does.
+
+* Eliminates internal use of `File.realpath`. During logging, root dirs are shown as configured if they contained symlinks.
+
+* Improves performance.
+
+* Deletes the long time deprecated preload API.
+
+* Requires Ruby 2.5.
+
 ## 2.4.2 (27 November 2020)
 
 * Implements `Zeitwerk::Loader#on_load`, which allows you to configure blocks of code to be executed after a certain class or module have been loaded:
