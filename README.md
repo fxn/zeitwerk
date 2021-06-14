@@ -10,6 +10,7 @@
 - [Introduction](#introduction)
 - [Synopsis](#synopsis)
 - [File structure](#file-structure)
+  - [Setting a custom namespace explicitly](#setting-a-custom-namespace-explicitly)
   - [Implicit namespaces](#implicit-namespaces)
   - [Explicit namespaces](#explicit-namespaces)
   - [Collapsing directories](#collapsing-directories)
@@ -139,6 +140,9 @@ Zeitwerk understands that their respective files and subdirectories belong to th
 app/models/user.rb                        -> User
 app/controllers/admin/users_controller.rb -> Admin::UsersController
 ```
+
+<a id="markdown-setting-a-custom-namespace-explicitly" name="setting-a-custom-namespace-explicitly"></a>
+### Setting a custom namespace explicitly
 
 Alternatively, you can associate a custom namespace to a root directory by passing a class or module object in the optional `namespace` keyword argument.
 
