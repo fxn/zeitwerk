@@ -11,7 +11,7 @@
 - [Synopsis](#synopsis)
 - [File structure](#file-structure)
   - [The idea: File paths match constant paths](#the-idea-file-paths-match-constant-paths)
-  - [Root directories](#root-directories)
+  - [Root directories and root namespaces](#root-directories-and-root-namespaces)
     - [The default root namespace is `Object`](#the-default-root-namespace-is-object)
     - [Custom root namespaces](#custom-root-namespaces)
     - [Nested root directories](#nested-root-directories)
@@ -135,8 +135,8 @@ lib/my_gem/woo/zoo.rb -> MyGem::Woo::Zoo
 
 You can tune that a bit by [collapsing directories](#collapsing-directories), or by [ignoring parts of the project](#ignoring-parts-of-the-project), but that is the main idea.
 
-<a id="markdown-root-directories" name="root-directories"></a>
-### Root directories
+<a id="markdown-root-directories-and-root-namespaces" name="root-directories-and-root-namespaces"></a>
+### Root directories and root namespaces
 
 Every directory configured with `push_dir` is called a _root directory_, and they represent _root namespaces_.
 
@@ -162,7 +162,7 @@ serializers/user_serializer.rb -> UserSerializer
 <a id="markdown-custom-root-namespaces" name="custom-root-namespaces"></a>
 #### Custom root namespaces
 
-You can associate a custom root namespace to a root directory by passing a class or module object in the optional `namespace` keyword argument.
+While `Object` is by far the most common root namespace, you can associate a different one to a particular root directory. The method `push_dir` accepts a class or module object in the optional `namespace` keyword argument.
 
 For example, given:
 
@@ -172,7 +172,7 @@ require "active_job/queue_adapters"
 loader.push_dir("#{__dir__}/adapters", namespace: ActiveJob::QueueAdapters)
 ```
 
-the correspondence should be:
+a file defining `ActiveJob::QueueAdapters::MyQueueAdapter` does not need the conventional parent directories, you can (and have to) store the file directly below `adapters`:
 
 ```
 adapters/my_queue_adapter.rb -> ActiveJob::QueueAdapters::MyQueueAdapter
