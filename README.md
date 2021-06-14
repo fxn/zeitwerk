@@ -14,10 +14,10 @@
   - [Root directories](#root-directories)
     - [The default root namespace is `Object`](#the-default-root-namespace-is-object)
     - [Custom root namespaces](#custom-root-namespaces)
+    - [Nested root directories](#nested-root-directories)
   - [Implicit namespaces](#implicit-namespaces)
   - [Explicit namespaces](#explicit-namespaces)
   - [Collapsing directories](#collapsing-directories)
-  - [Nested root directories](#nested-root-directories)
 - [Usage](#usage)
   - [Setup](#setup)
     - [Generic](#generic)
@@ -189,6 +189,19 @@ and now your adapter can be stored directly in that directory: `adapters/my_queu
 
 Please, note that the given root namespace must be non-reloadable, though autoloaded constants in that namespace can be. That is, if you associate `app/api` with an existing `Api` module, that module should not be reloadable. However, if the project defines and autoloads the class `Api::Deliveries`, that one can be reloaded.
 
+<a id="markdown-nested-root-directories" name="nested-root-directories"></a>
+#### Nested root directories
+
+Root directories should not be ideally nested, but Zeitwerk supports them because in Rails, for example, both `app/models` and `app/models/concerns` belong to the autoload paths.
+
+Zeitwerk detects nested root directories, and treats them as roots only. In the example above, `concerns` is not considered to be a namespace below `app/models`. For example, the file:
+
+```
+app/models/concerns/geolocatable.rb
+```
+
+should define `Geolocatable`, not `Concerns::Geolocatable`.
+
 <a id="markdown-implicit-namespaces" name="implicit-namespaces"></a>
 ### Implicit namespaces
 
@@ -248,19 +261,6 @@ To illustrate usage of glob patterns, if `actions` in the example above is part 
 ```ruby
 loader.collapse("#{__dir__}/*/actions")
 ```
-
-<a id="markdown-nested-root-directories" name="nested-root-directories"></a>
-### Nested root directories
-
-Root directories should not be ideally nested, but Zeitwerk supports them because in Rails, for example, both `app/models` and `app/models/concerns` belong to the autoload paths.
-
-Zeitwerk detects nested root directories, and treats them as roots only. In the example above, `concerns` is not considered to be a namespace below `app/models`. For example, the file:
-
-```
-app/models/concerns/geolocatable.rb
-```
-
-should define `Geolocatable`, not `Concerns::Geolocatable`.
 
 <a id="markdown-usage" name="usage"></a>
 ## Usage
