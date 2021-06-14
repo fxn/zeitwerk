@@ -10,7 +10,10 @@
 - [Introduction](#introduction)
 - [Synopsis](#synopsis)
 - [File structure](#file-structure)
-  - [Setting a custom namespace explicitly](#setting-a-custom-namespace-explicitly)
+  - [The idea: File paths match constant paths](#the-idea-file-paths-match-constant-paths)
+  - [Root directories](#root-directories)
+    - [The default root namespace is `Object`](#the-default-root-namespace-is-object)
+    - [Custom root namespaces](#custom-root-namespaces)
   - [Implicit namespaces](#implicit-namespaces)
   - [Explicit namespaces](#explicit-namespaces)
   - [Collapsing directories](#collapsing-directories)
@@ -118,6 +121,9 @@ Zeitwerk::Loader.eager_load_all
 <a id="markdown-file-structure" name="file-structure"></a>
 ## File structure
 
+<a id="markdown-the-idea-file-paths-match-constant-paths" name="the-idea-file-paths-match-constant-paths"></a>
+### The idea: File paths match constant paths
+
 To have a file structure Zeitwerk can work with, just name files and directories after the name of the classes and modules they define:
 
 ```
@@ -127,28 +133,50 @@ lib/my_gem/bar_baz.rb -> MyGem::BarBaz
 lib/my_gem/woo/zoo.rb -> MyGem::Woo::Zoo
 ```
 
-Every directory configured with `push_dir` acts as root namespace. There can be several of them. For example, given
+You can tune that a bit by [collapsing directories](#collapsing-directories), or by [ignoring parts of the project](#ignoring-parts-of-the-project), but that is the main idea.
+
+<a id="markdown-root-directories" name="root-directories"></a>
+### Root directories
+
+Every directory configured with `push_dir` is called a _root directory_, and they represent _root namespaces_.
+
+<a id="markdown-the-default-root-namespace-is-object" name="the-default-root-namespace-is-object"></a>
+#### The default root namespace is `Object`
+
+By default, the namespace associated to a root directory is the top-level one: `Object`.
+
+For example, given
 
 ```ruby
-loader.push_dir(Rails.root.join("app/models"))
-loader.push_dir(Rails.root.join("app/controllers"))
+loader.push_dir("#{__dir__}/models")
+loader.push_dir("#{__dir__}/serializers"))
 ```
 
-Zeitwerk understands that their respective files and subdirectories belong to the root namespace:
+these are the expected classes and modules being defined by these files:
 
 ```
-app/models/user.rb                        -> User
-app/controllers/admin/users_controller.rb -> Admin::UsersController
+models/user.rb                 -> User
+serializers/user_serializer.rb -> UserSerializer
 ```
 
-<a id="markdown-setting-a-custom-namespace-explicitly" name="setting-a-custom-namespace-explicitly"></a>
-### Setting a custom namespace explicitly
+<a id="markdown-custom-root-namespaces" name="custom-root-namespaces"></a>
+#### Custom root namespaces
 
-Alternatively, you can associate a custom namespace to a root directory by passing a class or module object in the optional `namespace` keyword argument.
+You can associate a custom root namespace to a root directory by passing a class or module object in the optional `namespace` keyword argument.
 
-For example, Active Job queue adapters have to define a constant after their name in `ActiveJob::QueueAdapters`.
+For example, Active Job queue adapters have to define a constant after their name in `ActiveJob::QueueAdapters`, like `ActiveJob::QueueAdapters::MyQueueAdapter`.
 
-So, if you declare
+If the project configures
+
+```ruby
+require "active_job"
+require "active_job/queue_adapters"
+loader.push_dir("#{__dir__}/adapters")
+```
+
+then, the adapter class should be defined in the file `adapters/active_job/queue_adapters/my_queue_adapter.rb`.
+
+However, you can alternatively set a custom root namespace for that root directory:
 
 ```ruby
 require "active_job"
@@ -156,9 +184,10 @@ require "active_job/queue_adapters"
 loader.push_dir("#{__dir__}/adapters", namespace: ActiveJob::QueueAdapters)
 ```
 
-your adapter can be stored directly in that directory instead of the canonical `#{__dir__}/active_job/queue_adapters`.
+and now your adapter can be stored directly in that directory: `adapters/my_queue_adapter.rb`.
 
-Please, note that the given namespace must be non-reloadable, though autoloaded constants in that namespace can be. That is, if you associate `app/api` with an existing `Api` module, that module should not be reloadable. However, if the project defines and autoloads the class `Api::V2::Deliveries`, that one can be reloaded.
+
+Please, note that the given root namespace must be non-reloadable, though autoloaded constants in that namespace can be. That is, if you associate `app/api` with an existing `Api` module, that module should not be reloadable. However, if the project defines and autoloads the class `Api::Deliveries`, that one can be reloaded.
 
 <a id="markdown-implicit-namespaces" name="implicit-namespaces"></a>
 ### Implicit namespaces
