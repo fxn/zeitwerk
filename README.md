@@ -164,19 +164,7 @@ serializers/user_serializer.rb -> UserSerializer
 
 You can associate a custom root namespace to a root directory by passing a class or module object in the optional `namespace` keyword argument.
 
-For example, Active Job queue adapters have to define a constant after their name in `ActiveJob::QueueAdapters`, like `ActiveJob::QueueAdapters::MyQueueAdapter`.
-
-If the project configures
-
-```ruby
-require "active_job"
-require "active_job/queue_adapters"
-loader.push_dir("#{__dir__}/adapters")
-```
-
-then, the adapter class should be defined in the file `adapters/active_job/queue_adapters/my_queue_adapter.rb`.
-
-However, you can alternatively set a custom root namespace for that root directory:
+For example, given:
 
 ```ruby
 require "active_job"
@@ -184,8 +172,11 @@ require "active_job/queue_adapters"
 loader.push_dir("#{__dir__}/adapters", namespace: ActiveJob::QueueAdapters)
 ```
 
-and now your adapter can be stored directly in that directory: `adapters/my_queue_adapter.rb`.
+the correspondence should be:
 
+```
+adapters/my_queue_adapter.rb -> ActiveJob::QueueAdapters::MyQueueAdapter
+```
 
 Please, note that the given root namespace must be non-reloadable, though autoloaded constants in that namespace can be. That is, if you associate `app/api` with an existing `Api` module, that module should not be reloadable. However, if the project defines and autoloads the class `Api::Deliveries`, that one can be reloaded.
 
