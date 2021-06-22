@@ -140,9 +140,9 @@ Classes and modules may have nested constants defined in their body, it is not r
 ```ruby
 # http/crawler.rb
 class Http::Crawler
-  MAX_RETRIES = 10 # This is fine.
+  MAX_RETRIES = 10 # this is fine
 
-  class RequestAttempt # Inner class, also fine.
+  class RequestAttempt # inner class, also fine
   end
 end
 ```
