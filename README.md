@@ -135,6 +135,18 @@ lib/my_gem/woo/zoo.rb -> MyGem::Woo::Zoo
 
 You can tune that a bit by [collapsing directories](#collapsing-directories), or by [ignoring parts of the project](#ignoring-parts-of-the-project), but that is the main idea.
 
+Classes and modules may have nested constants defined in their body, it is not required to have a dedicated file in a subdirectory for them. For example, `http/crawler.rb` in the next example has to implement `Http::Crawler`, that is not optional, but `Http::Crawler` can in turn define nested constants if you will:
+
+```ruby
+# http/crawler.rb
+class Http::Crawler
+  MAX_RETRIES = 10 # This is fine.
+
+  class RequestAttempt # Inner class, also fine.
+  end
+end
+```
+
 <a id="markdown-root-directories-and-root-namespaces" name="root-directories-and-root-namespaces"></a>
 ### Root directories and root namespaces
 
