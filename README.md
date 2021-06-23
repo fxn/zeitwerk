@@ -11,6 +11,7 @@
 - [Synopsis](#synopsis)
 - [File structure](#file-structure)
   - [The idea: File paths match constant paths](#the-idea-file-paths-match-constant-paths)
+  - [Inner simple constants](#inner-simple-constants)
   - [Root directories and root namespaces](#root-directories-and-root-namespaces)
     - [The default root namespace is `Object`](#the-default-root-namespace-is-object)
     - [Custom root namespaces](#custom-root-namespaces)
@@ -135,15 +136,22 @@ lib/my_gem/woo/zoo.rb -> MyGem::Woo::Zoo
 
 You can tune that a bit by [collapsing directories](#collapsing-directories), or by [ignoring parts of the project](#ignoring-parts-of-the-project), but that is the main idea.
 
-Classes and modules may have nested constants defined in their body, it is not required to have a dedicated file in a subdirectory for them. For example, `http/crawler.rb` in the next example has to implement `Http::Crawler`, that is not optional, but `Http::Crawler` can in turn define nested constants if you will:
+<a id="markdown-inner-simple-constants" name="inner-simple-constants"></a>
+### Inner simple constants
+
+While a simple constant like `HttpCrawler::MAX_RETRIES` can be defined in its own file:
 
 ```ruby
-# http/crawler.rb
-class Http::Crawler
-  MAX_RETRIES = 10 # this is fine
+# http_crawler/max_retries.rb
+HttpCrawler::MAX_RETRIES = 10
+```
 
-  class RequestAttempt # inner class, also fine
-  end
+that is not required, you can also define it the regular way:
+
+```ruby
+# http_crawler.rb
+class HttpCrawler
+  MAX_RETRIES = 10
 end
 ```
 
