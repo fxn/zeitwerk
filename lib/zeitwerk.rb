@@ -10,4 +10,5 @@ module Zeitwerk
   require_relative "zeitwerk/gem_inflector"
   require_relative "zeitwerk/kernel"
   require_relative "zeitwerk/error"
+  require_relative "zeitwerk/version"
 end
