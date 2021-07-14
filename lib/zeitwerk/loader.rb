@@ -193,6 +193,8 @@ module Zeitwerk
       mutex.synchronize do
         break if @eager_loaded
 
+        log("eager load start") if logger
+
         queue = []
         actual_root_dirs.each do |root_dir, namespace|
           queue << [namespace, root_dir] unless excluded_from_eager_load?(root_dir)
@@ -225,6 +227,8 @@ module Zeitwerk
         autoloaded_dirs.clear
 
         @eager_loaded = true
+
+        log("eager load end") if logger
       end
     end
 

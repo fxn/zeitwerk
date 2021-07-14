@@ -162,6 +162,24 @@ class TestLogging < LoaderTest
     end
   end
 
+  test "logs when eager loading starts" do
+    files = [["x.rb", "X = true"]]
+    with_files(files) do
+      assert_logged(/eager load start/) do
+        loader.eager_load
+      end
+    end
+  end
+
+  test "logs when eager loading ends" do
+    files = [["x.rb", "X = true"]]
+    with_files(files) do
+      assert_logged(/eager load end/) do
+        loader.eager_load
+      end
+    end
+  end
+
   test "eager loading skips files that would map to already loaded constants" do
     on_teardown { remove_const :X }
 
