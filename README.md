@@ -623,7 +623,7 @@ end
 
 `on_unload` gets a target constant path as a string (e.g., "User", or "Service::NotificationsGateway"). When fired, its block receives the stored value, and the absolute path to the corresponding file or directory as a string. The callback is executed every time the target is unloaded.
 
-`on_unload` blocks are executed before the class is unloaded, but in the middle of unloading, which happens in an unespecified order. Therefore, **that callback should not refer to any reloadable constant because there is no guarantee the constant works there**. Those blocks should rely on objects only, as in the example above, or regular constants not managed by the loader. This remark is transitive, applies to any methods invoked within the block.
+`on_unload` blocks are executed before the class is unloaded, but in the middle of unloading, which happens in an unspecified order. Therefore, **that callback should not refer to any reloadable constant because there is no guarantee the constant works there**. Those blocks should rely on objects only, as in the example above, or regular constants not managed by the loader. This remark is transitive, applies to any methods invoked within the block.
 
 Multiple callbacks on the same target are supported, and they run in order of definition.
 
