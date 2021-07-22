@@ -74,7 +74,7 @@ module Zeitwerk::Loader::Config
   # This is useful in order to be able to distinguish loaders in logging.
   #
   # @sig String
-  attr_accessor :tag
+  attr_reader :tag
 
   def initialize
     @initialized_at         = Time.now
