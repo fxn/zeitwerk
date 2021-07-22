@@ -26,7 +26,7 @@ class TestOnUnload < LoaderTest
     end
   end
 
-  test "on_unload blocks get the expected arguments passed" do
+  test "on_unload blocks for cpaths get the expected arguments passed" do
     with_setup([["x.rb", "X = 1"]]) do
       args = []; loader.on_unload("X") { |*a| args = a }
 
@@ -35,6 +35,18 @@ class TestOnUnload < LoaderTest
 
       assert_equal 1, args[0]
       assert_abspath "x.rb", args[1]
+    end
+  end
+
+  test "on_unload for cpaths is called before the constant is removed" do
+    with_setup([["x.rb", "X = 1"]]) do
+      defined_X = false
+      loader.on_unload("X") { defined_X = Object.const_defined?(:X) }
+
+      assert X
+      loader.reload
+
+      assert defined_X
     end
   end
 
@@ -65,6 +77,18 @@ class TestOnUnload < LoaderTest
       assert_equal "X", args[0][0]
       assert_equal 1, args[0][1]
       assert_abspath "x.rb", args[0][2]
+    end
+  end
+
+  test "on_unload for :ANY is called before the constant is removed" do
+    with_setup([["x.rb", "X = 1"]]) do
+      defined_X = false
+      loader.on_unload { defined_X = Object.const_defined?(:X) }
+
+      assert X
+      loader.reload
+
+      assert defined_X
     end
   end
 
