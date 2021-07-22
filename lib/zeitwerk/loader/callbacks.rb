@@ -79,9 +79,9 @@ module Zeitwerk::Loader::Callbacks
   def run_on_load_callbacks(cpath, value, abspath)
     # Order matters. If present, run the most specific one.
     callbacks = reloading_enabled? ? on_load_callbacks[cpath] : on_load_callbacks.delete(cpath)
-    callbacks.each { |c| c.call(value, abspath) } if callbacks
+    callbacks&.each { |c| c.call(value, abspath) }
 
     callbacks = on_load_callbacks[:ANY]
-    callbacks.each { |c| c.call(cpath, value, abspath) } if callbacks
+    callbacks&.each { |c| c.call(cpath, value, abspath) }
   end
 end

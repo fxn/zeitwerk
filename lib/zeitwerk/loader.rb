@@ -131,7 +131,12 @@ module Zeitwerk
           end
         end
 
-        to_unload.each_value do |(abspath, (parent, cname))|
+        to_unload.each do |cpath, (abspath, (parent, cname))|
+          unless on_unload_callbacks.empty?
+            value = parent.const_get(cname)
+            run_on_unload_callbacks(cpath, value, abspath)
+          end
+
           unload_cref(parent, cname)  if cdef?(parent, cname)
           unloaded_files.add(abspath) if ruby?(abspath)
         end
@@ -430,6 +435,13 @@ module Zeitwerk
           end
         end
       end
+    end
+
+    # @sig (String, Object, String) -> void
+    def run_on_unload_callbacks(cpath, value, abspath)
+      # Order matters. If present, run the most specific one.
+      on_unload_callbacks[cpath]&.each { |c| c.call(value, abspath) }
+      on_unload_callbacks[:ANY]&.each { |c| c.call(cpath, value, abspath) }
     end
 
     # @sig (Module, Symbol) -> void

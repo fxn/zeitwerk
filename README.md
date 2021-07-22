@@ -31,6 +31,8 @@
     - [Zeitwerk::GemInflector](#zeitwerkgeminflector)
     - [Custom inflector](#custom-inflector)
   - [The on_load callback](#the-on_load-callback)
+  - [The on_unload callback](#the-on_unload-callback)
+    - [Technical details](#technical-details)
   - [Logging](#logging)
     - [Loader tag](#loader-tag)
   - [Ignoring parts of the project](#ignoring-parts-of-the-project)
@@ -605,6 +607,50 @@ Multiple callbacks like these are supported, and they run in order of definition
 There are use cases for this last catch-all callback, but they are rare. If you just need to understand how things are being loaded for debugging purposes, please remember that `Zeitwerk::Loader#log!` logs plenty of information.
 
 If both types of callbacks are defined, the specific ones run first.
+
+<a id="markdown-the-on_unload-callback" name="the-on_unload-callback"></a>
+### The on_unload callback
+
+When reloading is enabled, you may occasionally need to execute something before a certain autoloaded class or module is unloaded. The `on_unload` callback allows you to do that.
+
+For example, let's imagine that a `Country` class fetches a list of countries and caches them when it is loaded. You might want to clear that cache if unloaded:
+
+```ruby
+loader.on_unload("Country") do |klass, _abspath|
+  klass.clear_cache
+end
+```
+
+`on_unload` gets a target constant path as a string (e.g., "User", or "Service::NotificationsGateway"). When fired, its block receives the stored value, and the absolute path to the corresponding file or directory as a string. The callback is executed every time the target is unloaded.
+
+`on_unload` blocks are executed before the class is unloaded, but in the middle of unloading, which happens in an unespecified order. Therefore, **that callback should not refer to any reloadable constant because there is no guarantee the constant works there**. Those blocks should rely on objects only, as in the example above, or regular constants not managed by the loader. This remark is transitive, applies to any methods invoked within the block.
+
+Multiple callbacks on the same target are supported, and they run in order of definition.
+
+Defining a callback for a target not managed by the receiver is not an error, the block simply won't ever be executed.
+
+It is also possible to be called when any constant managed by the loader is unloaded:
+
+```ruby
+loader.on_unload do |cpath, value, abspath|
+  # ...
+end
+```
+
+The block gets the constant path as a string (e.g., "User", or "Foo::VERSION"), the value it stores (e.g., the class object stored in `User`, or "2.5.0"), and the absolute path to the corresponding file or directory as a string.
+
+Multiple callbacks like these are supported, and they run in order of definition.
+
+If both types of callbacks are defined, the specific ones run first.
+
+<a id="markdown-technical-details" name="technical-details"></a>
+#### Technical details
+
+Zeitwerk uses the word "unload" to ease communication and for symmetry with `on_load`. However, in Ruby you cannot unload things for real. So, what does `on_unload` technically happen?
+
+When unloading, Zeitwerk issues `Module#remove_const` calls. Classes and modules are no longer reachable through their constants, and `on_unload` callbacks are executed right before those calls.
+
+Technically, though, the objects themselves are still alive, but if everything is used as expected and they are not stored in any non-reloadable place (don't do that), they are ready for garbage collection, which is when the real unloading happens.
 
 <a id="markdown-logging" name="logging"></a>
 ### Logging

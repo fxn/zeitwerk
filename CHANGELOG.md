@@ -2,6 +2,16 @@
 
 ## 2.5.0 (Unreleased)
 
+* Implements `Zeitwerk::Loader#on_unload`, which allows you to configure blocks of code to be executed before a certain class or module gets unloaded:
+
+  ```ruby
+  loader.on_unload("Country") do |klass, _abspath|
+    klass.clear_cache
+  end
+  ```
+
+  See the [documentation](https://github.com/fxn/zeitwerk/blob/master/README.md#the-on_unload-callback) for further details.
+
 * There is a new catch-all `Zeitwerk::Loader#on_load` that takes no argument:
 
   ```ruby

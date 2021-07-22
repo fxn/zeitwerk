@@ -61,6 +61,13 @@ module Zeitwerk::Loader::Config
   #      Hash[Symbol, Array[{ (String, Object, String) -> void }]]
   attr_reader :on_load_callbacks
 
+  # User-oriented callbacks to be fired before constants are removed.
+  #
+  # @private
+  # @sig Hash[String, Array[{ (Object, String) -> void }]]
+  #      Hash[Symbol, Array[{ (String, Object, String) -> void }]]
+  attr_reader :on_unload_callbacks
+
   # @sig #call | #debug | nil
   attr_accessor :logger
 
@@ -80,6 +87,7 @@ module Zeitwerk::Loader::Config
     @eager_load_exclusions  = Set.new
     @reloading_enabled      = false
     @on_load_callbacks      = {}
+    @on_unload_callbacks    = {}
     @logger                 = self.class.default_logger
     @tag                    = SecureRandom.hex(3)
   end
@@ -197,6 +205,31 @@ module Zeitwerk::Loader::Config
 
     mutex.synchronize do
       (on_load_callbacks[cpath] ||= []) << block
+    end
+  end
+
+  # Configure a block to be invoked right before a certain constant is removed.
+  # Supports multiple callbacks, and if there are many, they are executed in the
+  # order in which they were defined.
+  #
+  #   loader.on_unload("Country") do |klass, _abspath|
+  #     klass.clear_cache
+  #   end
+  #
+  # Can also be configured for any removed constant:
+  #
+  #   loader.on_unload do |cpath, value, abspath|
+  #     # ...
+  #   end
+  #
+  # @raise [TypeError]
+  # @sig (String) { (Object) -> void } -> void
+  #      (:ANY) { (String, Object) -> void } -> void
+  def on_unload(cpath = :ANY, &block)
+    raise TypeError, "on_unload only accepts strings" unless cpath.is_a?(String) || cpath == :ANY
+
+    mutex.synchronize do
+      (on_unload_callbacks[cpath] ||= []) << block
     end
   end
 
