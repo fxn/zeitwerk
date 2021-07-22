@@ -646,7 +646,7 @@ If both types of callbacks are defined, the specific ones run first.
 <a id="markdown-technical-details" name="technical-details"></a>
 #### Technical details
 
-Zeitwerk uses the word "unload" to ease communication and for symmetry with `on_load`. However, in Ruby you cannot unload things for real. So, what does `on_unload` technically happen?
+Zeitwerk uses the word "unload" to ease communication and for symmetry with `on_load`. However, in Ruby you cannot unload things for real. So, when does `on_unload` technically happen?
 
 When unloading, Zeitwerk issues `Module#remove_const` calls. Classes and modules are no longer reachable through their constants, and `on_unload` callbacks are executed right before those calls.
 
