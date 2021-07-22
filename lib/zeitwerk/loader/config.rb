@@ -115,7 +115,7 @@ module Zeitwerk::Loader::Config
   # Implemented as a method instead of via attr_reader for symmetry with the
   # writer below.
   #
-  # @sig void -> String
+  # @sig () -> String
   def tag
     @tag
   end
