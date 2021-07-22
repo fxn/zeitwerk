@@ -71,11 +71,6 @@ module Zeitwerk::Loader::Config
   # @sig #call | #debug | nil
   attr_accessor :logger
 
-  # This is useful in order to be able to distinguish loaders in logging.
-  #
-  # @sig String
-  attr_reader :tag
-
   def initialize
     @initialized_at         = Time.now
     @root_dirs              = {}
@@ -113,6 +108,16 @@ module Zeitwerk::Loader::Config
     else
       raise Zeitwerk::Error, "the root directory #{abspath} does not exist"
     end
+  end
+
+  # Returns the loader's tag.
+  #
+  # Implemented as a method instead of via attr_reader for symmetry with the
+  # writer below.
+  #
+  # @sig void -> String
+  def tag
+    @tag
   end
 
   # Sets a tag for the loader, useful for logging.
