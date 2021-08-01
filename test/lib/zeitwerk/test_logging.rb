@@ -105,6 +105,22 @@ class TestLogging < LoaderTest
     end
   end
 
+  test "logs implicit to explicit promotions" do
+    # We use two root directories to make sure the loader visits the implicit
+    # a/m first, and the explicit b/m.rb after it.
+    files = [
+      ["a/m/x.rb", "M::X = true"],
+      ["b/m.rb", "module M; end"]
+    ]
+    with_files(files) do
+      loader.push_dir("a")
+      loader.push_dir("b")
+      assert_logged(/earlier autoload for M discarded, it is actually an explicit namespace defined in #{File.expand_path("b/m.rb")}/) do
+        loader.setup
+      end
+    end
+  end
+
   test "logs autoload configured for files" do
     files = [["x.rb", "X = true"]]
     with_files(files) do

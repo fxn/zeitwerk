@@ -393,6 +393,8 @@ module Zeitwerk
       autoloads.delete(dir)
       Registry.unregister_autoload(dir)
 
+      log("earlier autoload for #{cpath(parent, cname)} discarded, it is actually an explicit namespace defined in #{file}") if logger
+
       set_autoload(parent, cname, file)
       register_explicit_namespace(cpath(parent, cname))
     end
