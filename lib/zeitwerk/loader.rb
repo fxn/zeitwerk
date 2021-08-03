@@ -14,6 +14,20 @@ module Zeitwerk
     include Helpers
     include Config
 
+    # Keeps track of autoloads defined by the loader which have not been
+    # executed so far.
+    #
+    # This metadata helps us implement a few things:
+    #
+    # 1. When autoloads are triggered, ensure they define the expected constant
+    #    and invoke user callbacks. If reloading is enabled, remember cref and
+    #    abspath for later unloading logic.
+    #
+    # 2. When unloading, remove autoloads that have not been executed.
+    #
+    # 3. Eager load with a recursive const_get, rather than a recursive require,
+    #    for consistency with lazy loading.
+    #
     # @private
     # @sig Zeitwerk::Autoloads
     attr_reader :autoloads
