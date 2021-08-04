@@ -10,6 +10,16 @@
   end
   ```
 
+  These callbacks are invoked during unloading, which happens in an unspecified order. Therefore, they should not refer to reloadable constants.
+
+  You can also be called for all unloaded objects:
+
+  ```ruby
+  loader.on_load do |cpath, value, abspath|
+    # ...
+  end
+  ```
+
   See the [documentation](https://github.com/fxn/zeitwerk/blob/master/README.md#the-on_unload-callback) for further details.
 
 * There is a new catch-all `Zeitwerk::Loader#on_load` that takes no argument:
