@@ -30,7 +30,9 @@
   end
   ```
 
-  That one is triggered for all constants loaded by the receiver. Check the docs for usage.
+  That one is triggered for all constants loaded by the receiver.
+
+  See the [documentation](https://github.com/fxn/zeitwerk#the-on_load-callback) for further details.
 
   Please, remember that if you want to trace the activity of a loader, `Zeitwerk::Loader#log!` logs plenty of information.
 
@@ -62,7 +64,9 @@
 
 * Performance improvements.
 
-* Documentation improvements,
+* Documentation improvements.
+
+* Logging prints a few new traces.
 
 ## 2.4.2 (27 November 2020)
 
