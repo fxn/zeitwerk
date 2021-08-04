@@ -25,7 +25,7 @@
 * There is a new catch-all `Zeitwerk::Loader#on_load` that takes no argument:
 
   ```ruby
-  loader.on_load do |cpath, value, abspath|
+  loader.on_unload do |cpath, value, abspath|
     # ...
   end
   ```
