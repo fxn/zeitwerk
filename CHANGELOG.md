@@ -56,11 +56,13 @@
 
 * Eliminates internal use of `File.realpath`. During logging, root dirs are shown as configured if they contained symlinks.
 
-* Improves performance.
-
 * Deletes the long time deprecated preload API.
 
 * Requires Ruby 2.5.
+
+* Performance improvements.
+
+* Documentation improvements,
 
 ## 2.4.2 (27 November 2020)
 
