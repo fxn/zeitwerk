@@ -20,9 +20,11 @@
   end
   ```
 
+  Please, remember that if you want to trace the activity of a loader, `Zeitwerk::Loader#log!` logs plenty of information.
+
   See the [documentation](https://github.com/fxn/zeitwerk/blob/master/README.md#the-on_unload-callback) for further details.
 
-* There is a new catch-all `Zeitwerk::Loader#on_load` that takes no argument:
+* There is a new catch-all `Zeitwerk::Loader#on_load` that takes no argument and is triggered for all loaded objects:
 
   ```ruby
   loader.on_load do |cpath, value, abspath|
@@ -30,11 +32,9 @@
   end
   ```
 
-  That one is triggered for all constants loaded by the receiver.
+  Please, remember that if you want to trace the activity of a loader, `Zeitwerk::Loader#log!` logs plenty of information.
 
   See the [documentation](https://github.com/fxn/zeitwerk#the-on_load-callback) for further details.
-
-  Please, remember that if you want to trace the activity of a loader, `Zeitwerk::Loader#log!` logs plenty of information.
 
 * The block of the existing `Zeitwerk::Loader#on_load` receives also the value stored in the constant, and the absolute path to its corresponding file or directory:
 
