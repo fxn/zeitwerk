@@ -580,7 +580,7 @@ end
 
 Some uses cases:
 
-* Doing something with an autoloadable class or module in a Rails application during initialization, in a way that plays well with reloading. As in the previous example.
+* Doing something with a reloadable class or module in a Rails application during initialization, in a way that plays well with reloading. As in the previous example.
 * Delaying the execution of the block until the class is loaded for performance.
 * Delaying the execution of the block until the class is loaded because it follows the adapter pattern and better not to load the class if the user does not need it.
 
