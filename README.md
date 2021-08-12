@@ -433,7 +433,9 @@ On reloading, client code has to update anything that would otherwise be storing
 <a id="markdown-inflection" name="inflection"></a>
 ### Inflection
 
-Each individual loader needs an inflector to figure out which constant path would a given file or directory map to. Zeitwerk ships with two basic inflectors.
+Each loader instantiated with `Zeitwerk::Loader.new` has an inflector of this type by default, and they are independent of each other.
+
+Each individual loader needs an inflector to figure out which constant path would a given file or directory map to. Zeitwerk ships with two basic inflectors, and you can define your own.
 
 <a id="markdown-zeitwerkinflector" name="zeitwerkinflector"></a>
 #### Zeitwerk::Inflector
@@ -464,16 +466,16 @@ loader.inflector.inflect "mysql_adapter" => "MySQLAdapter"
 
 Overrides need to be configured before calling `setup`.
 
-There are no inflection rules or global configuration that can affect this inflector. It is deterministic.
-
-Loaders instantiated with `Zeitwerk::Loader.new` have an inflector of this type, independent of each other.
+There are no global inflection rules or global configuration that can affect this inflector. It is deterministic.
 
 <a id="markdown-zeitwerkgeminflector" name="zeitwerkgeminflector"></a>
 #### Zeitwerk::GemInflector
 
+Each loader instantiated with `Zeitwerk::Loader.for_gem` has an inflector of this type by default, and they are independent of each other.
+
 This inflector is like the basic one, except it expects `lib/my_gem/version.rb` to define `MyGem::VERSION`.
 
-Loaders instantiated with `Zeitwerk::Loader.for_gem` have an inflector of this type, independent of each other.
+There are no global inflection rules or global configuration that can affect this inflector. It is deterministic.
 
 <a id="markdown-custom-inflector" name="custom-inflector"></a>
 #### Custom inflector
