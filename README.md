@@ -433,12 +433,12 @@ On reloading, client code has to update anything that would otherwise be storing
 <a id="markdown-inflection" name="inflection"></a>
 ### Inflection
 
-Each loader instantiated with `Zeitwerk::Loader.new` has an inflector of this type by default, and they are independent of each other.
-
 Each individual loader needs an inflector to figure out which constant path would a given file or directory map to. Zeitwerk ships with two basic inflectors, and you can define your own.
 
 <a id="markdown-zeitwerkinflector" name="zeitwerkinflector"></a>
 #### Zeitwerk::Inflector
+
+Each loader instantiated with `Zeitwerk::Loader.new` has an inflector of this type by default, and they are independent of each other.
 
 This is a very basic inflector that converts snake case to camel case:
 
