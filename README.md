@@ -438,7 +438,7 @@ Each individual loader needs an inflector to figure out which constant path woul
 <a id="markdown-zeitwerkinflector" name="zeitwerkinflector"></a>
 #### Zeitwerk::Inflector
 
-Each loader instantiated with `Zeitwerk::Loader.new` has an inflector of this type by default. The inflectors of different loaders are independent of each other.
+Each loader instantiated with `Zeitwerk::Loader.new` has an inflector of this type by default.
 
 This is a very basic inflector that converts snake case to camel case:
 
@@ -466,16 +466,16 @@ loader.inflector.inflect "mysql_adapter" => "MySQLAdapter"
 
 Overrides need to be configured before calling `setup`.
 
-There are no global inflection rules or global configuration that can affect this inflector. It is deterministic.
+ The inflectors of different loaders are independent of each other. There are no global inflection rules or global configuration that can affect this inflector. It is deterministic.
 
 <a id="markdown-zeitwerkgeminflector" name="zeitwerkgeminflector"></a>
 #### Zeitwerk::GemInflector
 
-Each loader instantiated with `Zeitwerk::Loader.for_gem` has an inflector of this type by default. The inflectors of different loaders are independent of each other.
+Each loader instantiated with `Zeitwerk::Loader.for_gem` has an inflector of this type by default.
 
 This inflector is like the basic one, except it expects `lib/my_gem/version.rb` to define `MyGem::VERSION`.
 
-There are no global inflection rules or global configuration that can affect this inflector. It is deterministic.
+The inflectors of different loaders are independent of each other. There are no global inflection rules or global configuration that can affect this inflector. It is deterministic.
 
 <a id="markdown-custom-inflector" name="custom-inflector"></a>
 #### Custom inflector
