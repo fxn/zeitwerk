@@ -121,7 +121,10 @@ module Zeitwerk
     # else, they are eligible for garbage collection, which would effectively
     # unload them.
     #
-    # @private
+    # This method is public but undocumented. Main interface is `reload`, which
+    # means `unload` + `setup`. This one is avaiable to be used together with
+    # `unregister`, which is undocumented too.
+    #
     # @sig () -> void
     def unload
       mutex.synchronize do
@@ -176,7 +179,7 @@ module Zeitwerk
         lazy_subdirs.clear
 
         Registry.on_unload(self)
-        ExplicitNamespace.unregister(self)
+        ExplicitNamespace.unregister_loader(self)
 
         @setup        = false
         @eager_loaded = false
@@ -265,6 +268,15 @@ module Zeitwerk
     # @sig () -> Array[String]
     def unloadable_cpaths
       to_unload.keys.freeze
+    end
+
+    # This is a dangerous method.
+    #
+    # @experimental
+    # @sig () -> void
+    def unregister
+      Registry.unregister_loader(self)
+      ExplicitNamespace.unregister_loader(self)
     end
 
     # --- Class methods ---------------------------------------------------------------------------

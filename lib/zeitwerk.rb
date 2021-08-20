@@ -11,4 +11,15 @@ module Zeitwerk
   require_relative "zeitwerk/kernel"
   require_relative "zeitwerk/error"
   require_relative "zeitwerk/version"
+
+  # This is a dangerous method.
+  #
+  # @experimental
+  # @sig () -> void
+  def self.with_loader
+    loader = Zeitwerk::Loader.new
+    yield loader
+  ensure
+    loader.unregister
+  end
 end

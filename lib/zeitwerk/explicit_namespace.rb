@@ -41,7 +41,7 @@ module Zeitwerk
 
       # @private
       # @sig (Zeitwerk::Loader) -> void
-      def unregister(loader)
+      def unregister_loader(loader)
         cpaths.delete_if { |_cpath, l| l == loader }
         disable_tracer_if_unneeded
       end

@@ -73,6 +73,15 @@ module Zeitwerk
         loaders << loader
       end
 
+      # @private
+      # @sig (Zeitwerk::Loader) -> void
+      def unregister_loader(loader)
+        loaders.delete(loader)
+        loaders_managing_gems.delete_if { |_, l| l == loader }
+        autoloads.delete_if { |_, l| l == loader }
+        inceptions.delete_if { |_, (_, l)| l == loader }
+      end
+
       # This method returns always a loader, the same instance for the same root
       # file. That is how Zeitwerk::Loader.for_gem is idempotent.
       #
