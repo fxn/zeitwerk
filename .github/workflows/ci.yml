@@ -20,8 +20,6 @@ jobs:
           - "2.7"
           - "3.0"
           - "head"
-          - "truffleruby"
-          - "truffleruby-head"
     runs-on: ${{ matrix.os }}
     steps:
       - uses: "actions/checkout@v2"
