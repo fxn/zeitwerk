@@ -2,8 +2,11 @@ require "test_helper"
 
 class TestConcurrency < LoaderTest
   test "constant definition is synchronized" do
+    $ensure_M_is_autoloaded_by_the_thread = Queue.new
+
     files = [["m.rb", <<-EOS]]
       module M
+        $ensure_M_is_autoloaded_by_the_thread << true
         sleep 0.5
 
         def self.works?
@@ -13,6 +16,7 @@ class TestConcurrency < LoaderTest
     EOS
     with_setup(files) do
       t = Thread.new { M }
+      $ensure_M_is_autoloaded_by_the_thread.pop()
       assert M.works?
       t.join
     end
