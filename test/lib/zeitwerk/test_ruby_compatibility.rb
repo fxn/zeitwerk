@@ -311,4 +311,27 @@ class TestRubyCompatibility < LoaderTest
       end
     end
   end
+
+  # This allows Zeitwerk to be thread-safe on regular file autoloads. Module
+  # autovivification is custom, has its own suite.
+  test "autoloads are synchronized" do
+    $ensure_M_is_autoloaded_by_the_thread = Queue.new
+
+    files = [["m.rb", <<-EOS]]
+      module M
+        $ensure_M_is_autoloaded_by_the_thread << true
+        sleep 0.5
+
+        def self.works?
+          true
+        end
+      end
+    EOS
+    with_setup(files) do
+      t = Thread.new { M }
+      $ensure_M_is_autoloaded_by_the_thread.pop()
+      assert M.works?
+      t.join
+    end
+  end
 end
