@@ -49,6 +49,8 @@
 - [Supported Ruby versions](#supported-ruby-versions)
 - [Testing](#testing)
 - [Motivation](#motivation)
+  - [Kerner#require is brittle](#kernerrequire-is-brittle)
+  - [Rails autoloading was brittle](#rails-autoloading-was-brittle)
 - [Thanks](#thanks)
 - [License](#license)
 
@@ -925,9 +927,19 @@ and run `bin/test`.
 <a id="markdown-motivation" name="motivation"></a>
 ## Motivation
 
-Since `require` has global side-effects, and there is no static way to verify that you have issued the `require` calls for code that your file depends on, in practice it is very easy to forget some. That introduces bugs that depend on the load order. Zeitwerk provides a way to forget about `require` in your own code, just name things following conventions and done.
+<a id="markdown-kernerrequire-is-brittle" name="kernerrequire-is-brittle"></a>
+### Kerner#require is brittle
 
-On the other hand, autoloading in Rails is based on `const_missing`, which lacks fundamental information like the nesting and the resolution algorithm that was being used. Because of that, Rails autoloading is not able to match Ruby's semantics and that introduces a series of gotchas. The original goal of this project was to bring a better autoloading mechanism for Rails 6.
+Since `require` has global side-effects, and there is no static way to verify that you have issued the `require` calls for code that your file depends on, in practice it is very easy to forget some. That introduces bugs that depend on the load order.
+
+Also, if the project has namespaces, setting things up and getting client code to load things in a consistent way needs discipline. For example, `require "foo/bar"` may define `Foo`, instead of reopen it. That may be a broken window, giving place to superclass mismatches or partially-defined namespaces.
+
+With Zeitwerk, you just name things following conventions and done. Things are available everywhere, and descend is always orderly. Without effort and without broken windows.
+
+<a id="markdown-rails-autoloading-was-brittle" name="rails-autoloading-was-brittle"></a>
+### Rails autoloading was brittle
+
+Autoloading in Rails was based on `const_missing` up to Rails 5. That callback lacks fundamental information like the nesting or the resolution algorithm being used. Because of that, Rails autoloading was not able to match Ruby's semantics, and that introduced a series of issues. Zeitwerk is based on a different technique and fixed Rails autoloading starting with Rails 6.
 
 <a id="markdown-thanks" name="thanks"></a>
 ## Thanks
