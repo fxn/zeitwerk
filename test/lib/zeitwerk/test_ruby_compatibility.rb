@@ -313,7 +313,7 @@ class TestRubyCompatibility < LoaderTest
   end
 
   # This allows Zeitwerk to be thread-safe on regular file autoloads. Module
-  # autovivification is custom, has its own suite.
+  # autovivification is custom, has its own test.
   test "autoloads are synchronized" do
     $ensure_M_is_autoloaded_by_the_thread = Queue.new
 
