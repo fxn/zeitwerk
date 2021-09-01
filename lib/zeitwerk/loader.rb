@@ -455,7 +455,6 @@ module Zeitwerk
       self.class.mutex.synchronize do
         Registry.loaders.each do |loader|
           if loader != self && loader.manages?(dir)
-            require "pp"
             raise Error,
               "loader\n\n#{pretty_inspect}\n\nwants to manage directory #{dir}," \
               " which is already managed by\n\n#{loader.pretty_inspect}\n"
