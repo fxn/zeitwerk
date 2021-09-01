@@ -247,17 +247,10 @@ module Zeitwerk::Loader::Config
 
   # @private
   # @sig (String) -> bool
-  def manages?(dir)
-    dir = dir + "/"
-    ignored_paths.each do |ignored_path|
-      return false if dir.start_with?(ignored_path + "/")
+  def ignores?(abspath)
+    ignored_paths.any? do |ignored_path|
+      ignored_path == abspath || (dir?(ignored_path) && abspath.start_with?(ignored_path + "/"))
     end
-
-    root_dirs.each_key do |root_dir|
-      return true if root_dir.start_with?(dir) || dir.start_with?(root_dir + "/")
-    end
-
-    false
   end
 
   private

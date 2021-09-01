@@ -2,6 +2,8 @@
 
 ## 2.5.0 (Unreleased)
 
+* Fixes a bug in which a certain valid combination of overlapping trees managed by different loaders and ignored directories was mistakenly reported as having conflicting directories.
+
 * Implements `Zeitwerk::Loader#on_unload`, which allows you to configure blocks of code to be executed before a certain class or module gets unloaded:
 
   ```ruby

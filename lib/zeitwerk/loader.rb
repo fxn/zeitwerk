@@ -454,12 +454,21 @@ module Zeitwerk
     def raise_if_conflicting_directory(dir)
       self.class.mutex.synchronize do
         Registry.loaders.each do |loader|
-          if loader != self && loader.manages?(dir)
-            require "pp" # Needed for pretty_inspect, even in Ruby 2.5.
-            raise Error,
-              "loader\n\n#{pretty_inspect}\n\nwants to manage directory #{dir}," \
-              " which is already managed by\n\n#{loader.pretty_inspect}\n"
-            EOS
+          next if loader == self
+          next if loader.ignores?(dir)
+
+          dir = dir + "/"
+          loader.root_dirs.each do |root_dir, _namespace|
+            next if ignores?(root_dir)
+
+            root_dir = root_dir + "/"
+            if dir.start_with?(root_dir) || root_dir.start_with?(dir)
+              require "pp" # Needed for pretty_inspect, even in Ruby 2.5.
+              raise Error,
+                "loader\n\n#{pretty_inspect}\n\nwants to manage directory #{dir.chop}," \
+                " which is already managed by\n\n#{loader.pretty_inspect}\n"
+              EOS
+            end
           end
         end
       end

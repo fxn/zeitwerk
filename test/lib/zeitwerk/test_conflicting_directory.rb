@@ -64,6 +64,18 @@ class TestConflictingDirectory < LoaderTest
     assert loader.push_dir(dir)
   end
 
+  test "does not raise if the loader ignores a directory managed by an existing loader (dir)" do
+    existing_loader.push_dir(dir)
+    loader.ignore(dir)
+    assert loader.push_dir(parent)
+  end
+
+  test "does not raise if the loader ignores a directory managed by an existing loader (glob pattern)" do
+    existing_loader.push_dir(dir)
+    loader.ignore("#{parent}/*")
+    assert loader.push_dir(parent)
+  end
+
   test "raises if an existing loader ignores a directory with a matching prefix" do
     files = [["foo/x.rb", "X = 1"], ["foobar/y.rb", "Y = 1"]]
     with_files(files) do
