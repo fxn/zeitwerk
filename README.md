@@ -49,7 +49,7 @@
 - [Supported Ruby versions](#supported-ruby-versions)
 - [Testing](#testing)
 - [Motivation](#motivation)
-  - [Kerner#require is brittle](#kernerrequire-is-brittle)
+  - [Kernel#require is brittle](#kernelrequire-is-brittle)
   - [Rails autoloading was brittle](#rails-autoloading-was-brittle)
 - [Thanks](#thanks)
 - [License](#license)
@@ -927,8 +927,8 @@ and run `bin/test`.
 <a id="markdown-motivation" name="motivation"></a>
 ## Motivation
 
-<a id="markdown-kernerrequire-is-brittle" name="kernerrequire-is-brittle"></a>
-### Kerner#require is brittle
+<a id="markdown-kernelrequire-is-brittle" name="kernelrequire-is-brittle"></a>
+### Kernel#require is brittle
 
 Since `require` has global side-effects, and there is no static way to verify that you have issued the `require` calls for code that your file depends on, in practice it is very easy to forget some. That introduces bugs that depend on the load order.
 

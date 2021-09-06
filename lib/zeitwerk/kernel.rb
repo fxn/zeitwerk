@@ -3,7 +3,7 @@
 module Kernel
   module_function
 
-  # We are going to decorate Kerner#require with two goals.
+  # We are going to decorate Kernel#require with two goals.
   #
   # First, by intercepting Kernel#require calls, we are able to autovivify
   # modules on required directories, and also do internal housekeeping when
