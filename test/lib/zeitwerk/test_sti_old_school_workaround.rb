@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "test_helper"
 
 # Rails applications are expected to preload STIs. Using requires is the old

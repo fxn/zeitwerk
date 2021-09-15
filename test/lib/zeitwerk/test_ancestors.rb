@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "test_helper"
 
 # The following properties are not supported by the classic Rails autoloader.
