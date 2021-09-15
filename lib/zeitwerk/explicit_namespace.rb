@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Zeitwerk
   # Centralizes the logic for the trace point used to detect the creation of
   # explicit namespaces, needed to descend into matching subdirectories right

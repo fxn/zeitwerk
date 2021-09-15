@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Zeitwerk::RealModName
   UNBOUND_METHOD_MODULE_NAME = Module.instance_method(:name)
   private_constant :UNBOUND_METHOD_MODULE_NAME
