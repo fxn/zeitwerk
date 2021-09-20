@@ -159,6 +159,16 @@ class HttpCrawler
 end
 ```
 
+Additionally, the first example needs a custom inflection rule. For example, if using one of the default inflectors:
+
+```ruby
+loader.inflector.inflect("max_retries" => "MAX_RETRIES")
+```
+
+Otherwise, Zeitwerk would expect the file to define `MaxRetries`.
+
+In the second example, no custom rule is needed.
+
 <a id="markdown-root-directories-and-root-namespaces" name="root-directories-and-root-namespaces"></a>
 ### Root directories and root namespaces
 
