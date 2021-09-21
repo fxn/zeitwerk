@@ -159,7 +159,7 @@ class HttpCrawler
 end
 ```
 
-Additionally, the first example needs a custom inflection rule. For example, if using one of the default inflectors:
+The first example needs a custom [inflection](https://github.com/fxn/zeitwerk#inflection) rule:
 
 ```ruby
 loader.inflector.inflect("max_retries" => "MAX_RETRIES")
