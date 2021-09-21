@@ -2,6 +2,10 @@
 
 ## 2.5.0 (Unreleased)
 
+* Implements `Zeitwerk::Loader#on_setup`, which allows you to configure blocks of code to be executed on setup and on each reload. When the callback is fired, the loader is ready, you can refer to project constants in the block.
+
+  See the [documentation](https://github.com/fxn/zeitwerk#the-on_setup-callback) for further details.
+
 * Fixes a bug in which a certain valid combination of overlapping trees managed by different loaders and ignored directories was mistakenly reported as having conflicting directories.
 
 * Implements `Zeitwerk::Loader#on_unload`, which allows you to configure blocks of code to be executed before a certain class or module gets unloaded:

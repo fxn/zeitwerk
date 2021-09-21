@@ -110,6 +110,8 @@ module Zeitwerk
           set_autoloads_in_dir(root_dir, namespace)
         end
 
+        on_setup_callbacks.each(&:call)
+
         @setup = true
       end
     end

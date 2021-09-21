@@ -56,6 +56,12 @@ module Zeitwerk::Loader::Config
   # @sig Set[String]
   attr_reader :eager_load_exclusions
 
+  # User-oriented callbacks to be fired on setup.
+  #
+  # @private
+  # @sig Array[{ () -> void }]
+  attr_reader :on_setup_callbacks
+
   # User-oriented callbacks to be fired when a constant is loaded.
   #
   # @private
@@ -83,6 +89,7 @@ module Zeitwerk::Loader::Config
     @collapse_dirs          = Set.new
     @eager_load_exclusions  = Set.new
     @reloading_enabled      = false
+    @on_setup_callbacks     = []
     @on_load_callbacks      = {}
     @on_unload_callbacks    = {}
     @logger                 = self.class.default_logger
@@ -187,6 +194,17 @@ module Zeitwerk::Loader::Config
     mutex.synchronize do
       collapse_glob_patterns.merge(glob_patterns)
       collapse_dirs.merge(expand_glob_patterns(glob_patterns))
+    end
+  end
+
+  # Configure a block to be called after setup and on each reload.
+  # If setup was already done, the block runs immediately.
+  #
+  # @sig () { () -> void } -> void
+  def on_setup(&block)
+    mutex.synchronize do
+      on_setup_callbacks << block
+      block.call if @setup
     end
   end
 

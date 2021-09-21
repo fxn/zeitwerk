@@ -30,6 +30,7 @@
     - [Zeitwerk::Inflector](#zeitwerkinflector)
     - [Zeitwerk::GemInflector](#zeitwerkgeminflector)
     - [Custom inflector](#custom-inflector)
+  - [The on_setup callback](#the-on_setup-callback)
   - [The on_load callback](#the-on_load-callback)
   - [The on_unload callback](#the-on_unload-callback)
     - [Technical details](#technical-details)
@@ -562,6 +563,21 @@ class MyGem::Inflector < Zeitwerk::GemInflector
   # ...
 end
 ```
+
+<a id="markdown-the-on_setup-callback" name="the-on_setup-callback"></a>
+### The on_setup callback
+
+The `on_setup` callback is fired on setup and on each reload:
+
+```ruby
+loader.on_setup do
+  # Ready to autoload here.
+end
+```
+
+Multiple `on_setup` callbacks are supported, and they run in order of definition.
+
+If `setup` was already executed, the callback is fired immediately.
 
 <a id="markdown-the-on_load-callback" name="the-on_load-callback"></a>
 ### The on_load callback
