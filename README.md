@@ -30,9 +30,10 @@
     - [Zeitwerk::Inflector](#zeitwerkinflector)
     - [Zeitwerk::GemInflector](#zeitwerkgeminflector)
     - [Custom inflector](#custom-inflector)
-  - [The on_setup callback](#the-on_setup-callback)
-  - [The on_load callback](#the-on_load-callback)
-  - [The on_unload callback](#the-on_unload-callback)
+  - [Callbacks](#callbacks)
+    - [The on_setup callback](#the-on_setup-callback)
+    - [The on_load callback](#the-on_load-callback)
+    - [The on_unload callback](#the-on_unload-callback)
     - [Technical details](#technical-details)
   - [Logging](#logging)
     - [Loader tag](#loader-tag)
@@ -564,8 +565,11 @@ class MyGem::Inflector < Zeitwerk::GemInflector
 end
 ```
 
+<a id="markdown-callbacks" name="callbacks"></a>
+### Callbacks
+
 <a id="markdown-the-on_setup-callback" name="the-on_setup-callback"></a>
-### The on_setup callback
+#### The on_setup callback
 
 The `on_setup` callback is fired on setup and on each reload:
 
@@ -580,7 +584,7 @@ Multiple `on_setup` callbacks are supported, and they run in order of definition
 If `setup` was already executed, the callback is fired immediately.
 
 <a id="markdown-the-on_load-callback" name="the-on_load-callback"></a>
-### The on_load callback
+#### The on_load callback
 
 The usual place to run something when a file is loaded is the file itself. However, sometimes you'd like to be called, and this is possible with the `on_load` callback.
 
@@ -639,7 +643,7 @@ There are use cases for this last catch-all callback, but they are rare. If you 
 If both types of callbacks are defined, the specific ones run first.
 
 <a id="markdown-the-on_unload-callback" name="the-on_unload-callback"></a>
-### The on_unload callback
+#### The on_unload callback
 
 When reloading is enabled, you may occasionally need to execute something before a certain autoloaded class or module is unloaded. The `on_unload` callback allows you to do that.
 
