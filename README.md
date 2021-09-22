@@ -969,7 +969,7 @@ With Zeitwerk, you just name things following conventions and done. Things are a
 <a id="markdown-rails-autoloading-was-brittle" name="rails-autoloading-was-brittle"></a>
 ### Rails autoloading was brittle
 
-Autoloading in Rails was based on `const_missing` up to Rails 5. That callback lacks fundamental information like the nesting or the resolution algorithm being used. Because of that, Rails autoloading was not able to match Ruby's semantics, and that introduced a series of issues. Zeitwerk is based on a different technique and fixed Rails autoloading starting with Rails 6.
+Autoloading in Rails was based on `const_missing` up to Rails 5. That callback lacks fundamental information like the nesting or the resolution algorithm being used. Because of that, Rails autoloading was not able to match Ruby's semantics, and that introduced a [series of issues](https://guides.rubyonrails.org/v5.2/autoloading_and_reloading_constants.html#common-gotchas). Zeitwerk is based on a different technique and fixed Rails autoloading starting with Rails 6.
 
 <a id="markdown-thanks" name="thanks"></a>
 ## Thanks
