@@ -56,7 +56,7 @@ module Zeitwerk::Loader::Config
   # @sig Set[String]
   attr_reader :eager_load_exclusions
 
-  # User-oriented callbacks to be fired on setup.
+  # User-oriented callbacks to be fired on setup and on reload.
   #
   # @private
   # @sig Array[{ () -> void }]
