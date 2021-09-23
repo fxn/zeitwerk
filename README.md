@@ -45,6 +45,7 @@
   - [Reopening third-party namespaces](#reopening-third-party-namespaces)
   - [Rules of thumb](#rules-of-thumb)
   - [Debuggers](#debuggers)
+    - [debug.rb](#debugrb)
     - [Break](#break)
     - [Byebug](#byebug)
 - [Pronunciation](#pronunciation)
@@ -907,6 +908,11 @@ With that, when Zeitwerk scans the file system and reaches the gem directories `
 
 <a id="markdown-debuggers" name="debuggers"></a>
 ### Debuggers
+
+<a id="markdown-debugrb" name="debugrb"></a>
+#### debug.rb
+
+The new [debug.rb](https://github.com/ruby/debug) gem and Zeitwerk seem to be compatible, as far as I can tell. This is the new debugger that is going to ship with Ruby 3.1.
 
 <a id="markdown-break" name="break"></a>
 #### Break
