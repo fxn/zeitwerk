@@ -42,6 +42,7 @@
     - [Use case: The adapter pattern](#use-case-the-adapter-pattern)
     - [Use case: Test files mixed with implementation files](#use-case-test-files-mixed-with-implementation-files)
   - [Edge cases](#edge-cases)
+  - [Beware of circular dependencies](#beware-of-circular-dependencies)
   - [Reopening third-party namespaces](#reopening-third-party-namespaces)
   - [Rules of thumb](#rules-of-thumb)
   - [Debuggers](#debuggers)
@@ -643,6 +644,8 @@ There are use cases for this last catch-all callback, but they are rare. If you 
 
 If both types of callbacks are defined, the specific ones run first.
 
+Since `on_load` callbacks are executed right after files are loaded, even if the loading context seems to be far away, in practice **the block is subject to <a href="#beware-of-circular-dependencies">circular dependencies</a>**. As a rule of thumb, as far as loading order and its interdependencies is concerned, you have to program as if the block was executed at the bottom of the file just loaded.
+
 <a id="markdown-the-on_unload-callback" name="the-on_unload-callback"></a>
 #### The on_unload callback
 
@@ -854,6 +857,26 @@ Trip = Struct.new { ... } # NOT SUPPORTED
 ```
 
 This only affects explicit namespaces, those idioms work well for any other ordinary class or module.
+
+<a id="markdown-beware-of-circular-dependencies" name="beware-of-circular-dependencies"></a>
+### Beware of circular dependencies
+
+In Ruby, you can't have certain top-level circular dependencies. Take for example:
+
+```ruby
+# c.rb
+class C < D
+end
+
+# d.rb
+class D
+  C
+end
+```
+
+In order to define `C`, you need to load `D`. However, the body of `D` refers to `C`.
+
+Circular dependencies like those do not work in plain Ruby, and therefore do not work in projects managed by Zeitwerk either.
 
 <a id="markdown-reopening-third-party-namespaces" name="reopening-third-party-namespaces"></a>
 ### Reopening third-party namespaces
