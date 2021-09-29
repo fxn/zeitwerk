@@ -19,12 +19,15 @@
   - [Implicit namespaces](#implicit-namespaces)
   - [Explicit namespaces](#explicit-namespaces)
   - [Collapsing directories](#collapsing-directories)
+  - [Testing compliance](#testing-compliance)
 - [Usage](#usage)
   - [Setup](#setup)
     - [Generic](#generic)
     - [for_gem](#for_gem)
   - [Autoloading](#autoloading)
   - [Eager loading](#eager-loading)
+    - [Eager load exclusions](#eager-load-exclusions)
+    - [Global eager load](#global-eager-load)
   - [Reloading](#reloading)
   - [Inflection](#inflection)
     - [Zeitwerk::Inflector](#zeitwerkinflector)
@@ -291,6 +294,23 @@ To illustrate usage of glob patterns, if `actions` in the example above is part 
 loader.collapse("#{__dir__}/*/actions")
 ```
 
+<a id="markdown-testing-compliance" name="testing-compliance"></a>
+### Testing compliance
+
+When a managed file is loaded, Zeitwerk verifies the expected constant is defined. If it is not, `Zeitwerk::NameError` is raised.
+
+So, an easy way to ensure compliance in the test suite is to eager load the project:
+
+```ruby
+begin
+  loader.eager_load(force: true)
+rescue Zeitwerk::NameError => e
+  flunk e.message
+else
+  assert true
+end
+```
+
 <a id="markdown-usage" name="usage"></a>
 ## Usage
 
@@ -393,7 +413,16 @@ Zeitwerk instances are able to eager load their managed files:
 loader.eager_load
 ```
 
-That skips [ignored files and directories](#ignoring-parts-of-the-project), and you can also tell Zeitwerk that certain files or directories are autoloadable, but should not be eager loaded:
+That skips [ignored files and directories](#ignoring-parts-of-the-project).
+
+In gems, the method needs to be invoked after the main namespace has been defined, as shown in [Synopsis](https://github.com/fxn/zeitwerk#synopsis).
+
+Eager loading is synchronized and idempotent.
+
+<a id="markdown-eager-load-exclusions" name="eager-load-exclusions"></a>
+#### Eager load exclusions
+
+ You can tell Zeitwerk that certain files or directories are autoloadable, but should not be eager loaded:
 
 ```ruby
 db_adapters = "#{__dir__}/my_gem/db_adapters"
@@ -402,13 +431,20 @@ loader.setup
 loader.eager_load # won't eager load the database adapters
 ```
 
-In gems, the method needs to be invoked after the main namespace has been defined, as shown in [Synopsis](https://github.com/fxn/zeitwerk#synopsis).
+However, that can be overridden with `force`:
 
-Eager loading is synchronized and idempotent.
+```ruby
+loader.eager_load(force: true) # database adapters are eager loaded
+```
 
-If eager loading a file does not define the expected class or module, Zeitwerk raises `Zeitwerk::NameError`, which is a subclass of `NameError`.
+Which may be handy if the project eager loads in the test suite to [ensure project layour compliance](#testing-compliance).
 
-If you want to eager load yourself and all dependencies using Zeitwerk, you can broadcast the `eager_load` call to all instances:
+The `force` flag does not affect ignored files and directories, those are still ignored.
+
+<a id="markdown-global-eager-load" name="global-eager-load"></a>
+#### Global eager load
+
+If you want to eager load yourself and all dependencies that use Zeitwerk, you can broadcast the `eager_load` call to all instances:
 
 ```ruby
 Zeitwerk::Loader.eager_load_all
@@ -417,6 +453,8 @@ Zeitwerk::Loader.eager_load_all
 This may be handy in top-level services, like web applications.
 
 Note that thanks to idempotence `Zeitwerk::Loader.eager_load_all` won't eager load twice if any of the instances already eager loaded.
+
+This method does not accept the `force` flag, since in general it wouldn't be a good idea to force eager loading in 3rd party code.
 
 <a id="markdown-reloading" name="reloading"></a>
 ### Reloading
@@ -644,7 +682,7 @@ There are use cases for this last catch-all callback, but they are rare. If you 
 
 If both types of callbacks are defined, the specific ones run first.
 
-Since `on_load` callbacks are executed right after files are loaded, even if the loading context seems to be far away, in practice **the block is subject to <a href="#beware-of-circular-dependencies">circular dependencies</a>**. As a rule of thumb, as far as loading order and its interdependencies is concerned, you have to program as if the block was executed at the bottom of the file just loaded.
+Since `on_load` callbacks are executed right after files are loaded, even if the loading context seems to be far away, in practice **the block is subject to [circular dependencies](#beware-of-circular-dependencies)**. As a rule of thumb, as far as loading order and its interdependencies is concerned, you have to program as if the block was executed at the bottom of the file just loaded.
 
 <a id="markdown-the-on_unload-callback" name="the-on_unload-callback"></a>
 #### The on_unload callback

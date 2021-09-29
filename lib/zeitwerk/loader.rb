@@ -210,25 +210,28 @@ module Zeitwerk
     # Eager loads all files in the root directories, recursively. Files do not
     # need to be in `$LOAD_PATH`, absolute file names are used. Ignored files
     # are not eager loaded. You can opt-out specifically in specific files and
-    # directories with `do_not_eager_load`.
+    # directories with `do_not_eager_load`, and that can be overridden passing
+    # `force: true`.
     #
-    # @sig () -> void
-    def eager_load
+    # @sig (true | false) -> void
+    def eager_load(force: false)
       mutex.synchronize do
         break if @eager_loaded
 
         log("eager load start") if logger
 
+        honour_exclusions = !force
+
         queue = []
         actual_root_dirs.each do |root_dir, namespace|
-          queue << [namespace, root_dir] unless excluded_from_eager_load?(root_dir)
+          queue << [namespace, root_dir] unless honour_exclusions && excluded_from_eager_load?(root_dir)
         end
 
         while to_eager_load = queue.shift
           namespace, dir = to_eager_load
 
           ls(dir) do |basename, abspath|
-            next if excluded_from_eager_load?(abspath)
+            next if honour_exclusions && excluded_from_eager_load?(abspath)
 
             if ruby?(abspath)
               if cref = autoloads.cref_for(abspath)

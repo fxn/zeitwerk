@@ -2,6 +2,16 @@
 
 ## 2.5.0 (Unreleased)
 
+* The method `Zeitwerk::Loader#eager_load` accepts a `force` flag:
+
+  ```ruby
+  loader.eager_load(force: true)
+  ```
+
+  If passed, eager load exclusions configured with `do_not_eager_load` are not honoured (but ignored files and directories are).
+
+  This may be handy for test suites that eager load in order to ensure all files define the expected constant.
+
 * Implements `Zeitwerk::Loader#on_setup`, which allows you to configure blocks of code to be executed on setup and on each reload. When the callback is fired, the loader is ready, you can refer to project constants in the block.
 
   See the [documentation](https://github.com/fxn/zeitwerk#the-on_setup-callback) for further details.

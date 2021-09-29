@@ -291,4 +291,103 @@ class TestEagerLoad < LoaderTest
       assert_nil Object.autoload?(:X)
     end
   end
+
+  test "force eager load for root directories" do
+    $test_eager_load_eager_loaded_p = false
+    files = [["foo.rb", "Foo = true; $test_eager_load_eager_loaded_p = true"]]
+    with_setup(files) do
+      loader.do_not_eager_load(".")
+      loader.eager_load(force: true)
+
+      assert $test_eager_load_eager_loaded_p
+    end
+  end
+
+  test "force eager load for sudirectories" do
+    $test_eager_load_eager_loaded_p = false
+    files = [
+      ["db_adapters/mysql_adapter.rb", <<-EOS],
+        module DbAdapters::MysqlAdapter
+        end
+        $test_eager_load_eager_loaded_p = true
+      EOS
+    ]
+    with_setup(files) do
+      loader.do_not_eager_load("db_adapters")
+      loader.eager_load(force: true)
+
+      assert $test_eager_load_eager_loaded_p
+      assert DbAdapters::MysqlAdapter
+    end
+  end
+
+  test "force eager load for root files" do
+    $test_eager_load_eager_loaded_p = false
+    files = [["foo.rb", "Foo = true; $test_eager_load_eager_loaded_p = true"]]
+    with_setup(files) do
+      loader.do_not_eager_load("foo.rb")
+      loader.eager_load(force: true)
+
+      assert $test_eager_load_eager_loaded_p
+    end
+  end
+
+  test "force eager load for namespaced files" do
+    $test_eager_load_eager_loaded_p = false
+    files = [["m/foo.rb", "M::Foo = true; $test_eager_load_eager_loaded_p = true"]]
+    with_setup(files) do
+      loader.do_not_eager_load("m/foo.rb")
+      loader.eager_load(force: true)
+
+      assert $test_eager_load_eager_loaded_p
+    end
+  end
+
+  test "force eager load honours ignored root directories" do
+    $test_eager_load_eager_loaded_p = false
+    files = [["foo.rb", "Foo = true; $test_eager_load_eager_loaded_p = true"]]
+    with_files(files) do
+      loader.ignore(".")
+      loader.setup
+      loader.eager_load(force: true)
+
+      assert !$test_eager_load_eager_loaded_p
+    end
+  end
+
+  test "force eager load honours ignored subdirectories" do
+    $test_eager_load_eager_loaded_p = false
+    files = [["m/foo.rb", "M::Foo = true; $test_eager_load_eager_loaded_p = true"]]
+    with_files(files) do
+      loader.ignore("m")
+      loader.setup
+      loader.eager_load(force: true)
+
+      assert !$test_eager_load_eager_loaded_p
+    end
+  end
+
+  test "force eager load honours root files" do
+    $test_eager_load_eager_loaded_p = false
+    files = [["foo.rb", "Foo = true; $test_eager_load_eager_loaded_p = true"]]
+    with_files(files) do
+      loader.ignore("foo.rb")
+      loader.setup
+      loader.eager_load(force: true)
+
+      assert !$test_eager_load_eager_loaded_p
+    end
+  end
+
+  test "force eager load honours namespaced files" do
+    $test_eager_load_eager_loaded_p = false
+    files = [["m/foo.rb", "M::Foo = true; $test_eager_load_eager_loaded_p = true"]]
+    with_files(files) do
+      loader.ignore("foo.rb")
+      loader.setup
+      loader.eager_load(force: true)
+
+      assert !$test_eager_load_eager_loaded_p
+    end
+  end
 end
