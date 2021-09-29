@@ -6,7 +6,7 @@
 
 * Requires Ruby 2.5.
 
-* Deletes the long time deprecated (and undocumented) preload API.
+* Deletes the long time deprecated preload API.
 
 ### Bug fixes
 
@@ -19,28 +19,6 @@
 * Implements `Zeitwerk::Loader#on_setup`, which allows you to configure blocks of code to be executed on setup and on each reload. When the callback is fired, the loader is ready, you can refer to project constants in the block.
 
   See the [documentation](https://github.com/fxn/zeitwerk#the-on_setup-callback) for further details.
-
-* Implements `Zeitwerk::Loader#on_unload`, which allows you to configure blocks of code to be executed before a certain class or module gets unloaded:
-
-  ```ruby
-  loader.on_unload("Country") do |klass, _abspath|
-    klass.clear_cache
-  end
-  ```
-
-  These callbacks are invoked during unloading, which happens in an unspecified order. Therefore, they should not refer to reloadable constants.
-
-  You can also be called for all unloaded objects:
-
-  ```ruby
-  loader.on_unload do |cpath, value, abspath|
-    # ...
-  end
-  ```
-
-  Please, remember that if you want to trace the activity of a loader, `Zeitwerk::Loader#log!` logs plenty of information.
-
-  See the [documentation](https://github.com/fxn/zeitwerk/blob/master/README.md#the-on_unload-callback) for further details.
 
 * There is a new catch-all `Zeitwerk::Loader#on_load` that takes no argument and is triggered for all loaded objects:
 
@@ -71,6 +49,28 @@
   ```
 
   That works.
+
+* Implements `Zeitwerk::Loader#on_unload`, which allows you to configure blocks of code to be executed before a certain class or module gets unloaded:
+
+  ```ruby
+  loader.on_unload("Country") do |klass, _abspath|
+    klass.clear_cache
+  end
+  ```
+
+  These callbacks are invoked during unloading, which happens in an unspecified order. Therefore, they should not refer to reloadable constants.
+
+  You can also be called for all unloaded objects:
+
+  ```ruby
+  loader.on_unload do |cpath, value, abspath|
+    # ...
+  end
+  ```
+
+  Please, remember that if you want to trace the activity of a loader, `Zeitwerk::Loader#log!` logs plenty of information.
+
+  See the [documentation](https://github.com/fxn/zeitwerk/blob/master/README.md#the-on_unload-callback) for further details.
 
 ### Assorted
 
