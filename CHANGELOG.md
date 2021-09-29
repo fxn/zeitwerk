@@ -2,21 +2,23 @@
 
 ## 2.5.0 (Unreleased)
 
-* The method `Zeitwerk::Loader#eager_load` accepts a `force` flag:
+### Breaking changes
 
-  ```ruby
-  loader.eager_load(force: true)
-  ```
+* Requires Ruby 2.5.
 
-  If passed, eager load exclusions configured with `do_not_eager_load` are not honoured (but ignored files and directories are).
+* Deletes the long time deprecated (and undocumented) preload API.
 
-  This may be handy for test suites that eager load in order to ensure all files define the expected constant.
+### Bug fixes
+
+* Fixes a bug in which a certain valid combination of overlapping trees managed by different loaders and ignored directories was mistakenly reported as having conflicting directories.
+
+* Detects external namespaces defined with `Module#autoload`. If your project reopens a 3rd party namespace, Zeitwerk already detected it and did not consider the namespace to be managed by the loader (automatically descends, ignored for reloads, etc.). However, the loader did not do that if the namespace had only an autoload in the 3rd party code yet to be executed. Now it does.
+
+### Callbacks
 
 * Implements `Zeitwerk::Loader#on_setup`, which allows you to configure blocks of code to be executed on setup and on each reload. When the callback is fired, the loader is ready, you can refer to project constants in the block.
 
   See the [documentation](https://github.com/fxn/zeitwerk#the-on_setup-callback) for further details.
-
-* Fixes a bug in which a certain valid combination of overlapping trees managed by different loaders and ignored directories was mistakenly reported as having conflicting directories.
 
 * Implements `Zeitwerk::Loader#on_unload`, which allows you to configure blocks of code to be executed before a certain class or module gets unloaded:
 
@@ -70,17 +72,23 @@
 
   That works.
 
-* Detects external namespaces defined with `Module#autoload`. If your project reopens a 3rd party namespace, Zeitwerk detects it and does not consider the namespace to be managed by the loader (automatic descend, ignored for reloads, etc.). However, the loader did not do that if the namespace had only an autoload in the 3rd party code yet to be executed. Now it does.
-
-* Eliminates internal use of `File.realpath`. During logging, root dirs are shown as configured if they contained symlinks.
-
-* Deletes the long time deprecated preload API.
-
-* Requires Ruby 2.5.
+### Assorted
 
 * Performance improvements.
 
 * Documentation improvements.
+
+* The method `Zeitwerk::Loader#eager_load` accepts a `force` flag:
+
+  ```ruby
+  loader.eager_load(force: true)
+  ```
+
+  If passed, eager load exclusions configured with `do_not_eager_load` are not honoured (but ignored files and directories are).
+
+  This may be handy for test suites that eager load in order to ensure all files define the expected constant.
+
+* Eliminates internal use of `File.realpath`. One visible consequence is that  in logs root dirs are shown as configured if they contain symlinks.
 
 * Logging prints a few new traces.
 
