@@ -6,7 +6,25 @@
 
 * Requires Ruby 2.5.
 
-* Deletes the long time deprecated preload API.
+* Deletes the long time deprecated preload API. Instead of:
+
+  ```ruby
+  loader.preload("app/models/user.rb")
+  ```
+
+  just reference the constant:
+
+  ```ruby
+  loader.on_setup { User }
+  ```
+
+  If you want to eager load a namespace, use the constants API:
+
+  ```ruby
+  loader.on_setup do
+    Admin.constants(false).each { |cname| Admin.const_get(cname) }
+  end
+  ```
 
 ### Bug fixes
 
