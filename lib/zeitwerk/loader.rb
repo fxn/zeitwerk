@@ -145,7 +145,7 @@ module Zeitwerk
             # Could happen if loaded with require_relative. That is unsupported,
             # and the constant path would escape unloadable_cpath? This is just
             # defensive code to clean things up as much as we are able to.
-            unload_cref(parent, cname)  if cdef?(parent, cname)
+            unload_cref(parent, cname)
             unloaded_files.add(abspath) if ruby?(abspath)
           end
         end
@@ -156,7 +156,7 @@ module Zeitwerk
             run_on_unload_callbacks(cpath, value, abspath)
           end
 
-          unload_cref(parent, cname)  if cdef?(parent, cname)
+          unload_cref(parent, cname)
           unloaded_files.add(abspath) if ruby?(abspath)
         end
 
@@ -494,7 +494,13 @@ module Zeitwerk
 
     # @sig (Module, Symbol) -> void
     def unload_cref(parent, cname)
+      # Let's optimistically remove_const. The way we use it, this is going to
+      # succeed always if all is good.
       parent.__send__(:remove_const, cname)
+    rescue ::NameError
+      # There are a few edge scenarios in which this may happen. If the constant
+      # is gone, that is OK, anyway.
+    else
       log("#{cpath(parent, cname)} unloaded") if logger
     end
   end

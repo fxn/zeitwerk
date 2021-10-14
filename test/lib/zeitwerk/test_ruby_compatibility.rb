@@ -183,26 +183,6 @@ class TestRubyCompatibility < LoaderTest
     end
   end
 
-  # Thanks to this the code that unloads can just blindly issue remove_const
-  # calls without catching exceptions.
-  test "remove_const works on constants with an autoload even if the file did not define them" do
-    on_teardown do
-      remove_const :Foo
-      remove_const :NOT_FOO
-      delete_loaded_feature "foo.rb"
-    end
-
-    files = [["foo.rb", "NOT_FOO = 1"]]
-    with_files(files) do
-      with_load_path(Dir.pwd) do
-        begin
-          Object.autoload(:Foo, "foo")
-          assert_raises(NameError) { Foo }
-        end
-      end
-    end
-  end
-
   # This edge case justifies the need for the inceptions collection in the
   # registry.
   test "an autoload on yourself is ignored" do

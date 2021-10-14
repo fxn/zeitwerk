@@ -141,4 +141,26 @@ class TestUnload < LoaderTest
       assert Zeitwerk::ExplicitNamespace.cpaths["X"] == lb
     end
   end
+
+  test "unload clears state even if the autoload failed and the exception was rescued" do
+    on_teardown do
+      remove_const :X_IS_NOT_DEFINED
+    end
+
+    files = [["x.rb", "X_IS_NOT_DEFINED = true"]]
+    with_setup(files) do
+      begin
+        X
+      rescue Zeitwerk::NameError
+        pass # precondition holds
+      else
+        flunk # precondition failed
+      end
+
+      loader.unload
+
+      assert !Object.constants.include?(:X)
+      assert !$LOADED_FEATURES.include?(File.expand_path("x.rb"))
+    end
+  end
 end
