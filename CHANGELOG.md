@@ -108,6 +108,8 @@
 
 * Eliminates internal use of `File.realpath`. One visible consequence is that  in logs root dirs are shown as configured if they contain symlinks.
 
+* When an autoloaded file does not define the expected constant, Ruby clears state differently starting with Ruby 3.1. Unloading has been revised to be compatible with both behaviours.
+
 * Logging prints a few new traces.
 
 ## 2.4.2 (27 November 2020)
