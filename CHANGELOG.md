@@ -2,7 +2,7 @@
 
 ## 2.5.1 (20 October 2021)
 
-* Restores support for namespaces that are not hashable. For example namespaces that overridde the `hash` method with a different arity as shown in [#188](https://github.com/fxn/zeitwerk/issues/188).
+* Restores support for namespaces that are not hashable. For example namespaces that override the `hash` method with a different arity as shown in [#188](https://github.com/fxn/zeitwerk/issues/188).
 
 ## 2.5.0 (20 October 2021)
 
