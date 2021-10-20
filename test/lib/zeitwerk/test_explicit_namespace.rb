@@ -203,4 +203,21 @@ class TestExplicitNamespace < LoaderTest
       assert tracer.enabled?
     end
   end
+
+  test "non-hashable explicit namespaces are supported" do
+    files = [
+      ["m.rb", <<~EOS],
+        module M
+          # This method is overridden with a different arity. Therefore, M is
+          # not hashable. See https://github.com/fxn/zeitwerk/issues/188.
+          def self.hash(_)
+          end
+        end
+      EOS
+      ["m/x.rb", "M::X = true"]
+    ]
+    with_setup(files) do
+      assert M::X
+    end
+  end
 end

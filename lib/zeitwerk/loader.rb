@@ -14,22 +14,16 @@ module Zeitwerk
     include Helpers
     include Config
 
-    # Keeps track of autoloads defined by the loader which have not been
-    # executed so far.
+    # Maps absolute paths for which an autoload has been set ---and not
+    # executed--- to their corresponding parent class or module and constant
+    # name.
     #
-    # This metadata helps us implement a few things:
-    #
-    # 1. When autoloads are triggered, ensure they define the expected constant
-    #    and invoke user callbacks. If reloading is enabled, remember cref and
-    #    abspath for later unloading logic.
-    #
-    # 2. When unloading, remove autoloads that have not been executed.
-    #
-    # 3. Eager load with a recursive const_get, rather than a recursive require,
-    #    for consistency with lazy loading.
+    #   "/Users/fxn/blog/app/models/user.rb"          => [Object, :User],
+    #   "/Users/fxn/blog/app/models/hotel/pricing.rb" => [Hotel, :Pricing]
+    #   ...
     #
     # @private
-    # @sig Zeitwerk::Autoloads
+    # @sig Hash[String, [Module, Symbol]]
     attr_reader :autoloads
 
     # We keep track of autoloaded directories to remove them from the registry
@@ -87,7 +81,7 @@ module Zeitwerk
     def initialize
       super
 
-      @autoloads       = Autoloads.new
+      @autoloads       = {}
       @autoloaded_dirs = []
       @to_unload       = {}
       @lazy_subdirs    = Hash.new { |h, cpath| h[cpath] = [] }
@@ -138,7 +132,7 @@ module Zeitwerk
         # is enough.
         unloaded_files = Set.new
 
-        autoloads.each do |(parent, cname), abspath|
+        autoloads.each do |abspath, (parent, cname)|
           if parent.autoload?(cname)
             unload_autoload(parent, cname)
           else
@@ -234,7 +228,7 @@ module Zeitwerk
             next if honour_exclusions && excluded_from_eager_load?(abspath)
 
             if ruby?(abspath)
-              if cref = autoloads.cref_for(abspath)
+              if cref = autoloads[abspath]
                 cget(*cref)
               end
             elsif dir?(abspath) && !root_dirs.key?(abspath)
@@ -376,7 +370,7 @@ module Zeitwerk
 
     # @sig (Module, Symbol, String) -> void
     def autoload_subdir(parent, cname, subdir)
-      if autoload_path = autoloads.abspath_for(parent, cname)
+      if autoload_path = autoload_path_set_by_me_for?(parent, cname)
         cpath = cpath(parent, cname)
         register_explicit_namespace(cpath) if ruby?(autoload_path)
         # We do not need to issue another autoload, the existing one is enough
@@ -432,7 +426,7 @@ module Zeitwerk
 
     # @sig (Module, Symbol, String) -> void
     def set_autoload(parent, cname, abspath)
-      autoloads.define(parent, cname, abspath)
+      parent.autoload(cname, abspath)
 
       if logger
         if ruby?(abspath)
@@ -442,11 +436,21 @@ module Zeitwerk
         end
       end
 
+      autoloads[abspath] = [parent, cname]
       Registry.register_autoload(self, abspath)
 
       # See why in the documentation of Zeitwerk::Registry.inceptions.
       unless parent.autoload?(cname)
         Registry.register_inception(cpath(parent, cname), abspath, self)
+      end
+    end
+
+    # @sig (Module, Symbol) -> String?
+    def autoload_path_set_by_me_for?(parent, cname)
+      if autoload_path = strict_autoload_path(parent, cname)
+        autoload_path if autoloads.key?(autoload_path)
+      else
+        Registry.inception?(cpath(parent, cname))
       end
     end
 
