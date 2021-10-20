@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 2.5.0 (Unreleased)
+## 2.5.0 (20 October 2021)
 
 ### Breaking changes
 
@@ -12,7 +12,7 @@
   loader.preload("app/models/user.rb")
   ```
 
-  just reference the constant:
+  just reference the constant on setup:
 
   ```ruby
   loader.on_setup { User }
