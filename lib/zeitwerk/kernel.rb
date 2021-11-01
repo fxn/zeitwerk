@@ -24,22 +24,22 @@ module Kernel
   def require(path)
     if loader = Zeitwerk::Registry.loader_for(path)
       if path.end_with?(".rb")
-        zeitwerk_original_require(path).tap do |required|
-          loader.on_file_autoloaded(path) if required
-        end
+        required = zeitwerk_original_require(path)
+        loader.on_file_autoloaded(path) if required
+        required
       else
         loader.on_dir_autoloaded(path)
         true
       end
     else
-      zeitwerk_original_require(path).tap do |required|
-        if required
-          abspath = $LOADED_FEATURES.last
-          if loader = Zeitwerk::Registry.loader_for(abspath)
-            loader.on_file_autoloaded(abspath)
-          end
+      required = zeitwerk_original_require(path)
+      if required
+        abspath = $LOADED_FEATURES.last
+        if loader = Zeitwerk::Registry.loader_for(abspath)
+          loader.on_file_autoloaded(abspath)
         end
       end
+      required
     end
   end
 
