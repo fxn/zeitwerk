@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require "set"
-require "securerandom"
 
 module Zeitwerk
   class Loader
