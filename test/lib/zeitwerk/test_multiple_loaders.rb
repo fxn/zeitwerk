@@ -2,7 +2,7 @@
 
 require "test_helper"
 
-class TestMultiple < LoaderTest
+class TestMultipleLoaders < LoaderTest
   test "multiple independent loaders" do
     files = [
       ["lib0/app0.rb", "module App0; end"],
