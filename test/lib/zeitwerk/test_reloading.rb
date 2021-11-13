@@ -189,34 +189,4 @@ class TestReloading < LoaderTest
       assert_equal 2, $test_eager_load_after_reload
     end
   end
-
-  test "reloading works for private constants" do
-    $test_reload_private_constants = 0
-    files = [["m/x.rb", <<~EOS1], ["c.rb", <<~EOS2]]
-      module M
-        X = $test_reload_private_constants
-        private_constant :X
-
-        def self.x
-          X
-        end
-      end
-    EOS1
-      class C
-        include M
-
-        def self.x
-          X
-        end
-      end
-    EOS2
-    with_setup(files) do
-      assert_equal 0, C.x
-
-      loader.reload
-      $test_reload_private_constants = 1
-
-      assert_equal 1, C.x
-    end
-  end
 end
