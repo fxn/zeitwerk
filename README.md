@@ -810,7 +810,9 @@ Kernel.module_eval do
 end
 ```
 
-That file does not define a constant path after the path name and you need to tell Zeitwerk:
+`Kernel` is already defined by Ruby so the module cannot be autoloaded. Also, that file does not define a constant path after the path name. Therefore, Zeitwerk should not process it at all.
+
+The extension can still coexist with the rest of the project, you only need to tell Zeitwerk to ignore it:
 
 ```ruby
 kernel_ext = "#{__dir__}/my_gem/core_ext/kernel.rb"
@@ -825,6 +827,14 @@ core_ext = "#{__dir__}/my_gem/core_ext"
 loader.ignore(core_ext)
 loader.setup
 ```
+
+Now, that file has to be loaded manually with `require` or `require_relative`:
+
+```ruby
+require_relative "my_gem/core_ext/kernel"
+```
+
+and you can do that anytime, before configuring the loader, or after configuring the loader, does not matter.
 
 <a id="markdown-use-case-the-adapter-pattern" name="use-case-the-adapter-pattern"></a>
 #### Use case: The adapter pattern
