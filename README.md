@@ -50,8 +50,8 @@
   - [Rules of thumb](#rules-of-thumb)
   - [Debuggers](#debuggers)
     - [debug.rb](#debugrb)
-    - [Break](#break)
     - [Byebug](#byebug)
+    - [Break](#break)
 - [Pronunciation](#pronunciation)
 - [Supported Ruby versions](#supported-ruby-versions)
 - [Testing](#testing)
@@ -983,17 +983,34 @@ With that, when Zeitwerk scans the file system and reaches the gem directories `
 <a id="markdown-debugrb" name="debugrb"></a>
 #### debug.rb
 
-The new [debug.rb](https://github.com/ruby/debug) gem and Zeitwerk seem to be compatible, as far as I can tell. This is the new debugger that is going to ship with Ruby 3.1.
+The new [debug.rb](https://github.com/ruby/debug) gem and Zeitwerk are mostly compatible. This is the new debugger that is going to ship with Ruby 3.1.
+
+There's one exception, though: Due to a technical limitation of tracepoints, autoloading an explicit namespace directly in the debugger REPL does not work. For example, if the project has
+
+```
+hotel.rb
+hotel/pricing.rb
+```
+
+and `Hotel` has not been loaded yet, then something like
+
+```
+(rdbg) p Hotel::Pricing
+```
+
+will raise `NameError` for `Hotel::Pricing`.
+
+Expressions that autoload explicit namespaces as a side-effect do work, the gotcha is related to the expression literally typed in the prompt. See https://github.com/ruby/debug/issues/408 for details.
+
+<a id="markdown-byebug" name="byebug"></a>
+#### Byebug
+
+Zeitwerk and [Byebug](https://github.com/deivid-rodriguez/byebug) have a similar edge incompatibility.
 
 <a id="markdown-break" name="break"></a>
 #### Break
 
 Zeitwerk works fine with [@gsamokovarov](https://github.com/gsamokovarov)'s [Break](https://github.com/gsamokovarov/break) debugger.
-
-<a id="markdown-byebug" name="byebug"></a>
-#### Byebug
-
-Zeitwerk and [Byebug](https://github.com/deivid-rodriguez/byebug) are incompatible, classes or modules that belong to [explicit namespaces](#explicit-namespaces) are not autoloaded inside a Byebug session. See [this issue](https://github.com/deivid-rodriguez/byebug/issues/564#issuecomment-499413606) for further details.
 
 <a id="markdown-pronunciation" name="pronunciation"></a>
 ## Pronunciation
