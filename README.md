@@ -1000,7 +1000,7 @@ and `Hotel` has not been loaded yet, then something like
 
 will raise `NameError` for `Hotel::Pricing`.
 
-Expressions that autoload explicit namespaces as a side-effect do work, the gotcha is related to the expression literally typed in the prompt. See https://github.com/ruby/debug/issues/408 for details.
+Expressions that autoload explicit namespaces as a side-effect do work, the gotcha is related to the expression literally typed in the prompt. See [ruby/debug#408](https://github.com/ruby/debug/issues/408).
 
 <a id="markdown-byebug" name="byebug"></a>
 #### Byebug
