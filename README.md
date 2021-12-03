@@ -985,22 +985,7 @@ With that, when Zeitwerk scans the file system and reaches the gem directories `
 
 The new [debug.rb](https://github.com/ruby/debug) gem and Zeitwerk are mostly compatible. This is the new debugger that is going to ship with Ruby 3.1.
 
-There's one exception, though: Due to a technical limitation of tracepoints, autoloading an explicit namespace directly in the debugger REPL does not work. For example, if the project has
-
-```
-hotel.rb
-hotel/pricing.rb
-```
-
-and `Hotel` has not been loaded yet, then something like
-
-```
-(rdbg) p Hotel::Pricing
-```
-
-will raise `NameError` for `Hotel::Pricing`.
-
-Expressions that autoload explicit namespaces as a side-effect do work, the gotcha is related to the expression literally typed in the prompt. See [ruby/debug#408](https://github.com/ruby/debug/issues/408).
+There's one exception, though: Due to a technical limitation of tracepoints, explicit namespaces are not autoloaded while expressions are evaluated in the REPL. See [ruby/debug#408](https://github.com/ruby/debug/issues/408).
 
 <a id="markdown-byebug" name="byebug"></a>
 #### Byebug
