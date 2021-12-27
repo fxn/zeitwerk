@@ -88,6 +88,18 @@ class TestReloading < LoaderTest
     end
   end
 
+  test "reloading works even if directories for managed namespaces get somehow pushed ot $LOADED_FEATURES" do
+    files = [["x/y.rb", "X::Y = true"]]
+    with_setup(files) do
+      assert X::Y
+      $LOADED_FEATURES << File.expand_path("x")
+
+      loader.reload
+
+      assert X::Y
+    end
+  end
+
   test "reloading raises if the flag is not set" do
     e = assert_raises(Zeitwerk::ReloadingDisabledError) do
       loader = Zeitwerk::Loader.new
@@ -108,6 +120,7 @@ class TestReloading < LoaderTest
 
       remove_const :Z
       delete_loaded_feature "z/a.rb"
+      delete_loaded_feature "z"
     end
 
     files = [
@@ -141,6 +154,7 @@ class TestReloading < LoaderTest
 
       remove_const :Z
       delete_loaded_feature "z/a.rb"
+      delete_loaded_feature "z"
     end
 
     files = [

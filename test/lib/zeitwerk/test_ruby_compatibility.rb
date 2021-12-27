@@ -85,19 +85,6 @@ class TestRubyCompatibility < LoaderTest
     end
   end
 
-  # While unloading constants we leverage this property to avoid lookups in
-  # $LOADED_FEATURES for strings that we know are not going to be there.
-  test "directories are not included in $LOADED_FEATURES" do
-    with_files([]) do
-      FileUtils.mkdir("admin")
-      loader.push_dir(".")
-      loader.setup
-
-      assert Admin
-      assert !$LOADED_FEATURES.include?(File.expand_path("admin"))
-    end
-  end
-
   # We exploit this one to simplify the detection of explicit namespaces.
   #
   # Let's suppose `Admin` is an explicit namespace and scanning finds first a

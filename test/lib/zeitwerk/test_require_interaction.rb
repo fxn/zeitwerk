@@ -93,6 +93,14 @@ class TestRequireInteraction < LoaderTest
     end
   end
 
+  test "autovivification pushes the directory of the implicit namespace to $LOADED_FEATURES" do
+    files = [["x/y.rb", "X::Y = true"]]
+    with_setup(files) do
+      assert X
+      assert_equal File.expand_path("x"), $LOADED_FEATURES[-1]
+    end
+  end
+
   test "files deep down the current visited level are recognized as managed (implicit)" do
     files = [["foo/bar/baz/zoo/woo.rb", "Foo::Bar::Baz::Zoo::Woo = 1"]]
     with_setup(files, load_path: ".") do

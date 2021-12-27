@@ -29,6 +29,7 @@ module Kernel
         required
       else
         loader.on_dir_autoloaded(path)
+        $LOADED_FEATURES << path
         true
       end
     else

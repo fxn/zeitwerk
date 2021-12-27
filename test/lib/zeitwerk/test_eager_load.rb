@@ -159,6 +159,7 @@ class TestEagerLoad < LoaderTest
 
         remove_const :DbAdapters
         delete_loaded_feature "db_adapters/mysql_adapter.rb"
+        delete_loaded_feature "db_adapters"
       end
 
       $test_eager_load_eager_loaded_p = false
@@ -212,6 +213,7 @@ class TestEagerLoad < LoaderTest
 
         delete_loaded_feature "ns/foo.rb"
         delete_loaded_feature "ns/bar.rb"
+        delete_loaded_feature "ns"
       end
 
       $test_eager_load_eager_loaded_p = false
@@ -234,6 +236,7 @@ class TestEagerLoad < LoaderTest
 
         delete_loaded_feature "ns/foo.rb"
         delete_loaded_feature "ns/bar.rb"
+        delete_loaded_feature "ns"
       end
 
       $test_eager_load_eager_loaded_p = false
@@ -243,7 +246,7 @@ class TestEagerLoad < LoaderTest
       ]
       with_files(files) do
         loader = new_loader(dirs: %w(lazylib eagerlib), enable_reloading: enable_reloading)
-        loader.do_not_eager_load('lazylib/namespace')
+        loader.do_not_eager_load('lazylib/ns')
         loader.eager_load
 
         assert $test_eager_load_eager_loaded_p

@@ -123,13 +123,7 @@ module Zeitwerk
     # @sig () -> void
     def unload
       mutex.synchronize do
-        # We are going to keep track of the files that were required by our
-        # autoloads to later remove them from $LOADED_FEATURES, thus making them
-        # loadable by Kernel#require again.
-        #
-        # Directories are not stored in $LOADED_FEATURES, keeping track of files
-        # is enough.
-        unloaded_files = Set.new
+        abspaths_of_unloaded_crefs = Set.new
 
         autoloads.each do |abspath, (parent, cname)|
           if parent.autoload?(cname)
@@ -139,7 +133,7 @@ module Zeitwerk
             # and the constant path would escape unloadable_cpath? This is just
             # defensive code to clean things up as much as we are able to.
             unload_cref(parent, cname)
-            unloaded_files.add(abspath) if ruby?(abspath)
+            abspaths_of_unloaded_crefs.add(abspath)
           end
         end
 
@@ -150,10 +144,14 @@ module Zeitwerk
           end
 
           unload_cref(parent, cname)
-          unloaded_files.add(abspath) if ruby?(abspath)
+          abspaths_of_unloaded_crefs.add(abspath)
         end
 
-        unless unloaded_files.empty?
+        unless abspaths_of_unloaded_crefs.empty?
+          # We remove these abspaths from $LOADED_FEATURES because, otherwise,
+          # `require`'s idempotence would prevent newly defined autoloads from
+          # loading them again.
+          #
           # Bootsnap decorates Kernel#require to speed it up using a cache and
           # this optimization does not check if $LOADED_FEATURES has the file.
           #
@@ -165,7 +163,7 @@ module Zeitwerk
           # Rails applications may depend on bootsnap, so for unloading to work
           # in that setting it is preferable that we restrict our API choice to
           # one of those methods.
-          $LOADED_FEATURES.reject! { |file| unloaded_files.member?(file) }
+          $LOADED_FEATURES.reject! { |file| abspaths_of_unloaded_crefs.member?(file) }
         end
 
         autoloads.clear

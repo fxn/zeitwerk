@@ -41,6 +41,7 @@ class TestExceptions < LoaderTest
     on_teardown do
       remove_const :CLI
       delete_loaded_feature 'cli/x.rb'
+      delete_loaded_feature 'cli'
     end
 
     files = [["cli/x.rb", "module CLI; X = 1; end"]]
