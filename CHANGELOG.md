@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2.5.2 (27 December 2021)
+
+* When `Module#autoload` triggers the autovivification of an implicit namespace, `$LOADED_FEATURES` now gets the correspoding directory pushed. This is just a tweak to Zeitwerk's `Kernel#require` decoration. That way it acts more like the original, and cooperates better with other potential `Kernel#require` wrappers, like Bootsnap's.
+
 ## 2.5.1 (20 October 2021)
 
 * Restores support for namespaces that are not hashable. For example namespaces that override the `hash` method with a different arity as shown in [#188](https://github.com/fxn/zeitwerk/issues/188).
