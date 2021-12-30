@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2.5.3 (30 December 2021)
+
+* The change introduced in 2.5.2 implied a performance regression that was particularly dramatic in Ruby 3.1. We'll address [#198](https://github.com/fxn/zeitwerk/issues/198) in a different way.
+
 ## 2.5.2 (27 December 2021)
 
 * When `Module#autoload` triggers the autovivification of an implicit namespace, `$LOADED_FEATURES` now gets the correspoding directory pushed. This is just a tweak to Zeitwerk's `Kernel#require` decoration. That way it acts more like the original, and cooperates better with other potential `Kernel#require` wrappers, like Bootsnap's.
