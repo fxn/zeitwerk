@@ -50,7 +50,6 @@ class TestUnloadableCpath < LoaderTest
       remove_const :M
       delete_loaded_feature "m/x.rb"
       delete_loaded_feature "m/y.rb"
-      delete_loaded_feature "m"
 
       remove_const :Z
       delete_loaded_feature "z.rb"
