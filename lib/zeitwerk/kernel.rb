@@ -4,11 +4,10 @@ module Kernel
   module_function
 
   # Zeitwerk's main idea is to define autoloads for project constants, and then
-  # intercept them when triggered in this thin Kernel#require wrapper.
+  # intercept them when triggered in this thin `Kernel#require` wrapper.
   #
-  # That allows us to complete the circle, invoke callbacks, autovivify implicit
-  # namespaces, define autoloads for namespaces log activity if needed, perform
-  # internal housekeeping, etc.
+  # That allows us to complete the circle, invoke callbacks, autovivify modules,
+  # define autoloads for just autoloaded namespaces, update internal state, etc.
   #
   # On the other hand, if you publish a new version of a gem that is now managed
   # by Zeitwerk, client code can reference directly your classes and modules and
