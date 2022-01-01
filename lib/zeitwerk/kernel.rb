@@ -3,11 +3,12 @@
 module Kernel
   module_function
 
-  # We are going to decorate Kernel#require with two goals.
+  # Zeitwerk's main idea is to define autoloads for project constants, and then
+  # intercept them when triggered in this thin Kernel#require wrapper.
   #
-  # First, by intercepting Kernel#require calls, we are able to autovivify
-  # modules on required directories, and also do internal housekeeping when
-  # managed files are loaded.
+  # That allows us to complete the circle, invoke callbacks, autovivify implicit
+  # namespaces, define autoloads for namespaces log activity if needed, perform
+  # internal housekeeping, etc.
   #
   # On the other hand, if you publish a new version of a gem that is now managed
   # by Zeitwerk, client code can reference directly your classes and modules and
