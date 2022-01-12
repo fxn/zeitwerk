@@ -17,7 +17,7 @@ module Kernel
   #
   # We cannot decorate with prepend + super because Kernel has already been
   # included in Object, and changes in ancestors don't get propagated into
-  # already existing ancestor chains.
+  # already existing ancestor chains on Ruby < 3.0.
   alias_method :zeitwerk_original_require, :require
 
   # @sig (String) -> true | false
