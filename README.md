@@ -437,7 +437,7 @@ However, that can be overridden with `force`:
 loader.eager_load(force: true) # database adapters are eager loaded
 ```
 
-Which may be handy if the project eager loads in the test suite to [ensure project layour compliance](#testing-compliance).
+Which may be handy if the project eager loads in the test suite to [ensure project layout compliance](#testing-compliance).
 
 The `force` flag does not affect ignored files and directories, those are still ignored.
 
