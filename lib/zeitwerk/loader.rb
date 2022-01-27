@@ -151,8 +151,7 @@ module Zeitwerk
           # If the constant is not defined, on_unload should not be triggered
           # for it.
           if !on_unload_callbacks.empty? && cdef?(parent, cname)
-            value = parent.const_get(cname)
-            run_on_unload_callbacks(cpath, value, abspath)
+            run_on_unload_callbacks(cpath, cget(parent, cname), abspath)
           end
 
           unload_cref(parent, cname)
