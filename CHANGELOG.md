@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2.5.4 (28 January 2022)
+
+* If a file did not define the expected constant, there was a reload, and there were `on_unload` callbacks, Zeitwerk still tried to access the constant during reload, which raised. This has been corrected.
+
 ## 2.5.3 (30 December 2021)
 
 * The change introduced in 2.5.2 implied a performance regression that was particularly dramatic in Ruby 3.1. We'll address [#198](https://github.com/fxn/zeitwerk/issues/198) in a different way.
