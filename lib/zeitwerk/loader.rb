@@ -144,7 +144,13 @@ module Zeitwerk
         end
 
         to_unload.each do |cpath, (abspath, (parent, cname))|
-          unless on_unload_callbacks.empty?
+          # We have to check cdef? in this condition. Reason is, constants whose
+          # file does not define them have to be kept in to_unload as explained
+          # in the implementation of on_file_autoloaded.
+          #
+          # If the constant is not defined, on_unload should not be triggered
+          # for it.
+          if !on_unload_callbacks.empty? && cdef?(parent, cname)
             value = parent.const_get(cname)
             run_on_unload_callbacks(cpath, value, abspath)
           end

@@ -189,4 +189,33 @@ class TestReloading < LoaderTest
       assert_equal 2, $test_eager_load_after_reload
     end
   end
+
+  test "reload recovers from name errors (w/o on_unload callbacks)" do
+    on_teardown { remove_const :Y }
+
+    files = [["x.rb", "Y = :typo"]]
+    with_setup(files) do
+      assert_raises(Zeitwerk::NameError) { X }
+
+      loader.reload
+      File.write("x.rb", "X = true")
+
+      assert X
+    end
+  end
+
+  test "reload recovers from name errors (w/ on_unload callbacks)" do
+    on_teardown { remove_const :Y }
+
+    files = [["x.rb", "Y = :typo"]]
+    with_setup(files) do
+      loader.on_unload {}
+      assert_raises(Zeitwerk::NameError) { X }
+
+      loader.reload
+      File.write("x.rb", "X = true")
+
+      assert X
+    end
+  end
 end
