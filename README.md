@@ -58,6 +58,7 @@
 - [Motivation](#motivation)
   - [Kernel#require is brittle](#kernelrequire-is-brittle)
   - [Rails autoloading was brittle](#rails-autoloading-was-brittle)
+- [Awards](#awards)
 - [Thanks](#thanks)
 - [License](#license)
 
@@ -1053,6 +1054,11 @@ With Zeitwerk, you just name things following conventions and done. Things are a
 ### Rails autoloading was brittle
 
 Autoloading in Rails was based on `const_missing` up to Rails 5. That callback lacks fundamental information like the nesting or the resolution algorithm being used. Because of that, Rails autoloading was not able to match Ruby's semantics, and that introduced a [series of issues](https://guides.rubyonrails.org/v5.2/autoloading_and_reloading_constants.html#common-gotchas). Zeitwerk is based on a different technique and fixed Rails autoloading starting with Rails 6.
+
+<a id="markdown-awards" name="awards"></a>
+## Awards
+
+Zeitwerk has been awarded an "Outstanding Performance Award" Fukuoka Ruby Award 2022.
 
 <a id="markdown-thanks" name="thanks"></a>
 ## Thanks
