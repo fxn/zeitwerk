@@ -37,7 +37,7 @@ module Zeitwerk::Loader::Helpers
     File.directory?(path)
   end
 
-  # @sig String -> bool
+  # @sig (String) -> bool
   def hidden?(basename)
     basename.start_with?(".")
   end
