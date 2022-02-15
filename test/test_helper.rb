@@ -6,7 +6,7 @@ require "minitest/focus"
 require "minitest/reporters"
 Minitest::Reporters.use!(Minitest::Reporters::DefaultReporter.new)
 
-require "support/no_warnings_policy"
+# require "support/no_warnings_policy"
 require "support/test_macro"
 require "support/delete_loaded_feature"
 require "support/loader_test"
