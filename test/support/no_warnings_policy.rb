@@ -9,7 +9,7 @@ module NoWarningsPolicy
       abort(MESSAGE)
     end
   else
-    def warn(...)
+    def warn(*, **)
       super
       abort(MESSAGE)
     end
