@@ -14,6 +14,7 @@ jobs:
         os:
           - "ubuntu-latest"
           - "macos-latest"
+          - "windows-latest"
         ruby-version:
           - "2.5"
           - "2.6"
