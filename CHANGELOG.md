@@ -4,7 +4,7 @@
 
 * `Zeitwerk::UnsynchronizedReloadError` is raised if concurrent reloads or autoloads during reloads are detected.
 
-  This is a fatal exception that signals a fundamental bug in the code that should be synchronizing reloads. You cannot rescue it and expect things to work.
+  This is a fatal error that signals there is a fundamental bug in the client code that should be responsible for synchronizing reloads (not in Zeitwerk itself). You cannot rescue this exception and expect things to work.
 
   The purpose of `Zeitwerk::UnsynchronizedReloadError` is to inform the user clearly this unrecoverable situation was found. Before, you could only tell indirectly by debugging side-effects. Also, the exception message includes instructions that may help.
 
