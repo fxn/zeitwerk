@@ -6,6 +6,14 @@ require "fileutils"
 class TestReloading < LoaderTest
   module Namespace; end
 
+  def silence_exceptions_in_threads
+    original_report_on_exception = Thread.report_on_exception
+    Thread.report_on_exception = false
+    yield
+  ensure
+    Thread.report_on_exception = original_report_on_exception
+  end
+
   test "enabling reloading after setup raises" do
     e = assert_raises(Zeitwerk::Error) do
       loader = Zeitwerk::Loader.new
@@ -216,6 +224,111 @@ class TestReloading < LoaderTest
       File.write("x.rb", "X = true")
 
       assert X
+    end
+  end
+
+  test "reloading? returns false before and after reloading" do
+    with_setup([]) do
+      assert !loader.reloading?
+
+      loader.reload
+
+      assert !loader.reloading?
+    end
+  end
+
+  test "reloading? is true during reloading" do
+    $reloading_flag_during_reloading = false
+    with_setup([]) do
+      def loader.unload
+        $reloading_flag_during_reloading = reloading?
+        super
+      end
+      loader.reload
+
+      assert $reloading_flag_during_reloading
+    end
+  end
+
+  test "concurrent reloads are detected" do
+    $test_concurrent_reloads_queue = Queue.new
+    with_setup([]) do
+      def loader.unload
+        $test_concurrent_reloads_queue << true
+        sleep 0.5
+        super
+      end
+
+      silence_exceptions_in_threads do
+        t1 = Thread.new { loader.reload }
+        t2 = Thread.new { $test_concurrent_reloads_queue.pop(); loader.reload }
+
+        assert_raises(Zeitwerk::UnsynchronizedReloadError) { t2.join }
+        t1.join
+      end
+    end
+  end
+
+  test "autoloads during reloading are detected (not a namespace)" do
+    on_teardown { remove_const :X }
+
+    $test_concurrent_reloads_queue = Queue.new
+    with_setup([["x.rb", "X = 1"]]) do
+      def loader.unload
+        $test_concurrent_reloads_queue << true
+        sleep 0.5
+        super
+      end
+
+      silence_exceptions_in_threads do
+        t1 = Thread.new { loader.reload }
+        t2 = Thread.new { $test_concurrent_reloads_queue.pop(); X }
+
+        assert_raises(Zeitwerk::UnsynchronizedReloadError) { t2.join }
+        t1.join
+      end
+    end
+  end
+
+  test "autoloads during reloading are detected (implicit namespace)" do
+    on_teardown { remove_const :X }
+
+    $test_concurrent_reloads_queue = Queue.new
+    with_setup([["x/y.rb", "X::Y = 1"]]) do
+      def loader.unload
+        $test_concurrent_reloads_queue << true
+        sleep 0.5
+        super
+      end
+
+      silence_exceptions_in_threads do
+        t1 = Thread.new { loader.reload }
+        t2 = Thread.new { $test_concurrent_reloads_queue.pop(); X }
+
+        assert_raises(Zeitwerk::UnsynchronizedReloadError) { t2.join }
+        t1.join
+      end
+    end
+  end
+
+  test "autoloads during reloading are detected (explicit namespace)" do
+    on_teardown { remove_const :X }
+
+    $test_concurrent_reloads_queue = Queue.new
+    with_setup([["x.rb", "module X; end"], ["x/y.rb", "X::Y = 1"]]) do
+      def loader.unload
+        $test_concurrent_reloads_queue << true
+        sleep 0.5
+        super
+      end
+
+      silence_exceptions_in_threads do
+        t1 = Thread.new { loader.reload }
+        t2 = Thread.new { $test_concurrent_reloads_queue.pop(); X }
+
+        assert_raises(Zeitwerk::UnsynchronizedReloadError) { t2.join }
+        t1.join
+      end
     end
   end
 end

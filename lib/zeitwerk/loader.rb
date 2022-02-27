@@ -77,6 +77,10 @@ module Zeitwerk
     # @sig Mutex
     attr_reader :mutex2
 
+    # @private
+    # @sig Mutex
+    attr_reader :reloading_mutex
+
     def initialize
       super
 
@@ -86,7 +90,9 @@ module Zeitwerk
       @lazy_subdirs    = Hash.new { |h, cpath| h[cpath] = [] }
       @mutex           = Mutex.new
       @mutex2          = Mutex.new
+      @reloading_mutex = Mutex.new
       @setup           = false
+      @reloading       = false
       @eager_loaded    = false
 
       Registry.register_loader(self)
@@ -196,10 +202,19 @@ module Zeitwerk
     # @sig () -> void
     def reload
       if reloading_enabled?
+        reloading_mutex.synchronize do
+          if @reloading
+            raise Zeitwerk::UnsynchronizedReloadError
+          end
+          @reloading = true
+        end
+
         unload
         recompute_ignored_paths
         recompute_collapse_dirs
         setup
+
+        reloading_mutex.synchronize { @reloading = false }
       else
         raise ReloadingDisabledError, "can't reload, please call loader.enable_reloading before setup"
       end
@@ -280,6 +295,12 @@ module Zeitwerk
     def unregister
       Registry.unregister_loader(self)
       ExplicitNamespace.unregister_loader(self)
+    end
+
+    # @private
+    # @sig () -> bool
+    def reloading?
+      reloading_enabled? && reloading_mutex.synchronize { @reloading }
     end
 
     # --- Class methods ---------------------------------------------------------------------------
