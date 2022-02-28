@@ -300,6 +300,12 @@ module Zeitwerk
     # @private
     # @sig () -> bool
     def reloading?
+      # Logically, the first check is redundant, we could just return
+      #
+      #   reloading_mutex.synchronize { @reloading }
+      #
+      # However, if reloading is disabled, this predicate is almost 3x faster
+      # written this way.
       reloading_enabled? && reloading_mutex.synchronize { @reloading }
     end
 
