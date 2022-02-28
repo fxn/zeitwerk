@@ -92,7 +92,6 @@ module Zeitwerk
       @mutex2          = Mutex.new
       @reloading_mutex = Mutex.new
       @setup           = false
-      @reloading       = false
       @eager_loaded    = false
 
       Registry.register_loader(self)
@@ -202,11 +201,8 @@ module Zeitwerk
     # @sig () -> void
     def reload
       if reloading_enabled?
-        reloading_mutex.synchronize do
-          if @reloading
-            raise Zeitwerk::UnsynchronizedReloadError
-          end
-          @reloading = true
+        unless reloading_mutex.try_lock
+          raise Zeitwerk::UnsynchronizedReloadError
         end
 
         unload
@@ -214,7 +210,7 @@ module Zeitwerk
         recompute_collapse_dirs
         setup
 
-        reloading_mutex.synchronize { @reloading = false }
+        reloading_mutex.unlock
       else
         raise ReloadingDisabledError, "can't reload, please call loader.enable_reloading before setup"
       end
@@ -300,13 +296,7 @@ module Zeitwerk
     # @private
     # @sig () -> bool
     def reloading?
-      # Logically, the first check is redundant, we could just return
-      #
-      #   reloading_mutex.synchronize { @reloading }
-      #
-      # However, if reloading is disabled, this predicate is almost 3x faster
-      # written this way.
-      reloading_enabled? && reloading_mutex.synchronize { @reloading }
+      reloading_mutex.locked?
     end
 
     # --- Class methods ---------------------------------------------------------------------------
