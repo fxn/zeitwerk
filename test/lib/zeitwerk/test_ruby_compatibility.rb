@@ -272,8 +272,8 @@ class TestRubyCompatibility < LoaderTest
   end
 
   # If the user issues a require call with a Pathname object for a path that is
-  # autoloadable, we are able to autoload because $LOADED_FEATURES.last returns
-  # the real path as a string and loader_for is able to find its loader. During
+  # autoloadable, we are still able to intercept it because $LOADED_FEATURES
+  # stores it as a string and loader_for is able to find its loader. During
   # unloading, we find and delete strings in $LOADED_FEATURES too.
   #
   # This is not a hard requirement, we could work around it if $LOADED_FEATURES
