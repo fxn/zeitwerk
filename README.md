@@ -47,6 +47,7 @@
   - [Edge cases](#edge-cases)
   - [Beware of circular dependencies](#beware-of-circular-dependencies)
   - [Reopening third-party namespaces](#reopening-third-party-namespaces)
+  - [Encodings](#encodings)
   - [Rules of thumb](#rules-of-thumb)
   - [Debuggers](#debuggers)
     - [debug.rb](#debugrb)
@@ -969,6 +970,18 @@ loader.setup
 ```
 
 With that, when Zeitwerk scans the file system and reaches the gem directories `lib/active_job` and `lib/active_job/queue_adapters`, it detects the corresponding modules already exist and therefore understands it does not have to manage them. The loader just descends into those directories. Eventually will reach `lib/active_job/queue_adapters/awesome_queue.rb`, and since `ActiveJob::QueueAdapters::AwesomeQueue` is unknown, Zeitwerk will manage it. Which is what happens regularly with the files in your gem. On reload, the namespaces are safe, won't be reloaded. The loader only reloads what it manages, which in this case is the adapter itself.
+
+<a id="markdown-encodings" name="encodings"></a>
+### Encodings
+
+Zeitwerk supports projects whose files and file system are in UTF-8. The encoding of the file system can be checked this way:
+
+```
+% ruby -e "puts Encoding.find('filesystem')"
+UTF-8
+```
+
+The test suite passes on Windows with codepage `Windows-1252` if all the involved absolute paths are ASCII. Other supersets of ASCII may work too, but you have to try.
 
 <a id="markdown-rules-of-thumb" name="rules-of-thumb"></a>
 ### Rules of thumb
