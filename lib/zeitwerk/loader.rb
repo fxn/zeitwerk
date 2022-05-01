@@ -13,6 +13,9 @@ module Zeitwerk
     include Helpers
     include Config
 
+    MUTEX = Mutex.new
+    private_constant :MUTEX
+
     # Maps absolute paths for which an autoload has been set ---and not
     # executed--- to their corresponding parent class or module and constant
     # name.
@@ -305,10 +308,6 @@ module Zeitwerk
       # @sig #call | #debug | nil
       attr_accessor :default_logger
 
-      # @private
-      # @sig Mutex
-      attr_accessor :mutex
-
       # This is a shortcut for
       #
       #   require "zeitwerk"
@@ -320,10 +319,10 @@ module Zeitwerk
       # except that this method returns the same object in subsequent calls from
       # the same file, in the unlikely case the gem wants to be able to reload.
       #
-      # @sig () -> Zeitwerk::Loader
-      def for_gem
+      # @sig (bool) -> Zeitwerk::GemLoader
+      def for_gem(warn_on_extra_files: true)
         called_from = caller_locations(1, 1).first.path
-        Registry.loader_for_gem(called_from)
+        Registry.loader_for_gem(called_from, warn_on_extra_files: warn_on_extra_files)
       end
 
       # Broadcasts `eager_load` to all loaders.
@@ -341,8 +340,6 @@ module Zeitwerk
         Registry.loaders.flat_map(&:dirs).freeze
       end
     end
-
-    self.mutex = Mutex.new
 
     private # -------------------------------------------------------------------------------------
 
@@ -482,7 +479,7 @@ module Zeitwerk
 
     # @sig (String) -> void
     def raise_if_conflicting_directory(dir)
-      self.class.mutex.synchronize do
+      MUTEX.synchronize do
         Registry.loaders.each do |loader|
           next if loader == self
           next if loader.ignores?(dir)

@@ -351,8 +351,6 @@ lib/my_gem/foo.rb     # MyGem::Foo
 
 Neither a gemspec nor a version file are technically required, this helper works as long as the code is organized using that standard structure.
 
-If the entry point of your gem lives in a subdirectory of `lib` because it is reopening a namespace defined somewhere else, please use the generic API to setup the loader, and make sure you check the section [_Reopening third-party namespaces_](https://github.com/fxn/zeitwerk#reopening-third-party-namespaces) down below.
-
 Conceptually, `for_gem` translates to:
 
 ```ruby
@@ -364,8 +362,6 @@ loader.tag = File.basename(__FILE__, ".rb")
 loader.inflector = Zeitwerk::GemInflector.new(__FILE__)
 loader.push_dir(__dir__)
 ```
-
-except that this method returns the same object in subsequent calls from the same file, in the unlikely case the gem wants to be able to reload.
 
 If the main module references project constants at the top-level, Zeitwerk has to be ready to load them. Their definitions, in turn, may reference other project constants. And this is recursive. Therefore, it is important that the `setup` call happens above the main module definition:
 
@@ -382,6 +378,26 @@ module MyGem
   include MyLogger
 end
 ```
+
+Loaders returned by `Zeitwerk::Loader.for_gem` issue warnings if `lib` has extra Ruby files or directories.
+
+For example, `lib/generators` by itself is telling Zeitwerk to create a module called `Generators`. If `generators` is just a container for non-autoloadable code and templates, not acting as a project namespace, you need to setup things accordingly.
+
+If the warning is legit, just tell the loader to ignore the offending file or directory:
+
+```ruby
+loader.ignore("#{__dir__}/generators")
+```
+
+Otherwise, there's a flag to say the extra stuff is OK:
+
+```ruby
+Zeitwerk::Loader.for_gem(warn_on_extra_files: false)
+```
+
+This method is idempotent when invoked from the same file, to support gems that want to reload (unlikely).
+
+If the entry point of your gem lives in a subdirectory of `lib` because it is reopening a namespace defined somewhere else, please use the generic API to setup the loader, and make sure you check the section [_Reopening third-party namespaces_](https://github.com/fxn/zeitwerk#reopening-third-party-namespaces) down below.
 
 <a id="markdown-autoloading" name="autoloading"></a>
 ### Autoloading

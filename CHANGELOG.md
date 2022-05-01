@@ -2,6 +2,38 @@
 
 ## 2.5.5 (Unreleased)
 
+* On setup, loaders returned by `Zeitwerk::Loader.for_gem` issue warnings if
+  `lib` has extra non-ignored Ruby files or directories. So if this is all:
+
+  ```
+  lib/my_gem.rb
+  lib/my_gem
+  ```
+
+  no warning is issued, but this one
+
+  ```
+  lib/my_gem.rb
+  lib/my_gem
+  lib/foo.rb
+  ```
+
+  gets a warning for `lib/foo.rb`, and this one
+
+  ```
+  lib/my_gem.rb
+  lib/my_gem
+  lib/generators
+  ```
+
+  Gets a warning for `lib/generators`.
+
+  The [documentation](https://github.com/fxn/zeitwerk#for_gem) and the warnings
+  themselves explain what to do about them.
+
+  This method returns an instance of a private subclass of `Zeitwerk::Loader`
+  now, but you cannot rely on the type, just on the interface.
+
 * `Zeitwerk::UnsynchronizedReloadError` is raised if concurrent reloads or autoloads during reloads are detected.
 
   This is a fatal error that signals there is a fundamental bug in the client code that should be responsible for synchronizing reloads (not in Zeitwerk itself). You cannot rescue this exception and expect things to work.

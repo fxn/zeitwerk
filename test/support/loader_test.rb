@@ -31,7 +31,7 @@ class LoaderTest < Minitest::Test
 
   def reset_registry
     Zeitwerk::Registry.loaders.clear
-    Zeitwerk::Registry.loaders_managing_gems.clear
+    Zeitwerk::Registry.gem_loaders_by_root_file.clear
     Zeitwerk::Registry.autoloads.clear
     Zeitwerk::Registry.inceptions.clear
   end
@@ -70,10 +70,11 @@ class LoaderTest < Minitest::Test
   end
 
   def with_load_path(dirs = loader.dirs)
-    Array(dirs).each { |dir| $LOAD_PATH.push(dir) }
+    dirs = Array(dirs).map { |dir| File.expand_path(dir) }
+    dirs.each { |dir| $LOAD_PATH.push(dir) }
     yield
   ensure
-    Array(dirs).each { |dir| $LOAD_PATH.delete(dir) }
+    dirs.each { |dir| $LOAD_PATH.delete(dir) }
   end
 
   def with_setup(files, dirs: ".", namespace: Object, load_path: nil, rm: true)

@@ -10,12 +10,11 @@ module Zeitwerk
       # @sig Array[Zeitwerk::Loader]
       attr_reader :loaders
 
-      # Registers loaders created with `for_gem` to make the method idempotent
-      # in case of reload.
+      # Registers gem loaders to let `for_gem` be idempotent in case of reload.
       #
       # @private
       # @sig Hash[String, Zeitwerk::Loader]
-      attr_reader :loaders_managing_gems
+      attr_reader :gem_loaders_by_root_file
 
       # Maps absolute paths to the loaders responsible for them.
       #
@@ -77,7 +76,7 @@ module Zeitwerk
       # @sig (Zeitwerk::Loader) -> void
       def unregister_loader(loader)
         loaders.delete(loader)
-        loaders_managing_gems.delete_if { |_, l| l == loader }
+        gem_loaders_by_root_file.delete_if { |_, l| l == loader }
         autoloads.delete_if { |_, l| l == loader }
         inceptions.delete_if { |_, (_, l)| l == loader }
       end
@@ -87,14 +86,8 @@ module Zeitwerk
       #
       # @private
       # @sig (String) -> Zeitwerk::Loader
-      def loader_for_gem(root_file)
-        loaders_managing_gems[root_file] ||= begin
-          Loader.new.tap do |loader|
-            loader.tag = File.basename(root_file, ".rb")
-            loader.inflector = GemInflector.new(root_file)
-            loader.push_dir(File.dirname(root_file))
-          end
-        end
+      def loader_for_gem(root_file, warn_on_extra_files:)
+        gem_loaders_by_root_file[root_file] ||= GemLoader._new(root_file, warn_on_extra_files: warn_on_extra_files)
       end
 
       # @private
@@ -137,9 +130,9 @@ module Zeitwerk
       end
     end
 
-    @loaders               = []
-    @loaders_managing_gems = {}
-    @autoloads             = {}
-    @inceptions            = {}
+    @loaders                  = []
+    @gem_loaders_by_root_file = {}
+    @autoloads                = {}
+    @inceptions               = {}
   end
 end
