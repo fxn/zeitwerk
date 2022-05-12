@@ -247,6 +247,8 @@ app/controllers/admin/users_controller.rb -> Admin::UsersController
 
 `Admin` is autovivified as a module on demand, you do not need to define an `Admin` class or module in an `admin.rb` file explicitly.
 
+Directories define namespaces regardless of their contents, even if they are empty. If they are not meant to represent namespaces, please tell the loader to [ignore](#ignoring-parts-of-the-project) them.
+
 <a id="markdown-explicit-namespaces" name="explicit-namespaces"></a>
 ### Explicit namespaces
 
