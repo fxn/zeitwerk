@@ -385,7 +385,7 @@ end
 
 Loaders returned by `Zeitwerk::Loader.for_gem` issue warnings if `lib` has extra Ruby files or directories.
 
-For example, `lib/generators` by itself is telling Zeitwerk to create a module called `Generators`. If `generators` is just a container for non-autoloadable code and templates, not acting as a project namespace, you need to setup things accordingly.
+For example, if the gem has Rails generators under `lib/generators`, by convention that directory defines a `Generators` Ruby module. If `generators` is just a container for non-autoloadable code and templates, not acting as a project namespace, you need to setup things accordingly.
 
 If the warning is legit, just tell the loader to ignore the offending file or directory:
 

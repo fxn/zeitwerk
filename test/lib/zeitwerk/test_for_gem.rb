@@ -172,6 +172,23 @@ class TestForGem < LoaderTest
     end
   end
 
+  test "does not warn if lib has an extra directory, but it has no Ruby files" do
+    files = [["lib/my_gem.rb", <<~EOS], ["lib/tasks/newsletter.rake", ""]]
+      loader = Zeitwerk::Loader.for_gem
+      loader.enable_reloading
+      loader.setup
+
+      module MyGem
+      end
+    EOS
+    with_my_gem(files, false) do
+      _out, err = capture_io do
+        assert require("my_gem")
+      end
+      assert_empty err
+    end
+  end
+
   test "does not warn if lib has an extra directory, but warnings are disabled" do
     files = [["lib/my_gem.rb", <<~EOS], ["lib/foo/bar.rb", "Foo::Bar = true"]]
       loader = Zeitwerk::Loader.for_gem(warn_on_extra_files: false)

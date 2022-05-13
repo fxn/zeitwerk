@@ -11,30 +11,7 @@
   If you need an empty module, please define it in a file.
 
 * On setup, loaders returned by `Zeitwerk::Loader.for_gem` issue warnings if
-  `lib` has extra non-ignored Ruby files or directories. So if this is all:
-
-  ```
-  lib/my_gem.rb
-  lib/my_gem
-  ```
-
-  no warning is issued, but this one
-
-  ```
-  lib/my_gem.rb
-  lib/my_gem
-  lib/foo.rb
-  ```
-
-  gets a warning for `lib/foo.rb`, and this one
-
-  ```
-  lib/my_gem.rb
-  lib/my_gem
-  lib/generators
-  ```
-
-  Gets a warning for `lib/generators`.
+  `lib` has extra, non-ignored Ruby files or directories.
 
   The [documentation](https://github.com/fxn/zeitwerk#for_gem) and the warnings
   themselves explain what to do about them.

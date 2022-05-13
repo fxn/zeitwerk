@@ -41,7 +41,6 @@ module Zeitwerk
       ls(@lib) do |basename, abspath|
         next if abspath == @root_file
         next if abspath == expected_namespace_dir
-        next if !ruby?(abspath) && !dir?(abspath)
 
         basename_without_ext = basename.delete_suffix(".rb")
         cname = inflector.camelize(basename_without_ext, abspath)

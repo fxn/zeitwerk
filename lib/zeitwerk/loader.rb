@@ -249,7 +249,7 @@ module Zeitwerk
               if cref = autoloads[abspath]
                 cget(*cref)
               end
-            elsif dir?(abspath) && !root_dirs.key?(abspath)
+            elsif !root_dirs.key?(abspath)
               if collapse?(abspath)
                 queue << [namespace, abspath]
               else
@@ -351,7 +351,7 @@ module Zeitwerk
             basename.delete_suffix!(".rb")
             cname = inflector.camelize(basename, abspath).to_sym
             autoload_file(parent, cname, abspath)
-          elsif dir?(abspath)
+          else
             # In a Rails application, `app/models/concerns` is a subdirectory of
             # `app/models`, but both of them are root directories.
             #
@@ -396,13 +396,9 @@ module Zeitwerk
         # subdirectory has to be visited if the namespace is used.
         lazy_subdirs[cpath] << subdir
       elsif !cdef?(parent, cname)
-        if has_at_least_one_ruby_file?(subdir)
-          # First time we find this namespace, set an autoload for it.
-          lazy_subdirs[cpath(parent, cname)] << subdir
-          set_autoload(parent, cname, subdir)
-        else
-          log("Directory #{subdir} has no Ruby files, ignoring") if logger
-        end
+        # First time we find this namespace, set an autoload for it.
+        lazy_subdirs[cpath(parent, cname)] << subdir
+        set_autoload(parent, cname, subdir)
       else
         # For whatever reason the constant that corresponds to this namespace has
         # already been defined, we have to recurse.

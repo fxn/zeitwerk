@@ -21,21 +21,28 @@ module Zeitwerk::Loader::Helpers
       abspath = File.join(dir, basename)
       next if ignored_paths.member?(abspath)
 
+      if dir?(abspath)
+        next unless has_at_least_one_ruby_file?(abspath)
+      else
+        next unless ruby?(abspath)
+      end
+
       # We freeze abspath because that saves allocations when passed later to
       # File methods. See #125.
       yield basename, abspath.freeze
     end
   end
 
+  # @sig (String) -> bool
   def has_at_least_one_ruby_file?(dir)
     to_visit = [dir]
 
     while dir = to_visit.shift
       ls(dir) do |_basename, abspath|
-        if ruby?(abspath)
-          return true
-        elsif dir?(abspath)
+        if dir?(abspath)
           to_visit << abspath
+        else
+          return true
         end
       end
     end
