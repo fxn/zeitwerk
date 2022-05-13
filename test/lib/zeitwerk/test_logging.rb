@@ -210,4 +210,14 @@ class TestLogging < LoaderTest
       end
     end
   end
+
+  test "logs directories that are ignored because they do not contain Ruby files" do
+    with_files([]) do
+      FileUtils.mkdir_p("foo/bar/baz")
+      loader.push_dir(".")
+      assert_logged(%r(Directory #{File.expand_path("foo")} has no Ruby files, ignoring)) do
+        loader.setup
+      end
+    end
+  end
 end

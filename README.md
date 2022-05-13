@@ -247,7 +247,9 @@ app/controllers/admin/users_controller.rb -> Admin::UsersController
 
 `Admin` is autovivified as a module on demand, you do not need to define an `Admin` class or module in an `admin.rb` file explicitly.
 
-Directories define namespaces regardless of their contents, even if they are empty. If they are not meant to represent namespaces, please tell the loader to [ignore](#ignoring-parts-of-the-project) them.
+For a directory to implicitly define a namespace, it has to contain at least one non-ignored Ruby file, either directly or recursively. For example, `tasks/newsletter.rake` does not define a `Tasks` namespace. If you'd like the loader to not even inspect the contents of some of these, remember you can manually [ignore them](#ignoring-parts-of-the-project).
+
+If you need an empty module, please define it in a file.
 
 <a id="markdown-explicit-namespaces" name="explicit-namespaces"></a>
 ### Explicit namespaces

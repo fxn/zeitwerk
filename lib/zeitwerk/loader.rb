@@ -396,9 +396,13 @@ module Zeitwerk
         # subdirectory has to be visited if the namespace is used.
         lazy_subdirs[cpath] << subdir
       elsif !cdef?(parent, cname)
-        # First time we find this namespace, set an autoload for it.
-        lazy_subdirs[cpath(parent, cname)] << subdir
-        set_autoload(parent, cname, subdir)
+        if has_at_least_one_ruby_file?(subdir)
+          # First time we find this namespace, set an autoload for it.
+          lazy_subdirs[cpath(parent, cname)] << subdir
+          set_autoload(parent, cname, subdir)
+        else
+          log("Directory #{subdir} has no Ruby files, ignoring") if logger
+        end
       else
         # For whatever reason the constant that corresponds to this namespace has
         # already been defined, we have to recurse.

@@ -27,6 +27,22 @@ module Zeitwerk::Loader::Helpers
     end
   end
 
+  def has_at_least_one_ruby_file?(dir)
+    to_visit = [dir]
+
+    while dir = to_visit.shift
+      ls(dir) do |_basename, abspath|
+        if ruby?(abspath)
+          return true
+        elsif dir?(abspath)
+          to_visit << abspath
+        end
+      end
+    end
+
+    false
+  end
+
   # @sig (String) -> bool
   def ruby?(path)
     path.end_with?(".rb")

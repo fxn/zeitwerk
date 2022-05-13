@@ -88,8 +88,7 @@ class TestRubyCompatibility < LoaderTest
   # While unloading constants we leverage this property to avoid lookups in
   # $LOADED_FEATURES for strings that we know are not going to be there.
   test "directories are not included in $LOADED_FEATURES" do
-    with_files([]) do
-      FileUtils.mkdir("admin")
+    with_files(["admin/users_controller.rb"]) do
       loader.push_dir(".")
       loader.setup
 

@@ -85,4 +85,54 @@ class TestAutovivification < LoaderTest
       assert $test_admin_const_set_queue.empty?
     end
   end
+
+  test "defines no namespace for empty directories" do
+    with_files([]) do
+      FileUtils.mkdir("foo")
+      loader.push_dir(".")
+      loader.setup
+      assert !Object.autoload?(:Foo)
+    end
+  end
+
+  test "defines no namespace for empty directories (recursively)" do
+    with_files([]) do
+      FileUtils.mkdir_p("foo/bar/baz")
+      loader.push_dir(".")
+      loader.setup
+      assert !Object.autoload?(:Foo)
+    end
+  end
+
+  test "defines no namespace for directories whose files are all non-Ruby" do
+    with_setup([["tasks/newsletter.rake", ""], ["assets/.keep", ""]]) do
+      assert !Object.autoload?(:Tasks)
+      assert !Object.autoload?(:Assets)
+    end
+  end
+
+  test "defines no namespace for directories whose files are all non-Ruby (recursively)" do
+    with_setup([["tasks/product/newsletter.rake", ""], ["assets/css/.keep", ""]]) do
+      assert !Object.autoload?(:Tasks)
+      assert !Object.autoload?(:Assets)
+    end
+  end
+
+  test "defines no namespace for directories whose Ruby files are all ignored" do
+    with_files([["foo/bar/baz.rb", ""]]) do
+      loader.push_dir(".")
+      loader.ignore("foo/bar/baz.rb")
+      loader.setup
+      assert !Object.autoload?(:Foo)
+    end
+  end
+
+  test "defines no namespace for directories that have Ruby files below ignored directories" do
+    with_files([["foo/bar/baz.rb", ""]]) do
+      loader.push_dir(".")
+      loader.ignore("foo/bar")
+      loader.setup
+      assert !Object.autoload?(:Foo)
+    end
+  end
 end

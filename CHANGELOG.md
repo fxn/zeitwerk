@@ -2,6 +2,14 @@
 
 ## 2.5.5 (Unreleased)
 
+* For a directory to implicitly define a namespace, it has now to contain at
+  least one non-ignored Ruby file, either directly or recursively. For example,
+  `tasks/newsletter.rake` defined a namespace `Tasks` before, now it doesn't.
+  This is also handy for project layouts that contain a mix of directories with
+  Ruby files, and directories with templates or other auxiliary resources.
+
+  If you need an empty module, please define it in a file.
+
 * On setup, loaders returned by `Zeitwerk::Loader.for_gem` issue warnings if
   `lib` has extra non-ignored Ruby files or directories. So if this is all:
 
