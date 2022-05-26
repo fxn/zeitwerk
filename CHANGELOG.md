@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 2.6.0 (25 May 2022)
+## 2.6.0 (Unreleased)
 
 * For a directory to implicitly define a namespace, it has now to contain at
   least one non-ignored Ruby file, either directly or recursively. For example,
