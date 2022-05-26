@@ -93,6 +93,21 @@ class TestOnUnload < LoaderTest
     end
   end
 
+  test "on_unload on cpaths does not trigger a failed autoload twice" do
+    on_teardown { remove_const :Y }
+
+    $failed_autoloads = 0
+    with_setup([["x.rb", "$failed_autoloads += 1; Y = 1"]]) do
+      on_unload_for_X = false
+      loader.on_unload("X") {}
+
+      assert_raises(Zeitwerk::NameError) { X }
+      loader.reload
+
+      assert_equal 1, $failed_autoloads
+    end
+  end
+
   test "on_unload for :ANY is called with the expected arguments" do
     with_setup([["x.rb", "X = 1"]]) do
       args = []; loader.on_unload { |*a| args << a }
@@ -169,6 +184,21 @@ class TestOnUnload < LoaderTest
       loader.reload
 
       assert !on_unload_for_X
+    end
+  end
+
+  test "on_unload on :ANY does not trigger a failed autoload twice" do
+    on_teardown { remove_const :Y }
+
+    $failed_autoloads = 0
+    with_setup([["x.rb", "$failed_autoloads += 1; Y = 1"]]) do
+      on_unload_for_X = false
+      loader.on_unload {}
+
+      assert_raises(Zeitwerk::NameError) { X }
+      loader.reload
+
+      assert_equal 1, $failed_autoloads
     end
   end
 end
