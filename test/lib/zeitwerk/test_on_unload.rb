@@ -50,7 +50,7 @@ class TestOnUnload < LoaderTest
     end
   end
 
-  test "on_unload on cpaths are not called for other constants" do
+  test "on_unload on cpaths is not called for other constants" do
     files = [
       ["x.rb", "X = 1"],
       ["y.rb", "Y = 1"]
@@ -63,6 +63,33 @@ class TestOnUnload < LoaderTest
       loader.reload
 
       assert !on_unload_for_Y
+    end
+  end
+
+  test "on_unload on cpaths is resilient to manually removed constants" do
+    with_setup([["x.rb", "X = 1"]]) do
+      on_unload_for_X = false
+      loader.on_unload("X") { on_unload_for_X = true }
+
+      assert X
+      remove_const :X
+      loader.reload
+
+      assert !on_unload_for_X
+    end
+  end
+
+  test "on_unload on cpaths is resilient to failed autoloads" do
+    on_teardown { remove_const :Y }
+
+    with_setup([["x.rb", "Y = 1"]]) do
+      on_unload_for_X = false
+      loader.on_unload("X") { on_unload_for_X = true }
+
+      assert_raises(Zeitwerk::NameError) { X }
+      loader.reload
+
+      assert !on_unload_for_X
     end
   end
 
@@ -115,6 +142,33 @@ class TestOnUnload < LoaderTest
       loader.reload
 
       assert_equal [1, 2], x
+    end
+  end
+
+  test "on_unload for :ANY is is resilient to manually removed constants" do
+    with_setup([["x.rb", "X = 1"]]) do
+      on_unload_for_X = false
+      loader.on_unload { on_unload_for_X = true }
+
+      assert X
+      remove_const :X
+      loader.reload
+
+      assert !on_unload_for_X
+    end
+  end
+
+  test "on_unload for :ANY is is resilient to failed autoloads" do
+    on_teardown { remove_const :Y }
+
+    with_setup([["x.rb", "Y = 1"]]) do
+      on_unload_for_X = false
+      loader.on_unload { on_unload_for_X = true }
+
+      assert_raises(Zeitwerk::NameError) { X }
+      loader.reload
+
+      assert !on_unload_for_X
     end
   end
 end

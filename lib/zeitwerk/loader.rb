@@ -152,14 +152,16 @@ module Zeitwerk
         end
 
         to_unload.each do |cpath, (abspath, (parent, cname))|
-          # We have to check cdef? in this condition. Reason is, constants whose
-          # file does not define them have to be kept in to_unload as explained
-          # in the implementation of on_file_autoloaded.
-          #
-          # If the constant is not defined, on_unload should not be triggered
-          # for it.
-          if !on_unload_callbacks.empty? && cdef?(parent, cname)
-            run_on_unload_callbacks(cpath, cget(parent, cname), abspath)
+          unless on_unload_callbacks.empty?
+            begin
+              value = cget(parent, cname)
+            rescue ::NameError
+              # Perhaps the user deleted the constant by hand, or perhaps an
+              # autoload failed to define the expected constant but the user
+              # rescued the exception.
+            else
+              run_on_unload_callbacks(cpath, value, abspath)
+            end
           end
 
           unload_cref(parent, cname)
