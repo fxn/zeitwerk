@@ -36,6 +36,18 @@ class TestRubyCompatibility < LoaderTest
     end
   end
 
+  # Used to check if the constant being autoloaded was actually defined by the
+  # require call. We raise Zeitwerk::NameError if not.
+  test "within a file triggered by an autoload, the constant being autoloaded is not defined" do
+    files = [["x.rb", "$const_defined_for_X = Object.const_defined?(:X); X = 1"]]
+    with_setup(files) do
+      $const_defined_for_X = Object.const_defined?(:X)
+      assert $const_defined_for_X
+      assert X
+      assert !$const_defined_for_X
+    end
+  end
+
   # Zeitwerk sets autoloads using absolute paths, and the root dirs are joined
   # as given. Thanks to this property, we are able to identify the files we
   # manage in our decorated Kernel#require.
