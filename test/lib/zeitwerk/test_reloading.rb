@@ -331,4 +331,16 @@ class TestReloading < LoaderTest
       end
     end
   end
+
+  test "unexpected errors don't leave reloading enabled" do
+    with_setup([["x.rb", "X = true"]]) do
+      def loader.recompute_ignored_paths
+        raise Interrupt.new
+      end
+
+      assert X
+      assert_raises(Interrupt) { loader.reload }
+      assert !loader.reloading?
+    end
+  end
 end

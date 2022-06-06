@@ -210,12 +210,14 @@ module Zeitwerk
           raise Zeitwerk::UnsynchronizedReloadError
         end
 
-        unload
-        recompute_ignored_paths
-        recompute_collapse_dirs
-        setup
-
-        reloading_mutex.unlock
+        begin
+          unload
+          recompute_ignored_paths
+          recompute_collapse_dirs
+          setup
+        ensure
+          reloading_mutex.unlock
+        end
       else
         raise ReloadingDisabledError, "can't reload, please call loader.enable_reloading before setup"
       end
