@@ -323,6 +323,9 @@ module Zeitwerk
       # except that this method returns the same object in subsequent calls from
       # the same file, in the unlikely case the gem wants to be able to reload.
       #
+      # This method returns a subclass of Zeitwerk::Loader, but the exact type
+      # is private, client code can only rely on the interface.
+      #
       # @sig (bool) -> Zeitwerk::GemLoader
       def for_gem(warn_on_extra_files: true)
         called_from = caller_locations(1, 1).first.path
