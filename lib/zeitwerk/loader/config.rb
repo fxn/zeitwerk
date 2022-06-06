@@ -131,7 +131,6 @@ module Zeitwerk::Loader::Config
 
   # Sets a tag for the loader, useful for logging.
   #
-  # @param tag [#to_s]
   # @sig (#to_s) -> void
   def tag=(tag)
     @tag = tag.to_s
