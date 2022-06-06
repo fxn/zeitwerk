@@ -98,7 +98,6 @@ class TestOnUnload < LoaderTest
 
     $failed_autoloads = 0
     with_setup([["x.rb", "$failed_autoloads += 1; Y = 1"]]) do
-      on_unload_for_X = false
       loader.on_unload("X") {}
 
       assert_raises(Zeitwerk::NameError) { X }
@@ -192,7 +191,6 @@ class TestOnUnload < LoaderTest
 
     $failed_autoloads = 0
     with_setup([["x.rb", "$failed_autoloads += 1; Y = 1"]]) do
-      on_unload_for_X = false
       loader.on_unload {}
 
       assert_raises(Zeitwerk::NameError) { X }
