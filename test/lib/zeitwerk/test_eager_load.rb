@@ -390,4 +390,20 @@ class TestEagerLoad < LoaderTest
       assert !$test_eager_load_eager_loaded_p
     end
   end
+
+  test "files are eager loaded in lexicographic order" do
+    files = [["x.rb", "X = 1"], ["y.rb", "Y = 1"]]
+    with_setup(files) do
+      loaded = []
+      loader.on_load do |cpath, _value, _abspath|
+        loaded << cpath
+      end
+
+      Dir.stub :children, ["y.rb", "x.rb"] do
+        loader.eager_load
+      end
+
+      assert_equal ["X", "Y"], loaded
+    end
+  end
 end

@@ -2,6 +2,10 @@
 
 ## 2.6.0 (Unreleased)
 
+* Directories are processed in lexicographic order. Different file systems may
+  list directories in different order, and with this change we ensure that
+  client code eager loads consistently across platforms, for example.
+
 * For a directory to implicitly define a namespace, it has now to contain at
   least one non-ignored Ruby file, either directly or recursively. For example,
   `tasks/newsletter.rake` defined a namespace `Tasks` before, now it doesn't.

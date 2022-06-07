@@ -15,7 +15,16 @@ module Zeitwerk::Loader::Helpers
 
   # @sig (String) { (String, String) -> void } -> void
   def ls(dir)
-    Dir.children(dir).sort.each do |basename|
+    children = Dir.children(dir)
+
+    # The order in which a directory is listed depends on the file system.
+    #
+    # Since client code may run in different platforms, it seems convenient to
+    # order directory entries. This provides consistent eager loading across
+    # platforms, for example.
+    children.sort!
+
+    children.each do |basename|
       next if hidden?(basename)
 
       abspath = File.join(dir, basename)
