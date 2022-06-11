@@ -6,19 +6,41 @@
   list directories in different order, and with this change we ensure that
   client code eager loads consistently across platforms, for example.
 
-* For a directory to implicitly define a namespace, it has now to contain at
-  least one non-ignored Ruby file, either directly or recursively. For example,
-  `tasks/newsletter.rake` defined a namespace `Tasks` before, now it doesn't.
-  This is also handy for project layouts that contain a mix of directories with
-  Ruby files, and directories with templates or other auxiliary resources.
+* For a directory to implicitly define a namespace, now it has to have at least one
+  non-ignored Ruby file, directly or recursively.
 
-  If you need an empty module, please define it in a file.
+  This is handy for project layouts that contain a mix of directories with Ruby
+  files, and others with templates or other auxiliary resources whose ignore
+  pattern would be too dynamic.
+
+  In practice, this is also convenient in Rails application that have `lib` in
+  the autoload paths and overlook ignoring `lib/tasks`, say. Before, Zeitwerk
+  defined a Ruby module `Tasks` for it. Now, it does not.
+
+  If a namespace is split in multiple directories, empty ones do not prevent its
+  definition as long as there is one with non-ignored Ruby files.
+
+  In the rare event that a project had an empty directory to define a totally
+  empty module (no code, and no nested classes or modules), such module has now
+  to be defined in a file.
+
+  This condition is evaluated again on each reload. For example, if a project
+  has an empty directory by the time the loader scans that part of the project
+  tree, and a Ruby file is created there later, on reload the loader will pick
+  the namespace and the new file as usual.
 
 * On setup, loaders returned by `Zeitwerk::Loader.for_gem` issue warnings if
   `lib` has extra, non-ignored Ruby files or directories.
 
-  The [documentation](https://github.com/fxn/zeitwerk#for_gem) and the warnings
-  themselves explain what to do about them.
+  This is motivated by existing gems with directories under `lib` that are not
+  meant to define Ruby modules, like directories for Rails generators, for
+  instance.
+
+  This warning can be silenced in the unlikely case that the extra stuff is
+  actually autoloadable and has to be managed by Zeitwerk.
+
+  Please, check the [documentation](https://github.com/fxn/zeitwerk#for_gem) for
+  further details.
 
   This method returns an instance of a private subclass of `Zeitwerk::Loader`
   now, but you cannot rely on the type, just on the interface.
