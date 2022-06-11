@@ -80,10 +80,6 @@ module Zeitwerk
     # @sig Mutex
     attr_reader :mutex2
 
-    # @private
-    # @sig Mutex
-    attr_reader :reloading_mutex
-
     def initialize
       super
 
@@ -93,7 +89,6 @@ module Zeitwerk
       @lazy_subdirs    = Hash.new { |h, cpath| h[cpath] = [] }
       @mutex           = Mutex.new
       @mutex2          = Mutex.new
-      @reloading_mutex = Mutex.new
       @setup           = false
       @eager_loaded    = false
 
@@ -205,22 +200,12 @@ module Zeitwerk
     # @raise [Zeitwerk::Error]
     # @sig () -> void
     def reload
-      if reloading_enabled?
-        unless reloading_mutex.try_lock
-          raise Zeitwerk::UnsynchronizedReloadError
-        end
+      raise ReloadingDisabledError unless reloading_enabled?
 
-        begin
-          unload
-          recompute_ignored_paths
-          recompute_collapse_dirs
-          setup
-        ensure
-          reloading_mutex.unlock
-        end
-      else
-        raise ReloadingDisabledError, "can't reload, please call loader.enable_reloading before setup"
-      end
+      unload
+      recompute_ignored_paths
+      recompute_collapse_dirs
+      setup
     end
 
     # Eager loads all files in the root directories, recursively. Files do not
@@ -298,12 +283,6 @@ module Zeitwerk
     def unregister
       Registry.unregister_loader(self)
       ExplicitNamespace.unregister_loader(self)
-    end
-
-    # @private
-    # @sig () -> bool
-    def reloading?
-      reloading_mutex.locked?
     end
 
     # --- Class methods ---------------------------------------------------------------------------

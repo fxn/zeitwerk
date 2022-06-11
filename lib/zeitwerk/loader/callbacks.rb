@@ -8,8 +8,6 @@ module Zeitwerk::Loader::Callbacks
   # @private
   # @sig (String) -> void
   def on_file_autoloaded(file)
-    raise Zeitwerk::UnsynchronizedReloadError if reloading?
-
     cref  = autoloads.delete(file)
     cpath = cpath(*cref)
 
@@ -34,8 +32,6 @@ module Zeitwerk::Loader::Callbacks
   # @private
   # @sig (String) -> void
   def on_dir_autoloaded(dir)
-    raise Zeitwerk::UnsynchronizedReloadError if reloading?
-
     # Module#autoload does not serialize concurrent requires, and we handle
     # directories ourselves, so the callback needs to account for concurrency.
     #
@@ -75,8 +71,6 @@ module Zeitwerk::Loader::Callbacks
   # @private
   # @sig (Module) -> void
   def on_namespace_loaded(namespace)
-    raise Zeitwerk::UnsynchronizedReloadError if reloading?
-
     if subdirs = lazy_subdirs.delete(real_mod_name(namespace))
       subdirs.each do |subdir|
         set_autoloads_in_dir(subdir, namespace)

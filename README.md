@@ -515,9 +515,7 @@ Reloading is not thread-safe:
 * You should not reload while another thread is reloading.
 * You should not autoload while another thread is reloading.
 
-Zeitwerk raises `Zeitwerk::UnsynchronizedReloadError` if any of these situations are detected. This is a fatal exception that signals a fundamental bug, you cannot rescue it and expect things to work.
-
-In order for reloading to be thread-safe, frameworks need to implement some coordination. For example, a web framework that serves each request with its own thread may have a globally accessible read/write lock: When a request comes in, the framework acquires the lock for reading at the beginning, and releases it at the end. On the other hand, the code in the framework responsible for the call to `Zeitwerk::Loader#reload` needs to acquire the lock for writing.
+In order to reload in a thread-safe manner, frameworks need to implement some coordination. For example, a web framework that serves each request with its own thread may have a globally accessible read/write lock: When a request comes in, the framework acquires the lock for reading at the beginning, and releases it at the end. On the other hand, the code in the framework responsible for the call to `Zeitwerk::Loader#reload` needs to acquire the lock for writing.
 
 On reloading, client code has to update anything that would otherwise be storing a stale object. For example, if the routing layer of a web framework stores reloadable controller class objects or instances in internal structures, on reload it has to refresh them somehow, possibly reevaluating routes.
 

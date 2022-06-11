@@ -45,12 +45,6 @@
   This method returns an instance of a private subclass of `Zeitwerk::Loader`
   now, but you cannot rely on the type, just on the interface.
 
-* `Zeitwerk::UnsynchronizedReloadError` is raised if concurrent reloads or autoloads during reloads are detected.
-
-  This is a fatal error that signals there is a fundamental bug in the client code that should be responsible for synchronizing reloads (not in Zeitwerk itself). You cannot rescue this exception and expect things to work.
-
-  The purpose of `Zeitwerk::UnsynchronizedReloadError` is to inform the user clearly this unrecoverable situation was found. Before, you could only tell indirectly by debugging side-effects. Also, the exception message includes instructions that may help.
-
 ## 2.5.4 (28 January 2022)
 
 * If a file did not define the expected constant, there was a reload, and there were `on_unload` callbacks, Zeitwerk still tried to access the constant during reload, which raised. This has been corrected.
