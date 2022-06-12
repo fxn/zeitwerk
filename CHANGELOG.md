@@ -17,7 +17,8 @@
 
   However, if you don't do so and have a directory `tasks` that only contains
   Rake files, arguably that directory is not meant to represent a Ruby module.
-  Before, Zeitwerk would define a top-level `Tasks` after it; now, it does not.
+  Before, Zeitwerk would define a top-level `Tasks` module after it; now, it
+  does not.
 
   This feature is also handy for projects that have directories with auxiliary
   resources mixed in the project tree in a way that is too dynamic for an ignore
