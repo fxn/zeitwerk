@@ -6,30 +6,29 @@
   list directories in different order, and with this change we ensure that
   client code eager loads consistently across platforms, for example.
 
-* For a directory to implicitly define a namespace, now it has to have at least one
-  non-ignored Ruby file, directly or recursively.
+* Before this release, directories represented namespaces (unless ignored or
+  collapsed). From now on, to be considered namespaces they also have to contain
+  at least one non-ignored Ruby file.
 
-  This is handy for project layouts that contain a mix of directories with Ruby
-  files, and others with templates or other auxiliary resources whose ignore
-  pattern would be too dynamic.
+  If you know beforehand a certain directory or directory pattern does not
+  represent a namespace, it is intentional and more efficient to tell Zeitwerk
+  to [ignore](https://github.com/fxn/zeitwerk#ignoring-parts-of-the-project) it.
 
-  In practice, this is also convenient in Rails application that have `lib` in
-  the autoload paths and overlook ignoring `lib/tasks`, say. Before, Zeitwerk
-  defined a Ruby module `Tasks` for it. Now, it does not.
+  However, if you don't do so and have a directory `tasks` that only contains
+  Rake files, arguably that directory is not meant to represent a Ruby module.
+  Before, Zeitwerk would define a top-level `Tasks` after it; now, it does not.
 
-  If a namespace is split in multiple directories, empty ones do not prevent its
-  definition as long as there is one with non-ignored Ruby files.
+  This feature is also handy for projects that have directories with auxiliary
+  resources mixed in the project tree in a way that is too dynamic for an ignore
+  pattern to be practical. See https://github.com/fxn/zeitwerk/issues/216.
 
-  In the rare event that a project had an empty directory to define a totally
-  empty module (no code, and no nested classes or modules), such module has now
-  to be defined in a file.
+  In the unlikely case that an existing project has an empty directory to define
+  a totally empty module (no code, and no nested classes or modules), such
+  module has now to be defined in a file.
 
-  This condition is evaluated again on each reload. For example, if a project
-  has an empty directory by the time the loader scans that part of the project
-  tree, and a Ruby file is created there later, on reload the loader will pick
-  the namespace and the new file as usual.
+  Directories are scanned again on reloads.
 
-* On setup, loaders returned by `Zeitwerk::Loader.for_gem` issue warnings if
+* On setup, loaders created with `Zeitwerk::Loader.for_gem` issue warnings if
   `lib` has extra, non-ignored Ruby files or directories.
 
   This is motivated by existing gems with directories under `lib` that are not

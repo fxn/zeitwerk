@@ -239,25 +239,17 @@ should define `Geolocatable`, not `Concerns::Geolocatable`.
 <a id="markdown-implicit-namespaces" name="implicit-namespaces"></a>
 ### Implicit namespaces
 
-Directories without a matching Ruby file get modules autovivified automatically by Zeitwerk. For example, in
+If a namespace is just a simple module with no code, you do not need to define it in a file: Directories without a matching Ruby file get modules created automatically on your behalf.
+
+For example, if a project has an `admin` directory:
 
 ```
 app/controllers/admin/users_controller.rb -> Admin::UsersController
 ```
 
-`Admin` is autovivified as a module on demand, you do not need to define an `Admin` class or module in an `admin.rb` file explicitly.
+and does not have a file called `admin.rb`, Zeitwerk automatically creates an `Admin` module on your behalf the first time `Admin` is used.
 
-For a directory to implicitly define a namespace, it has to have at least one non-ignored Ruby file, directly or recursively.
-
-This is handy for project layouts that contain a mix of directories with Ruby files, and others with templates or other auxiliary resources whose ignore pattern would be too dynamic.
-
-In practice, this is also convenient in Rails application that have `lib` in the autoload paths and overlook ignoring `lib/tasks`, say. Before, Zeitwerk defined a Ruby module `Tasks` for it. Now, it does not.
-
-If a namespace is split in multiple directories, empty ones do not prevent its definition as long as there is one with non-ignored Ruby files.
-
-In the rare event that a project had an empty directory to define a totally empty module (no code, and no nested classes or modules), such module has now to be defined in a file.
-
-This condition is evaluated again on each reload. For example, if a project has an empty directory by the time the loader scans that part of the project tree, and a Ruby file is created there later, on reload the loader will pick the namespace and the new file as usual.
+For this to happen, the directory has to contain non-ignored Ruby files, directly or recursively, otherwise it is ignored. This condition is evaluated again on reloads.
 
 <a id="markdown-explicit-namespaces" name="explicit-namespaces"></a>
 ### Explicit namespaces
