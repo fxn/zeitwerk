@@ -6,9 +6,10 @@
   list directories in different order, and with this change we ensure that
   client code eager loads consistently across platforms, for example.
 
-* Before this release, directories represented namespaces (unless ignored or
-  collapsed). From now on, to be considered namespaces they also have to contain
-  at least one non-ignored Ruby file.
+* Before this release, subdirectories of root directories always represented
+  namespaces (unless ignored or collapsed). From now on, to be considered
+  namespaces they also have to contain at least one non-ignored Ruby file,
+  directly or recursively.
 
   If you know beforehand a certain directory or directory pattern does not
   represent a namespace, it is intentional and more efficient to tell Zeitwerk
@@ -22,9 +23,9 @@
   resources mixed in the project tree in a way that is too dynamic for an ignore
   pattern to be practical. See https://github.com/fxn/zeitwerk/issues/216.
 
-  In the unlikely case that an existing project has an empty directory to define
-  a totally empty module (no code, and no nested classes or modules), such
-  module has now to be defined in a file.
+  In the unlikely case that an existing project has an empty directory for the
+  sole purpose of defining a totally empty module (no code, and no nested
+  classes or modules), such module has now to be defined in a file.
 
   Directories are scanned again on reloads.
 
