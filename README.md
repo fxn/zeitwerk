@@ -249,7 +249,7 @@ app/controllers/admin/users_controller.rb -> Admin::UsersController
 
 and does not have a file called `admin.rb`, Zeitwerk automatically creates an `Admin` module on your behalf the first time `Admin` is used.
 
-For this to happen, the directory has to contain non-ignored Ruby files, directly or recursively, otherwise it is ignored. This condition is evaluated again on reloads.
+For this to happen, the directory has to contain non-ignored Ruby files with extension `.rb`, directly or recursively, otherwise it is ignored. This condition is evaluated again on reloads.
 
 <a id="markdown-explicit-namespaces" name="explicit-namespaces"></a>
 ### Explicit namespaces

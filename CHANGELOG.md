@@ -10,8 +10,8 @@
 
 * Before this release, subdirectories of root directories always represented
   namespaces (unless ignored or collapsed). From now on, to be considered
-  namespaces they also have to contain at least one non-ignored Ruby file,
-  directly or recursively.
+  namespaces they also have to contain at least one non-ignored Ruby file with
+  extension `.rb`, directly or recursively.
 
   If you know beforehand a certain directory or directory pattern does not
   represent a namespace, it is intentional and more efficient to tell Zeitwerk
