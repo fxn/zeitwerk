@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 2.6.0 (Unreleased)
+## 2.6.0 (13 June 2022)
 
 * Directories are processed in lexicographic order. Different file systems may
   list directories in different order, and with this change we ensure that
