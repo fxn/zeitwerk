@@ -2,9 +2,11 @@
 
 ## 2.6.0 (13 June 2022)
 
-* Directories are processed in lexicographic order. Different file systems may
-  list directories in different order, and with this change we ensure that
-  client code eager loads consistently across platforms, for example.
+* Directories are processed in lexicographic order.
+
+  Different file systems may list directories in different order, and with this
+  change we ensure that client code eager loads consistently across platforms,
+  for example.
 
 * Before this release, subdirectories of root directories always represented
   namespaces (unless ignored or collapsed). From now on, to be considered
