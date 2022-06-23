@@ -245,4 +245,24 @@ class TestForGem < LoaderTest
       assert_includes err, "Zeitwerk::Loader.for_gem(warn_on_extra_files: false)"
     end
   end
+
+  test "allows specification of root file" do
+    files = [["lib/my_gem-extension.rb", "require \"my_gem/extension\""], ["lib/my_gem/extension.rb", <<~EOS]]
+      root_file = File.expand_path("../my_gem-extension.rb", __dir__)
+      loader = Zeitwerk::Loader.for_gem(root_file: root_file, warn_on_extra_files: false)
+      loader.enable_reloading
+      loader.setup
+
+      module MyGem
+        module Extension
+        end
+      end
+    EOS
+    with_my_gem(files, false) do
+      _out, err = capture_io do
+        assert require("my_gem-extension")
+      end
+      assert_empty err
+    end
+  end
 end

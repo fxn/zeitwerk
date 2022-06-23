@@ -23,6 +23,7 @@ module Zeitwerk
       @lib                 = File.dirname(root_file)
       @warn_on_extra_files = warn_on_extra_files
 
+      ignore(root_file) if @tag.include?("-")
       push_dir(@lib)
     end
 

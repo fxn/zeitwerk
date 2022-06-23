@@ -306,9 +306,9 @@ module Zeitwerk
       # is private, client code can only rely on the interface.
       #
       # @sig (bool) -> Zeitwerk::GemLoader
-      def for_gem(warn_on_extra_files: true)
+      def for_gem(warn_on_extra_files: true, root_file: nil)
         called_from = caller_locations(1, 1).first.path
-        Registry.loader_for_gem(called_from, warn_on_extra_files: warn_on_extra_files)
+        Registry.loader_for_gem(root_file || called_from, warn_on_extra_files: warn_on_extra_files)
       end
 
       # Broadcasts `eager_load` to all loaders.
