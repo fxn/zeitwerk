@@ -4,6 +4,17 @@ require "test_helper"
 require "set"
 
 class TestCollapse < LoaderTest
+  test "top-level directories can be collapsed" do
+    files = [["foo/bar/x.rb", "Bar::X = true"]]
+    with_files(files) do
+      loader.push_dir(".")
+      loader.collapse("foo")
+      loader.setup
+
+      assert Bar::X
+    end
+  end
+
   test "collapsed directories are ignored as namespaces" do
     files = [["foo/bar/x.rb", "Foo::X = true"]]
     with_files(files) do
@@ -15,14 +26,46 @@ class TestCollapse < LoaderTest
     end
   end
 
-  test "top-level directories can be collapsed" do
-    files = [["foo/bar/x.rb", "Bar::X = true"]]
+  test "collapsed directories are ignored as explicit namespaces" do
+    files = [
+      ["foo.rb", "Foo = true"],
+      ["foo/x.rb", "X = true"]
+    ]
     with_files(files) do
       loader.push_dir(".")
       loader.collapse("foo")
       loader.setup
 
-      assert Bar::X
+      assert Foo
+      assert X
+    end
+  end
+
+  test "explicit namespaces are honored downwards" do
+    files = [
+      ["foo.rb", "module Foo; end"],
+      ["foo/foo/x.rb", "Foo::X = true"]
+    ]
+    with_files(files) do
+      loader.push_dir(".")
+      loader.collapse("foo")
+      loader.setup
+
+      assert Foo::X
+    end
+  end
+
+  test "explicit namespaces are honored downwards, deeper" do
+    files = [
+      ["foo.rb", "module Foo; end"],
+      ["foo/bar/foo/x.rb", "Foo::X = true"]
+    ]
+    with_files(files) do
+      loader.push_dir(".")
+      loader.collapse(["foo", "foo/bar"])
+      loader.setup
+
+      assert Foo::X
     end
   end
 
