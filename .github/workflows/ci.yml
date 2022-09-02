@@ -22,6 +22,9 @@ jobs:
           - "3.0"
           - "3.1"
           - "head"
+        exclude:
+          - os: "windows-latest"
+            ruby-version: "head"
     runs-on: ${{ matrix.os }}
     steps:
       - uses: "actions/checkout@v2"
