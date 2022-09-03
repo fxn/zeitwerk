@@ -1,8 +1,6 @@
 name: "CI"
 on:
   push:
-    branches:
-      - "*"
   pull_request:
     branches:
       - "main"
@@ -24,7 +22,7 @@ jobs:
           - "head"
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: "actions/checkout@v2"
+      - uses: "actions/checkout@v3"
       - uses: "ruby/setup-ruby@v1"
         with:
           ruby-version: ${{ matrix.ruby-version }}
