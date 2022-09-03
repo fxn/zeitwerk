@@ -60,13 +60,10 @@ class LoaderTest < Minitest::Test
         FileUtils.mkdir_p(File.dirname(fname))
         File.write(fname, contents)
       end
-
-      begin
-        yield
-      ensure
-        mkdir_test if rm
-      end
+      yield
     end
+  ensure
+    mkdir_test if rm
   end
 
   def with_load_path(dirs = loader.dirs)
