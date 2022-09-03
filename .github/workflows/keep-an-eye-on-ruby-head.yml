@@ -1,0 +1,24 @@
+name: "Keep an eye on Ruby HEAD"
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "11 9 * * *"
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - "ubuntu-latest"
+          - "macos-latest"
+          - "windows-latest"
+        ruby-version:
+          - "head"
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: "actions/checkout@v3"
+      - uses: "ruby/setup-ruby@v1"
+        with:
+          ruby-version: ${{ matrix.ruby-version }}
+          bundler-cache: true
+      - run: "bundle exec rake"
