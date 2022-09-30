@@ -6,32 +6,37 @@ require "pathname"
 class TesPushDir < LoaderTest
   module Namespace; end
 
+  def check_dirs
+    root_dirs = loader.root_dirs # this is private interface
+
+    dirs = loader.dirs
+    assert_equal root_dirs.keys, dirs
+    assert dirs.frozen?
+
+    dirs = loader.dirs(namespaces: true)
+    assert_equal root_dirs, dirs
+    assert dirs.frozen?
+    assert !dirs.equal?(root_dirs)
+  end
+
   test "accepts dirs as strings and associates them to the Object namespace" do
     loader.push_dir(".")
-    assert loader.root_dirs == { Dir.pwd => Object }
-    assert loader.dirs.include?(Dir.pwd)
-    assert loader.dirs(namespaces: true)[Dir.pwd] == Object
+    check_dirs
   end
 
   test "accepts dirs as pathnames and associates them to the Object namespace" do
     loader.push_dir(Pathname.new("."))
-    assert loader.root_dirs == { Dir.pwd => Object }
-    assert loader.dirs.include?(Dir.pwd)
-    assert loader.dirs(namespaces: true) == { Dir.pwd => Object }
+    check_dirs
   end
 
   test "accepts dirs as strings and associates them to the given namespace" do
     loader.push_dir(".", namespace: Namespace)
-    assert loader.root_dirs == { Dir.pwd => Namespace }
-    assert loader.dirs.include?(Dir.pwd)
-    assert loader.dirs(namespaces: true) == { Dir.pwd => Namespace }
+    check_dirs
   end
 
   test "accepts dirs as pathnames and associates them to the given namespace" do
     loader.push_dir(Pathname.new("."), namespace: Namespace)
-    assert loader.root_dirs == { Dir.pwd => Namespace }
-    assert loader.dirs.include?(Dir.pwd)
-    assert loader.dirs(namespaces: true) == { Dir.pwd => Namespace }
+    check_dirs
   end
 
   test "raises on non-existing directories" do
