@@ -4,13 +4,12 @@ require "set"
 require "securerandom"
 
 module Zeitwerk::Loader::Config
-  # Absolute paths of the root directories. Stored in a hash to preserve
-  # order, easily handle duplicates, have a fast lookup needed for detecting
-  # nested paths, and store custom namespaces as values.
+  # Absolute paths of the root directories. Stored in a hash to preserve order,
+  # easily handle duplicates, have a fast lookup needed for detecting nested
+  # paths, and store namespaces as values.
   #
-  #   "/Users/fxn/blog/app/assets"   => Object,
   #   "/Users/fxn/blog/app/channels" => Object,
-  #   "/Users/fxn/blog/adapters"     => ActiveJob::QueueAdapters,
+  #   "/Users/fxn/blog/app/adapters" => ActiveJob::QueueAdapters,
   #   ...
   #
   # This is a private collection maintained by the loader. The public
