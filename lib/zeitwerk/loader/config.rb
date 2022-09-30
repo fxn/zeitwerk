@@ -5,9 +5,8 @@ require "securerandom"
 
 module Zeitwerk::Loader::Config
   # Absolute paths of the root directories. Stored in a hash to preserve
-  # order, easily handle duplicates, to have a fast lookup needed for
-  # detecting nested paths and to store custom namespaces as values (default
-  # is Object).
+  # order, easily handle duplicates, have a fast lookup needed for detecting
+  # nested paths, and store custom namespaces as values.
   #
   #   "/Users/fxn/blog/app/assets"   => Object,
   #   "/Users/fxn/blog/app/channels" => Object,
