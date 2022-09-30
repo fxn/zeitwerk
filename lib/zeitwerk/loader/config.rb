@@ -137,12 +137,20 @@ module Zeitwerk::Loader::Config
     @tag = tag.to_s
   end
 
-  # Absolute paths of the root directories. This is a read-only collection,
-  # please push here via `push_dir`.
+  # If `namespaces` is falsey (default), returns an array with the absolute
+  # paths of the root directories as strings. If truthy, returns a hash table
+  # instead. Keys are the absolute paths of the root directories as strings,
+  # values are their corresponding namespaces, class or module objects.
   #
-  # @sig () -> Array[String]
-  def dirs
-    root_dirs.keys.freeze
+  # These are read-only collections, please add to them with `push_dir`.
+  #
+  # @sig () -> Array[String] | Hash[String, Module]
+  def dirs(namespaces: false)
+    if namespaces
+      root_dirs.clone
+    else
+      root_dirs.keys
+    end.freeze
   end
 
   # You need to call this method before setup in order to be able to reload.

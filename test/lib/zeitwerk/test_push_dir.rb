@@ -10,24 +10,28 @@ class TesPushDir < LoaderTest
     loader.push_dir(".")
     assert loader.root_dirs == { Dir.pwd => Object }
     assert loader.dirs.include?(Dir.pwd)
+    assert loader.dirs(namespaces: true)[Dir.pwd] == Object
   end
 
   test "accepts dirs as pathnames and associates them to the Object namespace" do
     loader.push_dir(Pathname.new("."))
     assert loader.root_dirs == { Dir.pwd => Object }
     assert loader.dirs.include?(Dir.pwd)
+    assert loader.dirs(namespaces: true) == { Dir.pwd => Object }
   end
 
   test "accepts dirs as strings and associates them to the given namespace" do
     loader.push_dir(".", namespace: Namespace)
     assert loader.root_dirs == { Dir.pwd => Namespace }
     assert loader.dirs.include?(Dir.pwd)
+    assert loader.dirs(namespaces: true) == { Dir.pwd => Namespace }
   end
 
   test "accepts dirs as pathnames and associates them to the given namespace" do
     loader.push_dir(Pathname.new("."), namespace: Namespace)
     assert loader.root_dirs == { Dir.pwd => Namespace }
     assert loader.dirs.include?(Dir.pwd)
+    assert loader.dirs(namespaces: true) == { Dir.pwd => Namespace }
   end
 
   test "raises on non-existing directories" do

@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 2.6.1 (1 October 2022)
+
+* `Zeitwerk::Loader#dirs` allows you to instrospect the root directories
+  configured in the receiver. Please check its
+  [documentation](https://github.com/fxn/zeitwerk#introspection) for details.
+
 ## 2.6.0 (13 June 2022)
 
 * Directories are processed in lexicographic order.
