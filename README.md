@@ -984,7 +984,7 @@ require "active_job"
 require "active_job/queue_adapters"
 
 require "zeitwerk"
-# By passign the flag, we acknowledge the extra directory lib/active_job
+# By passing the flag, we acknowledge the extra directory lib/active_job
 # has to be managed by the loader and no warning has to be issued for it.
 loader = Zeitwerk::Loader.for_gem(warn_on_extra_files: false)
 loader.setup
