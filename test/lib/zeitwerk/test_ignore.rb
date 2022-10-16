@@ -21,6 +21,7 @@ class TestIgnore < LoaderTest
     with_files(files) do
       loader.push_dir(".")
       loader.ignore(".")
+      loader.setup
 
       assert !Object.autoload?(:X)
       assert_raises(NameError) { ::X }

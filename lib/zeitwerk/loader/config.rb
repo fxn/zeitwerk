@@ -272,12 +272,21 @@ module Zeitwerk::Loader::Config
     @logger = ->(msg) { puts msg }
   end
 
+  # Returns true if the argument has been configured to be ignored, or is a
+  # descendant of an ignored directory.
+  #
   # @private
   # @sig (String) -> bool
   def ignores?(abspath)
-    ignored_paths.any? do |ignored_path|
-      ignored_path == abspath || (dir?(ignored_path) && abspath.start_with?(ignored_path + "/"))
+    # Common use case.
+    return false if ignored_paths.empty?
+
+    walk_up(abspath) do |abspath|
+      return true  if ignored_paths.member?(abspath)
+      return false if root_dirs.key?(abspath)
     end
+
+    false
   end
 
   private

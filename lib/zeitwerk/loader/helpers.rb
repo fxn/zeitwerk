@@ -74,6 +74,15 @@ module Zeitwerk::Loader::Helpers
     basename.start_with?(".")
   end
 
+  # @sig (String) { (String) -> void } -> void
+  def walk_up(abspath)
+    loop do
+      yield abspath
+      abspath, basename = File.split(abspath)
+      break if basename == "/"
+    end
+  end
+
   # --- Constants ---------------------------------------------------------------------------------
 
   # The autoload? predicate takes into account the ancestor chain of the
