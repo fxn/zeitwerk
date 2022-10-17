@@ -260,6 +260,37 @@ module Zeitwerk
       end
     end
 
+    def namespace_at(path)
+      abspath = File.expand_path(path)
+      return if !File.exist?(abspath) || ignores?(abspath)
+
+      unless dir?(abspath)
+        if ruby?(abspath)
+          abspath = File.dirname(abspath)
+        else
+          return
+        end
+      end
+
+      cnames = []
+
+      walk_up(abspath) do |dir|
+        if namespace = root_dirs[dir]
+          cnames.reverse_each do |cname|
+            # Could happen if none of these directories have Ruby files.
+            return unless cdef?(namespace, cname)
+            namespace = cget(namespace, cname)
+          end
+          return namespace
+        end
+
+        unless collapse?(dir)
+          basename = File.basename(dir)
+          cnames << inflector.camelize(basename, dir)
+        end
+      end
+    end
+
     def constant_path_at(path)
       abspath = File.expand_path(path)
       if ruby?(abspath)
