@@ -72,6 +72,17 @@ module Zeitwerk
     # @sig Hash[String, Array[String]]
     attr_reader :lazy_subdirs
 
+    # A shadowed file is a file managed by this loader that is ignored when
+    # setting autoloads because its matching constant is taken. Either the
+    # constant is already defined, or there exists an autoload for it.
+    #
+    # Think $LOAD_PATH and require, only the first occurrence of a given
+    # relative name is loaded.
+    #
+    # @private
+    # @sig Set[String]
+    attr_reader :shadowed_files
+
     # @private
     # @sig Mutex
     attr_reader :mutex
@@ -87,6 +98,7 @@ module Zeitwerk
       @autoloaded_dirs = []
       @to_unload       = {}
       @lazy_subdirs    = Hash.new { |h, cpath| h[cpath] = [] }
+      @shadowed_files  = Set.new
       @mutex           = Mutex.new
       @mutex2          = Mutex.new
       @setup           = false
@@ -182,6 +194,7 @@ module Zeitwerk
         autoloaded_dirs.clear
         to_unload.clear
         lazy_subdirs.clear
+        shadowed_files.clear
 
         Registry.on_unload(self)
         ExplicitNamespace.unregister_loader(self)
@@ -325,6 +338,13 @@ module Zeitwerk
       ExplicitNamespace.unregister_loader(self)
     end
 
+    # @private
+    # @sig (String) -> Boolean
+    def shadowed_file?(file)
+      shadowed_files.member?(file)
+    end
+
+
     # --- Class methods ---------------------------------------------------------------------------
 
     class << self
@@ -438,6 +458,7 @@ module Zeitwerk
       if autoload_path = strict_autoload_path(parent, cname) || Registry.inception?(cpath(parent, cname))
         # First autoload for a Ruby file wins, just ignore subsequent ones.
         if ruby?(autoload_path)
+          shadowed_files << file
           log("file #{file} is ignored because #{autoload_path} has precedence") if logger
         else
           promote_namespace_from_implicit_to_explicit(
@@ -448,6 +469,7 @@ module Zeitwerk
           )
         end
       elsif cdef?(parent, cname)
+        shadowed_files << file
         log("file #{file} is ignored because #{cpath(parent, cname)} is already defined") if logger
       else
         set_autoload(parent, cname, file)

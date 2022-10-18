@@ -142,6 +142,22 @@ class TestUnload < LoaderTest
     end
   end
 
+  test "unload clears the set of shadowed files" do
+    files = [
+      ["a/m.rb", "module M; end"],
+      ["b/m.rb", "module M; end"],
+    ]
+    with_files(files) do
+      loader.push_dir("a")
+      loader.push_dir("b")
+      loader.setup
+
+      assert !loader.shadowed_files.empty? # precondition
+      loader.unload
+      assert loader.shadowed_files.empty?
+    end
+  end
+
   test "unload clears state even if the autoload failed and the exception was rescued" do
     on_teardown do
       remove_const :X_IS_NOT_DEFINED

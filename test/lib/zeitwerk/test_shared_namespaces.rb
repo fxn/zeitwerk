@@ -2,21 +2,8 @@
 
 require "test_helper"
 
-class TestShadowed < LoaderTest
-  test "does not autoload from a shadowed file" do
-    on_teardown { remove_const :X }
-
-    ::X = 1
-
-    files = [["x.rb", "X = 2"]]
-    with_setup(files) do
-      assert_equal 1, ::X
-      loader.reload
-      assert_equal 1, ::X
-    end
-  end
-
-  test "autoloads from a shadowed implicit namespace" do
+class TestSharedNamespaces < LoaderTest
+  test "autoloads from a shared implicit namespace" do
     on_teardown { remove_const :M }
 
     mod = Module.new
@@ -31,7 +18,7 @@ class TestShadowed < LoaderTest
     end
   end
 
-  test "autoloads from a shadowed implicit namespace managed by another loader" do
+  test "autoloads from a shared implicit namespace managed by another loader" do
     files = [["a/m/x.rb", "M::X = true"], ["b/m/y.rb", "M::Y = true"]]
     with_files(files) do
       new_loader(dirs: "a")
@@ -48,7 +35,7 @@ class TestShadowed < LoaderTest
     end
   end
 
-  test "autoloads from a shadowed explicit namespace" do
+  test "autoloads from a shared explicit namespace" do
     on_teardown { remove_const :M }
 
     mod = Module.new
@@ -66,7 +53,7 @@ class TestShadowed < LoaderTest
     end
   end
 
-  test "autoloads from a shadowed explicit namespace (autoload)" do
+  test "autoloads from a shared explicit namespace (autoload)" do
     on_teardown do
       remove_const :M
       delete_loaded_feature "a/m.rb"
