@@ -220,6 +220,20 @@ class TestEagerLoadDir < LoaderTest
     end
   end
 
+  # This is a file system-based interface.
+  test "eager loads collapsed directories, ignoring the rest of the namespace" do
+    files = [["x.rb", "X = 1"], ["collapsed/y.rb", "Y = 1"]]
+    with_files(files) do
+      loader.push_dir(".")
+      loader.collapse("collapsed")
+      loader.setup
+      loader.eager_load_dir("collapsed")
+
+      assert !eager_loaded?(files[0])
+      assert eager_loaded?(files[1])
+    end
+  end
+
   test "can be called recursively" do
     $test_loader = loader
     files = [
