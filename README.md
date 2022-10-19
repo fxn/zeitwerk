@@ -27,6 +27,7 @@
   - [Autoloading](#autoloading)
   - [Eager loading](#eager-loading)
     - [Eager load exclusions](#eager-load-exclusions)
+    - [Eager load directories](#eager-load-directories)
     - [Global eager load](#global-eager-load)
   - [Reloading](#reloading)
   - [Inflection](#inflection)
@@ -463,6 +464,23 @@ loader.eager_load(force: true) # database adapters are eager loaded
 Which may be handy if the project eager loads in the test suite to [ensure project layout compliance](#testing-compliance).
 
 The `force` flag does not affect ignored files and directories, those are still ignored.
+
+<a id="markdown-eager-load-directories" name="eager-load-directories"></a>
+#### Eager load directories
+
+The method `Zeitwerk::Loader#eager_load_dir` eager loads a given directory, recursively:
+
+```ruby
+loader.eager_load_dir("#{__dir__}/custom_web_app/routes")
+```
+
+This is useful when the loader is not eager loading the entire project, but you still need some subtree to be loaded for things to function properly.
+
+Both strings and `Pathname` objects are supported as arguments. If the argument is not an existing directory, `ArgumentError` is raised. If the directory exists but it is not managed by the receiver, no error is raised, but nothing is eager loaded either.
+
+This method honours ignored files and directories, and eager load exclusions. Exclusions can be bypassed with `force: true`, however, which may be handy for test suites.
+
+`Zeitwerk::Loader#eager_load_dir` is idempotent, but compatible with reloading. If you eager load a directory and then reload, eager loading that directory will load its (current) contents again.
 
 <a id="markdown-global-eager-load" name="global-eager-load"></a>
 #### Global eager load

@@ -73,8 +73,7 @@ module Zeitwerk
     attr_reader :lazy_subdirs
 
     # A shadowed file is a file managed by this loader that is ignored when
-    # setting autoloads because its matching constant is taken. Either the
-    # constant is already defined, or there exists an autoload for it.
+    # setting autoloads because its matching constant is already taken.
     #
     # Think $LOAD_PATH and require, only the first occurrence of a given
     # relative name is loaded.
@@ -222,10 +221,10 @@ module Zeitwerk
     end
 
     # Eager loads all files in the root directories, recursively. Files do not
-    # need to be in `$LOAD_PATH`, absolute file names are used. Ignored files
-    # are not eager loaded. You can opt-out specifically in specific files and
-    # directories with `do_not_eager_load`, and that can be overridden passing
-    # `force: true`.
+    # need to be in `$LOAD_PATH`, absolute file names are used. Ignored and
+    # shadowed files are not eager loaded. You can opt-out specifically in
+    # specific files and directories with `do_not_eager_load`, and that can be
+    # overridden passing `force: true`.
     #
     # @sig (true | false) -> void
     def eager_load(force: false)
@@ -234,32 +233,8 @@ module Zeitwerk
 
         log("eager load start") if logger
 
-        honour_exclusions = !force
-
-        queue = []
         actual_root_dirs.each do |root_dir, namespace|
-          queue << [namespace, root_dir] unless honour_exclusions && excluded_from_eager_load?(root_dir)
-        end
-
-        while to_eager_load = queue.shift
-          namespace, dir = to_eager_load
-
-          ls(dir) do |basename, abspath|
-            next if honour_exclusions && excluded_from_eager_load?(abspath)
-
-            if ruby?(abspath)
-              if cref = autoloads[abspath]
-                cget(*cref)
-              end
-            elsif !root_dirs.key?(abspath)
-              if collapse?(abspath)
-                queue << [namespace, abspath]
-              else
-                cname = inflector.camelize(basename, abspath)
-                queue << [cget(namespace, cname), abspath]
-              end
-            end
-          end
+          actual_eager_load_dir(root_dir, namespace, force: force)
         end
 
         autoloaded_dirs.each do |autoloaded_dir|
@@ -270,6 +245,14 @@ module Zeitwerk
         @eager_loaded = true
 
         log("eager load end") if logger
+      end
+    end
+
+    def eager_load_dir(path, force: false)
+      abspath = File.expand_path(path)
+      raise ArgumentError.new("#{abspath} is not a directory") unless dir?(abspath)
+      if namespace = namespace_at(abspath)
+        actual_eager_load_dir(abspath, namespace, force: force)
       end
     end
 
@@ -299,7 +282,7 @@ module Zeitwerk
 
         unless collapse?(dir)
           basename = File.basename(dir)
-          cnames << inflector.camelize(basename, dir)
+          cnames << inflector.camelize(basename, dir).to_sym
         end
       end
     end
@@ -572,6 +555,38 @@ module Zeitwerk
       # is gone, that is OK, anyway.
     else
       log("#{cpath(parent, cname)} unloaded") if logger
+    end
+
+    # @sig (String, Module, Boolean) -> void
+    def actual_eager_load_dir(dir, namespace, force: false)
+      honour_exclusions = !force
+      return if honour_exclusions && excluded_from_eager_load?(dir)
+
+      log("eager load directory #{dir} start") if logger
+
+      queue = [[dir, namespace]]
+      while to_eager_load = queue.shift
+        dir, namespace = to_eager_load
+
+        ls(dir) do |basename, abspath|
+          next if honour_exclusions && eager_load_exclusions.member?(abspath)
+
+          if ruby?(abspath)
+            if (cref = autoloads[abspath]) && !shadowed_file?(abspath)
+              cget(*cref)
+            end
+          elsif !root_dirs.key?(abspath)
+            if collapse?(abspath)
+              queue << [abspath, namespace]
+            else
+              cname = inflector.camelize(basename, abspath).to_sym
+              queue << [abspath, cget(namespace, cname)]
+            end
+          end
+        end
+      end
+
+      log("eager load directory #{dir} end") if logger
     end
 
     def constant_path_at_file(file)

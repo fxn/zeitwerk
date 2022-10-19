@@ -305,7 +305,15 @@ module Zeitwerk::Loader::Config
 
   # @sig (String) -> bool
   def excluded_from_eager_load?(abspath)
-    eager_load_exclusions.member?(abspath)
+    # Optimize this common use case.
+    return false if eager_load_exclusions.empty?
+
+    walk_up(abspath) do |abspath|
+      return true  if eager_load_exclusions.member?(abspath)
+      return false if root_dirs.key?(abspath)
+    end
+
+    false
   end
 
   # @sig (String) -> bool
