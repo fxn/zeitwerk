@@ -75,8 +75,9 @@ module Zeitwerk
     # A shadowed file is a file managed by this loader that is ignored when
     # setting autoloads because its matching constant is already taken.
     #
-    # Think $LOAD_PATH and require, only the first occurrence of a given
-    # relative name is loaded.
+    # This private set is populated as we descend. For example, if the loader
+    # has only scanned the top-level, `shadowed_files` does not have shadowed
+    # files that may exist deep in the project tree yet.
     #
     # @private
     # @sig Set[String]
@@ -321,6 +322,9 @@ module Zeitwerk
       ExplicitNamespace.unregister_loader(self)
     end
 
+    # The return value of this predicate is only meaningful if the loader has
+    # scanned the file. This is the case in the spots where we use it.
+    #
     # @private
     # @sig (String) -> Boolean
     def shadowed_file?(file)
