@@ -45,6 +45,7 @@
     - [Use case: Files that do not follow the conventions](#use-case-files-that-do-not-follow-the-conventions)
     - [Use case: The adapter pattern](#use-case-the-adapter-pattern)
     - [Use case: Test files mixed with implementation files](#use-case-test-files-mixed-with-implementation-files)
+  - [Shadowed files](#shadowed-files)
   - [Edge cases](#edge-cases)
   - [Beware of circular dependencies](#beware-of-circular-dependencies)
   - [Reopening third-party namespaces](#reopening-third-party-namespaces)
@@ -922,6 +923,35 @@ tests = "#{__dir__}/**/*_test.rb"
 loader.ignore(tests)
 loader.setup
 ```
+
+<a id="markdown-shadowed-files" name="shadowed-files"></a>
+### Shadowed files
+
+In Ruby, if you have several files called `foo.rb` in different directories of `$LOAD_PATH` and execute
+
+```ruby
+require "foo"
+```
+
+the first one found gets loaded, and the rest are ignored.
+
+Zeitwerk behaves in a similar way. If `foo.rb` is present in several root directories (at the same namespace level), the constant `Foo` is autoloaded from the first one, and the rest of the files are not evaluated. If logging is enabled, you'll see something like
+
+```
+file #{file} is ignored because #{previous_occurrence} has precedence
+```
+
+(This message is not public interface and may change, you cannot rely on that exact wording.)
+
+Even if there's only one `foo.rb`, if the constant `Foo` is already defined when Zeitwerk finds `foo.rb`, then the file is ignored too. This could happen if `Foo` was defined by a dependency, for example. If logging is enabled, you'll see something like
+
+```
+file #{file} is ignored because #{constant_path} is already defined
+```
+
+(This message is not public interface and may change, you cannot rely on that exact wording.)
+
+Shadowing only applies to Ruby files, namespace definition can be spread over multiple directories. And you can also reopen third-party namespaces if done [orderly](https://github.com/fxn/zeitwerk#reopening-third-party-namespaces).
 
 <a id="markdown-edge-cases" name="edge-cases"></a>
 ### Edge cases
