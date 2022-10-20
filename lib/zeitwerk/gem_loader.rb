@@ -43,7 +43,7 @@ module Zeitwerk
         next if abspath == expected_namespace_dir
 
         basename_without_ext = basename.delete_suffix(".rb")
-        cname = inflector.camelize(basename_without_ext, abspath)
+        cname = inflector.camelize(basename_without_ext, abspath).to_sym
         ftype = dir?(abspath) ? "directory" : "file"
 
         warn(<<~EOS)
