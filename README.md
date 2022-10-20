@@ -956,7 +956,7 @@ Shadowing only applies to Ruby files, namespace definition can be spread over mu
 <a id="markdown-edge-cases" name="edge-cases"></a>
 ### Edge cases
 
-A class or module that acts as a namespace:
+[Explicit namespaces](#explicit-namespaces) like `Trip` here:
 
 ```ruby
 # trip.rb
@@ -970,7 +970,7 @@ module Trip::Geolocation
 end
 ```
 
-has to be defined with the `class` or `module` keywords, as in the example above.
+have to be defined with the `class`/`module` keywords, as in the example above.
 
 For technical reasons, raw constant assignment is not supported:
 
