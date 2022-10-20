@@ -951,7 +951,7 @@ file #{file} is ignored because #{constant_path} is already defined
 
 (This message is not public interface and may change, you cannot rely on that exact wording.)
 
-Shadowing only applies to Ruby files, namespace definition can be spread over multiple directories. And you can also reopen third-party namespaces if done [orderly](https://github.com/fxn/zeitwerk#reopening-third-party-namespaces).
+Shadowing only applies to Ruby files, namespace definition can be spread over multiple directories. And you can also reopen third-party namespaces if done [orderly](#reopening-third-party-namespaces).
 
 <a id="markdown-edge-cases" name="edge-cases"></a>
 ### Edge cases
