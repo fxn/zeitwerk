@@ -234,6 +234,22 @@ class TestEagerLoadDir < LoaderTest
     end
   end
 
+  test "files under nested root directories are ignored" do
+    files = [
+      ["x.rb", "X = 1"],
+      ["nested_root/y.rb", "Y = 1"]
+    ]
+    with_files(files) do
+      loader.push_dir(".")
+      loader.push_dir("nested_root")
+      loader.setup
+      loader.eager_load_dir(".")
+
+      assert eager_loaded?(files[0])
+      assert !eager_loaded?(files[1])
+    end
+  end
+
   test "can be called recursively" do
     $test_loader = loader
     files = [

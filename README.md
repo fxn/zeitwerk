@@ -483,6 +483,8 @@ This method honours ignored files and directories, and eager load exclusions. Ex
 
 `Zeitwerk::Loader#eager_load_dir` is idempotent, but compatible with reloading. If you eager load a directory and then reload, eager loading that directory will load its (current) contents again.
 
+Nested directories which are descendants of the argument are skipped. Those subtrees are considered to be conceptually apart.
+
 <a id="markdown-global-eager-load" name="global-eager-load"></a>
 #### Global eager load
 
