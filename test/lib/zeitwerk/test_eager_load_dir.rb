@@ -4,10 +4,6 @@ require "pathname"
 require "test_helper"
 
 class TestEagerLoadDir < LoaderTest
-  def eager_loaded?(file)
-    $LOADED_FEATURES.include?(File.expand_path(file[0]))
-  end
-
   test "eager loads all files" do
     files = [
       ["x.rb", "X = 1"],
@@ -20,7 +16,7 @@ class TestEagerLoadDir < LoaderTest
       loader.eager_load_dir(".")
 
       files.each do |file|
-        assert eager_loaded?(file)
+        assert required?(file)
       end
     end
   end
@@ -35,10 +31,7 @@ class TestEagerLoadDir < LoaderTest
     ]
     with_setup(files) do
       loader.eager_load_dir(Pathname.new("."))
-
-      files.each do |file|
-        assert eager_loaded?(file)
-      end
+      assert required?(files)
     end
   end
 
@@ -48,7 +41,7 @@ class TestEagerLoadDir < LoaderTest
       loader.do_not_eager_load("m")
       loader.eager_load_dir("m")
 
-      assert !eager_loaded?(files[0])
+      assert !required?(files)
     end
   end
 
@@ -59,17 +52,15 @@ class TestEagerLoadDir < LoaderTest
       ["m/n.rb", "module M::N; end"],
       ["m/n/a.rb", "M::N::A = 1"]
     ]
-    with_files(files) do
-      loader.push_dir(".")
+    with_setup(files) do
       loader.do_not_eager_load("y.rb")
       loader.do_not_eager_load("m/n")
-      loader.setup
       loader.eager_load_dir(".")
 
-      assert eager_loaded?(files[0])
-      assert !eager_loaded?(files[1])
-      assert eager_loaded?(files[2])
-      assert !eager_loaded?(files[3])
+      assert required?(files[0])
+      assert !required?(files[1])
+      assert required?(files[2])
+      assert !required?(files[3])
     end
   end
 
@@ -78,13 +69,11 @@ class TestEagerLoadDir < LoaderTest
       ["excluded/m/n.rb", "module M::N; end"],
       ["excluded/m/n/a.rb", "M::N::A = 1"]
     ]
-    with_files(files) do
-      loader.push_dir(".")
+    with_setup(files) do
       loader.do_not_eager_load("excluded")
-      loader.setup
       loader.eager_load_dir(".")
 
-      assert files.none? { |file| eager_loaded?(file) }
+      assert files.none? { |file| required?(file) }
     end
   end
 
@@ -95,15 +84,11 @@ class TestEagerLoadDir < LoaderTest
       ["m/n.rb", "module M::N; end"],
       ["m/n/a.rb", "M::N::A = 1"]
     ]
-    with_files(files) do
-      loader.push_dir(".")
+    with_setup(files) do
       loader.do_not_eager_load("m/n.rb")
-      loader.setup
       loader.eager_load_dir(".")
 
-      assert eager_loaded?(files[0])
-      assert eager_loaded?(files[1])
-      assert eager_loaded?(files[2])
+      assert required?(files)
     end
   end
 
@@ -114,7 +99,7 @@ class TestEagerLoadDir < LoaderTest
       loader.setup
       loader.eager_load_dir("m")
 
-      assert !eager_loaded?(files[0])
+      assert !required?(files[0])
     end
   end
 
@@ -132,10 +117,10 @@ class TestEagerLoadDir < LoaderTest
       loader.setup
       loader.eager_load_dir(".")
 
-      assert eager_loaded?(files[0])
-      assert !eager_loaded?(files[1])
-      assert eager_loaded?(files[2])
-      assert !eager_loaded?(files[3])
+      assert required?(files[0])
+      assert !required?(files[1])
+      assert required?(files[2])
+      assert !required?(files[3])
     end
   end
 
@@ -150,7 +135,7 @@ class TestEagerLoadDir < LoaderTest
       loader.setup
       loader.eager_load_dir("ignored/m")
 
-      assert files.none? { |file| eager_loaded?(file) }
+      assert files.none? { |file| required?(file) }
     end
   end
 
@@ -159,14 +144,11 @@ class TestEagerLoadDir < LoaderTest
       ["a/x.rb", "X = 1"],
       ["b/x.rb", "SHADOWED"]
     ]
-    with_files(files) do
-      loader.push_dir("a")
-      loader.push_dir("b")
-      loader.setup
+    with_setup(files, dirs: %w(a b)) do
       loader.eager_load_dir("b")
 
-      assert !eager_loaded?(files[0])
-      assert !eager_loaded?(files[1])
+      assert !required?(files[0])
+      assert !required?(files[1])
     end
   end
 
@@ -181,11 +163,11 @@ class TestEagerLoadDir < LoaderTest
     with_setup(files) do
       loader.eager_load_dir("m/n")
 
-      assert !eager_loaded?(files[0])
-      assert !eager_loaded?(files[1])
-      assert eager_loaded?(files[2])
-      assert eager_loaded?(files[3])
-      assert eager_loaded?(files[4])
+      assert !required?(files[0])
+      assert !required?(files[1])
+      assert required?(files[2])
+      assert required?(files[3])
+      assert required?(files[4])
     end
   end
 
@@ -198,9 +180,9 @@ class TestEagerLoadDir < LoaderTest
     with_setup(files) do
       loader.eager_load_dir("a")
 
-      assert eager_loaded?(files[0])
-      assert !eager_loaded?(files[1])
-      assert !eager_loaded?(files[2])
+      assert required?(files[0])
+      assert !required?(files[1])
+      assert !required?(files[2])
     end
   end
 
@@ -209,14 +191,11 @@ class TestEagerLoadDir < LoaderTest
       ["a/m/x.rb", "M::X = 1"],
       ["b/m/y.rb", "M::Y = 1"],
     ]
-    with_files(files) do
-      loader.push_dir("a")
-      loader.push_dir("b")
-      loader.setup
+    with_setup(files, dirs: %w(a b)) do
       loader.eager_load_dir("a/m")
 
-      assert eager_loaded?(files[0])
-      assert !eager_loaded?(files[1])
+      assert required?(files[0])
+      assert !required?(files[1])
     end
   end
 
@@ -229,8 +208,8 @@ class TestEagerLoadDir < LoaderTest
       loader.setup
       loader.eager_load_dir("collapsed")
 
-      assert !eager_loaded?(files[0])
-      assert eager_loaded?(files[1])
+      assert !required?(files[0])
+      assert required?(files[1])
     end
   end
 
@@ -239,14 +218,11 @@ class TestEagerLoadDir < LoaderTest
       ["x.rb", "X = 1"],
       ["nested_root/y.rb", "Y = 1"]
     ]
-    with_files(files) do
-      loader.push_dir(".")
-      loader.push_dir("nested_root")
-      loader.setup
+    with_setup(files, dirs: %w(. nested_root)) do
       loader.eager_load_dir(".")
 
-      assert eager_loaded?(files[0])
-      assert !eager_loaded?(files[1])
+      assert required?(files[0])
+      assert !required?(files[1])
     end
   end
 
@@ -259,7 +235,7 @@ class TestEagerLoadDir < LoaderTest
     with_setup(files) do
       loader.eager_load_dir("a")
 
-      assert files.all? { |file| eager_loaded?(file) }
+      assert files.all? { |file| required?(file) }
     end
   end
 
@@ -287,8 +263,8 @@ class TestEagerLoadDir < LoaderTest
     with_setup(files) do
       loader.eager_load_dir(".")
 
-      assert eager_loaded?(files[0])
-      assert files[1..-1].none? { | file| eager_loaded?(file) }
+      assert required?(files[0])
+      assert files[1..-1].none? { | file| required?(file) }
     end
   end
 

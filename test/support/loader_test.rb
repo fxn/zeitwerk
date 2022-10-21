@@ -86,6 +86,16 @@ class LoaderTest < Minitest::Test
     end
   end
 
+  def required?(file_or_files)
+    if file_or_files.is_a?(String)
+      $LOADED_FEATURES.include?(File.expand_path(file_or_files, TMP_DIR))
+    elsif file_or_files[0].is_a?(String)
+      required?(file_or_files[0])
+    else
+      file_or_files.all? { |f| required?(f) }
+    end
+  end
+
   def assert_abspath(expected, actual)
     assert_equal(File.expand_path(expected, TMP_DIR), actual)
   end

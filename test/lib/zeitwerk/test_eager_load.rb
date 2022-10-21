@@ -9,13 +9,11 @@ class TestEagerLoad < LoaderTest
   test "eager loads independent files (Object)" do
     loaders = [loader, new_loader(setup: false)]
 
-    $tel0 = $tel1 = false
-
     files = [
       ["lib0/app0.rb", "module App0; end"],
-      ["lib0/app0/foo.rb", "class App0::Foo; $tel0 = true; end"],
+      ["lib0/app0/foo.rb", "class App0::Foo; end"],
       ["lib1/app1/foo.rb", "class App1::Foo; end"],
-      ["lib1/app1/foo/bar/baz.rb", "class App1::Foo::Bar::Baz; $tel1 = true; end"]
+      ["lib1/app1/foo/bar/baz.rb", "class App1::Foo::Bar::Baz; end"]
     ]
     with_files(files) do
       loaders[0].push_dir("lib0")
@@ -26,21 +24,18 @@ class TestEagerLoad < LoaderTest
 
       Zeitwerk::Loader.eager_load_all
 
-      assert $tel0
-      assert $tel1
+      assert required?(files)
     end
   end
 
   test "eager loads independent files (Namespace)" do
     loaders = [loader, new_loader(setup: false)]
 
-    $tel0 = $tel1 = false
-
     files = [
       ["lib0/app0.rb", "module #{Namespace}::App0; end"],
-      ["lib0/app0/foo.rb", "class #{Namespace}::App0::Foo; $tel0 = true; end"],
+      ["lib0/app0/foo.rb", "class #{Namespace}::App0::Foo; end"],
       ["lib1/app1/foo.rb", "class App1::Foo; end"],
-      ["lib1/app1/foo/bar/baz.rb", "class App1::Foo::Bar::Baz; $tel1 = true; end"]
+      ["lib1/app1/foo/bar/baz.rb", "class App1::Foo::Bar::Baz; end"]
     ]
     with_files(files) do
       loaders[0].push_dir("lib0", namespace: Namespace)
@@ -51,15 +46,12 @@ class TestEagerLoad < LoaderTest
 
       Zeitwerk::Loader.eager_load_all
 
-      assert $tel0
-      assert $tel1
+      assert required?(files)
     end
   end
 
   test "eager loads dependent loaders" do
     loaders = [loader, new_loader(setup: false)]
-
-    $tel0 = $tel1 = false
 
     files = [
       ["lib0/app0.rb", <<-EOS],
@@ -69,7 +61,7 @@ class TestEagerLoad < LoaderTest
       EOS
       ["lib0/app0/foo.rb", <<-EOS],
         class App0::Foo
-          $tel0 = App1::Foo
+          App1::Foo
         end
       EOS
       ["lib1/app1/foo.rb", <<-EOS],
@@ -79,7 +71,7 @@ class TestEagerLoad < LoaderTest
       EOS
       ["lib1/app1/foo/bar/baz.rb", <<-EOS]
         class App1::Foo::Bar::Baz
-          $tel1 = App0::Foo
+          App0::Foo
         end
       EOS
     ]
@@ -92,8 +84,7 @@ class TestEagerLoad < LoaderTest
 
       Zeitwerk::Loader.eager_load_all
 
-      assert $tel0
-      assert $tel1
+      assert required?(files)
     end
   end
 
@@ -107,28 +98,26 @@ class TestEagerLoad < LoaderTest
       delete_loaded_feature "my_gem/foo/baz.rb"
     end
 
-    $my_gem_foo_bar_eager_loaded = false
-
     files = [
       ["my_gem.rb", <<-EOS],
-        $for_gem_test_loader = Zeitwerk::Loader.for_gem
-        $for_gem_test_loader.setup
+        loader = Zeitwerk::Loader.for_gem
+        loader.setup
 
         class MyGem
           Foo::Baz # autoloads fine
         end
 
-        $for_gem_test_loader.eager_load
+        loader.eager_load
       EOS
       ["my_gem/foo.rb", "class MyGem::Foo; end"],
-      ["my_gem/foo/bar.rb", "class MyGem::Foo::Bar; end; $my_gem_foo_bar_eager_loaded = true"],
+      ["my_gem/foo/bar.rb", "class MyGem::Foo::Bar; end"],
       ["my_gem/foo/baz.rb", "class MyGem::Foo::Baz; end"],
     ]
 
     with_files(files) do
       with_load_path(".") do
         require "my_gem"
-        assert $my_gem_foo_bar_eager_loaded
+        assert required?(files)
       end
     end
   end
@@ -140,14 +129,13 @@ class TestEagerLoad < LoaderTest
         delete_loaded_feature "foo.rb"
       end
 
-      $test_eager_load_eager_loaded_p = false
-      files = [["foo.rb", "Foo = true; $test_eager_load_eager_loaded_p = true"]]
+      files = [["foo.rb", "Foo = true"]]
       with_files(files) do
         loader = new_loader(dirs: ".", enable_reloading: enable_reloading)
         loader.do_not_eager_load(".")
         loader.eager_load
 
-        assert !$test_eager_load_eager_loaded_p
+        assert !required?(files[0])
         assert Foo
       end
     end
@@ -161,12 +149,10 @@ class TestEagerLoad < LoaderTest
         delete_loaded_feature "db_adapters/mysql_adapter.rb"
       end
 
-      $test_eager_load_eager_loaded_p = false
       files = [
         ["db_adapters/mysql_adapter.rb", <<-EOS],
           module DbAdapters::MysqlAdapter
           end
-          $test_eager_load_eager_loaded_p = true
         EOS
         ["foo.rb", "Foo = true"]
       ]
@@ -175,8 +161,8 @@ class TestEagerLoad < LoaderTest
         loader.do_not_eager_load("db_adapters")
         loader.eager_load
 
-        assert Foo
-        assert !$test_eager_load_eager_loaded_p
+        assert !required?(files[0])
+        assert required?(files[1])
         assert DbAdapters::MysqlAdapter
       end
     end
@@ -190,18 +176,17 @@ class TestEagerLoad < LoaderTest
         delete_loaded_feature "bar.rb"
       end
 
-      $test_eager_load_eager_loaded_p = false
       files = [
         ["foo.rb", "Foo = true"],
-        ["bar.rb", "Bar = true; $test_eager_load_eager_loaded_p = true"]
+        ["bar.rb", "Bar = true"]
       ]
       with_files(files) do
         loader = new_loader(dirs: ".", enable_reloading: enable_reloading)
         loader.do_not_eager_load("bar.rb")
         loader.eager_load
 
-        assert Foo
-        assert !$test_eager_load_eager_loaded_p
+        assert required?(files[0])
+        assert !required?(files[1])
         assert Bar
       end
     end
@@ -214,17 +199,18 @@ class TestEagerLoad < LoaderTest
         delete_loaded_feature "ns/bar.rb"
       end
 
-      $test_eager_load_eager_loaded_p = false
       files = [
         ["lazylib/ns/foo.rb", "module Ns::Foo; end"],
-        ["eagerlib/ns/bar.rb", "module Ns::Bar; $test_eager_load_eager_loaded_p = true; end"]
+        ["eagerlib/ns/bar.rb", "module Ns::Bar; end"]
       ]
       with_files(files) do
         loader = new_loader(dirs: %w(lazylib eagerlib), enable_reloading: enable_reloading)
         loader.do_not_eager_load('lazylib')
         loader.eager_load
 
-        assert $test_eager_load_eager_loaded_p
+        assert !required?(files[0])
+        assert required?(files[1])
+        assert Ns::Foo
       end
     end
 
@@ -236,26 +222,26 @@ class TestEagerLoad < LoaderTest
         delete_loaded_feature "ns/bar.rb"
       end
 
-      $test_eager_load_eager_loaded_p = false
       files = [
         ["lazylib/ns/foo.rb", "module Ns::Foo; end"],
-        ["eagerlib/ns/bar.rb", "module Ns::Bar; $test_eager_load_eager_loaded_p = true; end"]
+        ["eagerlib/ns/bar.rb", "module Ns::Bar; end"]
       ]
       with_files(files) do
         loader = new_loader(dirs: %w(lazylib eagerlib), enable_reloading: enable_reloading)
-        loader.do_not_eager_load('lazylib/namespace')
+        loader.do_not_eager_load('lazylib/ns')
         loader.eager_load
 
-        assert $test_eager_load_eager_loaded_p
+        assert !required?(files[0])
+        assert required?(files[1])
+        assert Ns::Foo
       end
     end
   end
 
-  test "eager loading skips repeated files" do
-    $test_eager_loaded_file = nil
+  test "eager loading skips shadowed files" do
     files = [
-      ["a/foo.rb", "Foo = 1; $test_eager_loaded_file = :a"],
-      ["b/foo.rb", "Foo = 1; $test_eager_loaded_file = :b"]
+      ["a/foo.rb", "Foo = 1"],
+      ["b/foo.rb", "Foo = 1"]
     ]
     with_files(files) do
       la = new_loader(dirs: "a")
@@ -264,19 +250,19 @@ class TestEagerLoad < LoaderTest
       la.eager_load
       lb.eager_load
 
-      assert_equal :a, $test_eager_loaded_file
+      assert required?(files[0])
+      assert !required?(files[1])
     end
   end
 
   test "eager loading skips files that would map to already loaded constants" do
     on_teardown { remove_const :X }
 
-    $test_eager_loaded_file = false
-    files = [["x.rb", "X = 1; $test_eager_loaded_file = true"]]
+    files = [["x.rb", "X = 1"]]
     ::X = 1
     with_setup(files) do
       loader.eager_load
-      assert !$test_eager_loaded_file
+      assert !required?(files[0])
     end
   end
 
@@ -293,101 +279,92 @@ class TestEagerLoad < LoaderTest
   end
 
   test "force eager load for root directories" do
-    $test_eager_load_eager_loaded_p = false
-    files = [["foo.rb", "Foo = true; $test_eager_load_eager_loaded_p = true"]]
+    files = [["foo.rb", "Foo = true"]]
     with_setup(files) do
       loader.do_not_eager_load(".")
       loader.eager_load(force: true)
 
-      assert $test_eager_load_eager_loaded_p
+      assert required?(files)
     end
   end
 
   test "force eager load for sudirectories" do
-    $test_eager_load_eager_loaded_p = false
     files = [
       ["db_adapters/mysql_adapter.rb", <<-EOS],
         module DbAdapters::MysqlAdapter
         end
-        $test_eager_load_eager_loaded_p = true
       EOS
     ]
     with_setup(files) do
       loader.do_not_eager_load("db_adapters")
       loader.eager_load(force: true)
 
-      assert $test_eager_load_eager_loaded_p
+      assert required?(files)
       assert DbAdapters::MysqlAdapter
     end
   end
 
   test "force eager load for root files" do
-    $test_eager_load_eager_loaded_p = false
-    files = [["foo.rb", "Foo = true; $test_eager_load_eager_loaded_p = true"]]
+    files = [["foo.rb", "Foo = true"]]
     with_setup(files) do
       loader.do_not_eager_load("foo.rb")
       loader.eager_load(force: true)
 
-      assert $test_eager_load_eager_loaded_p
+      assert required?(files)
     end
   end
 
   test "force eager load for namespaced files" do
-    $test_eager_load_eager_loaded_p = false
-    files = [["m/foo.rb", "M::Foo = true; $test_eager_load_eager_loaded_p = true"]]
+    files = [["m/foo.rb", "M::Foo = true"]]
     with_setup(files) do
       loader.do_not_eager_load("m/foo.rb")
       loader.eager_load(force: true)
 
-      assert $test_eager_load_eager_loaded_p
+      assert required?(files)
     end
   end
 
   test "force eager load honours ignored root directories" do
-    $test_eager_load_eager_loaded_p = false
-    files = [["foo.rb", "Foo = true; $test_eager_load_eager_loaded_p = true"]]
+    files = [["foo.rb", "Foo = true"]]
     with_files(files) do
       loader.ignore(".")
       loader.setup
       loader.eager_load(force: true)
 
-      assert !$test_eager_load_eager_loaded_p
+      assert !required?(files)
     end
   end
 
   test "force eager load honours ignored subdirectories" do
-    $test_eager_load_eager_loaded_p = false
-    files = [["m/foo.rb", "M::Foo = true; $test_eager_load_eager_loaded_p = true"]]
+    files = [["m/foo.rb", "M::Foo = true"]]
     with_files(files) do
       loader.ignore("m")
       loader.setup
       loader.eager_load(force: true)
 
-      assert !$test_eager_load_eager_loaded_p
+      assert !required?(files)
     end
   end
 
   test "force eager load honours root files" do
-    $test_eager_load_eager_loaded_p = false
-    files = [["foo.rb", "Foo = true; $test_eager_load_eager_loaded_p = true"]]
+    files = [["foo.rb", "Foo = true"]]
     with_files(files) do
       loader.ignore("foo.rb")
       loader.setup
       loader.eager_load(force: true)
 
-      assert !$test_eager_load_eager_loaded_p
+      assert !required?(files)
     end
   end
 
   test "force eager load honours namespaced files" do
-    $test_eager_load_eager_loaded_p = false
-    files = [["m/foo.rb", "M::Foo = true; $test_eager_load_eager_loaded_p = true"]]
+    files = [["m/foo.rb", "M::Foo = true"]]
     with_files(files) do
       loader.ignore("foo.rb")
       loader.setup
       loader.eager_load(force: true)
 
-      assert !$test_eager_load_eager_loaded_p
+      assert !required?(files)
     end
   end
 

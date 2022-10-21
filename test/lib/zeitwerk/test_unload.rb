@@ -176,7 +176,7 @@ class TestUnload < LoaderTest
       loader.unload
 
       assert !Object.constants.include?(:X)
-      assert !$LOADED_FEATURES.include?(File.expand_path("x.rb"))
+      assert !required?(files)
     end
   end
 end
