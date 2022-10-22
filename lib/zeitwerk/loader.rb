@@ -554,7 +554,7 @@ module Zeitwerk
     end
 
     # @sig (String, Module, Boolean) -> void
-    def actual_eager_load_dir(dir, namespace, force: false)
+    def actual_eager_load_dir(dir, namespace, force:)
       honour_exclusions = !force
       return if honour_exclusions && excluded_from_eager_load?(dir)
 
