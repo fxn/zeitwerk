@@ -385,19 +385,11 @@ module Zeitwerk
             cname = inflector.camelize(basename, abspath).to_sym
             autoload_file(parent, cname, abspath)
           else
-            # In a Rails application, `app/models/concerns` is a subdirectory of
-            # `app/models`, but both of them are root directories.
-            #
-            # To resolve the ambiguity file name -> constant path this introduces,
-            # the `app/models/concerns` directory is totally ignored as a namespace,
-            # it counts only as root. The guard checks that.
-            unless root_dir?(abspath)
+            if collapse?(abspath)
+              set_autoloads_in_dir(abspath, parent)
+            else
               cname = inflector.camelize(basename, abspath).to_sym
-              if collapse?(abspath)
-                set_autoloads_in_dir(abspath, parent)
-              else
-                autoload_subdir(parent, cname, abspath)
-              end
+              autoload_subdir(parent, cname, abspath)
             end
           end
         rescue ::NameError => error
@@ -579,7 +571,7 @@ module Zeitwerk
             if (cref = autoloads[abspath]) && !shadowed_file?(abspath)
               cget(*cref)
             end
-          elsif !root_dirs.key?(abspath)
+          else
             if collapse?(abspath)
               queue << [abspath, namespace]
             else
