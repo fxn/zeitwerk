@@ -28,6 +28,7 @@
   - [Eager loading](#eager-loading)
     - [Eager load exclusions](#eager-load-exclusions)
     - [Eager load directories](#eager-load-directories)
+    - [Eager load namespaces](#eager-load-namespaces)
     - [Global eager load](#global-eager-load)
   - [Reloading](#reloading)
   - [Inflection](#inflection)
@@ -484,6 +485,37 @@ This method honours ignored files and directories, and eager load exclusions. Ex
 `Zeitwerk::Loader#eager_load_dir` is idempotent, but compatible with reloading. If you eager load a directory and then reload, eager loading that directory will load its (current) contents again.
 
 Nested directories which are descendants of the argument are skipped. Those subtrees are considered to be conceptually apart.
+
+<a id="markdown-eager-load-namespaces" name="eager-load-namespaces"></a>
+#### Eager load namespaces
+
+The method `Zeitwerk::Loader#eager_load_namespace` eager loads a given namespace, recursively:
+
+```ruby
+loader.eager_load_namespace(MyApp::Routes)
+```
+
+This is useful when the loader is not eager loading the entire project, but you still need some namespace to be loaded for things to function properly.
+
+The argument has to be a class or module object and the method raises `Zeitwerk::Error` otherwise. If the argument is not managed by the receiver, no error is raised, but nothing is eager loaded either.
+
+If the namespace is spread over multiple directories in the receiver's source tree, they are all eager loaded. For example, if you have a structure like
+
+```
+root_dir1/my_app/routes
+root_dir2/my_app/routes
+root_dir3/my_app/routes
+```
+
+where `root_directory{1,2,3}` are root directories, eager loading `MyApp::Routes` will eager load the contents of the three corresponding directories.
+
+There might exist external source trees implementing part of the namespace. This happens trivially and routinely with the root namespace (`Object`), and in particular when deliberately [reopening third-party namespaces](reopening-third-party-namespaces). By design, that code is not eager loaded. The method is carefully scoped to what the receiver manages to avoid side-effects elsewhere.
+
+This method honours ignored files and directories, and eager load exclusions. Exclusions can be bypassed with `force: true`, however, which may be handy for test suites.
+
+`Zeitwerk::Loader#eager_load_namespace` is idempotent, but compatible with reloading. If you eager load a namespace and then reload, eager loading that namespace will load its (current) contents again.
+
+If root directories are assigned to custom namespaces, the method behaves as you'd expect, according to the namespacing relationship between the custom namespace and the argument.
 
 <a id="markdown-global-eager-load" name="global-eager-load"></a>
 #### Global eager load

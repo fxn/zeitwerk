@@ -260,6 +260,33 @@ module Zeitwerk
       end
     end
 
+    def eager_load_namespace(mod, force: false)
+      unless mod.is_a?(Module)
+        raise Zeitwerk::Error, "#{mod.inspect} is not a class or module object"
+      end
+
+      actual_root_dirs.each do |root_dir, root_namespace|
+        if mod.equal?(Object)
+          actual_eager_load_dir(root_dir, root_namespace, force: force)
+        elsif root_namespace.equal?(Object)
+          eager_load_child_namespace(mod, root_dir, root_namespace, force: force)
+        else
+          mod_name = real_mod_name(mod)
+          root_namespace_name = real_mod_name(root_namespace)
+
+          if root_namespace_name.start_with?(mod_name + "::")
+            actual_eager_load_dir(root_dir, root_namespace, force: force)
+          elsif mod_name == root_namespace_name
+            actual_eager_load_dir(root_dir, root_namespace, force: force)
+          elsif mod_name.start_with?(root_namespace_name + "::")
+            eager_load_child_namespace(mod, root_dir, root_namespace, force: force)
+          else
+            # Unrelated constant hierarchies, do nothing.
+          end
+        end
+      end
+    end
+
     def namespace_at(path)
       abspath = File.expand_path(path)
       return if !File.exist?(abspath) || ignores?(abspath)
@@ -586,6 +613,50 @@ module Zeitwerk
       end
 
       log("eager load directory #{dir} end") if logger
+    end
+
+    # In order to invoke this method, the caller has to ensure `child` is a
+    # strict namespace descendendant of `root_namespace`.
+    #
+    # @sig (Module, String, Module, Boolean) -> void
+    def eager_load_child_namespace(child, root_dir, root_namespace, force:)
+      suffix = real_mod_name(child)
+      unless root_namespace.equal?(Object)
+        suffix = suffix.delete_prefix(real_mod_name(root_namespace) + "::")
+      end
+
+      # These directories are at the same namespace level, there may be more if
+      # we find collapsed ones. As we scan, we look for matches for the first
+      # segment, and store them in `next_dirs`. If there are any, we look for
+      # the next segments in those matches. Repeat.
+      #
+      # If we exhaust the search locating directories that match all segments,
+      # we just need to eager load those ones.
+      dirs = [root_dir]
+      next_dirs = []
+
+      suffix.split("::").each do |segment|
+        while dir = dirs.shift
+          ls(dir) do |basename, abspath|
+            next unless dir?(abspath)
+
+            if collapse?(abspath)
+              current_dirs << abspath
+            elsif segment == inflector.camelize(basename, abspath)
+              next_dirs << abspath
+            end
+          end
+        end
+
+        return if next_dirs.empty?
+
+        dirs.replace(next_dirs)
+        next_dirs.clear
+      end
+
+      dirs.each do |dir|
+        actual_eager_load_dir(dir, child, force: force)
+      end
     end
 
     def constant_path_at_file(file)

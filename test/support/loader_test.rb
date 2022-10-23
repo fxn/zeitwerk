@@ -15,10 +15,10 @@ class LoaderTest < Minitest::Test
   # There are gems that allow you to run tests in forked processes and you do
   # not need to care, but JRuby does not support forking, and I prefer to be
   # ready for the day in which Zeitwerk runs on JRuby.
-  def new_loader(dirs: [], enable_reloading: true, setup: true)
+  def new_loader(dirs: [], namespace: Object, enable_reloading: true, setup: true)
     Zeitwerk::Loader.new.tap do |loader|
       Array(dirs).each do |dir|
-        loader.push_dir(dir)
+        loader.push_dir(dir, namespace: namespace)
       end
       loader.enable_reloading if enable_reloading
       loader.setup            if setup
