@@ -601,7 +601,7 @@ module Zeitwerk
 
       walk_up(dir) do |ancestor|
         if namespace = root_dirs[ancestor]
-          cpath = cnames.reverse!.join('::')
+          cpath = cnames.reverse!.join("::")
           return cpath if namespace.equal?(Object)
           return real_mod_name(namespace) if cpath.empty?
           return real_mod_name(namespace) + "::" + cpath
