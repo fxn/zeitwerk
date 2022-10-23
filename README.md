@@ -477,7 +477,7 @@ loader.eager_load_dir("#{__dir__}/custom_web_app/routes")
 
 This is useful when the loader is not eager loading the entire project, but you still need some subtree to be loaded for things to function properly.
 
-Both strings and `Pathname` objects are supported as arguments. If the argument is not an existing directory, `ArgumentError` is raised. If the directory exists but it is not managed by the receiver, no error is raised, but nothing is eager loaded either.
+Both strings and `Pathname` objects are supported as arguments. If the argument is not an existing directory, `Zeitwerk::Error` is raised. If the directory exists but it is not managed by the receiver, no error is raised, but nothing is eager loaded either.
 
 This method honours ignored files and directories, and eager load exclusions. Exclusions can be bypassed with `force: true`, however, which may be handy for test suites.
 

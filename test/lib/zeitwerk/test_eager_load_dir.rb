@@ -268,8 +268,8 @@ class TestEagerLoadDir < LoaderTest
     end
   end
 
-  test "raises ArgumentError if the argument is not a directory" do
-    e = assert_raises(ArgumentError) { loader.eager_load_dir(__FILE__) }
+  test "raises Zeitwerk::Error if the argument is not a directory" do
+    e = assert_raises(Zeitwerk::Error) { loader.eager_load_dir(__FILE__) }
     assert_equal "#{__FILE__} is not a directory", e.message
   end
 end

@@ -251,7 +251,10 @@ module Zeitwerk
 
     def eager_load_dir(path, force: false)
       abspath = File.expand_path(path)
-      raise ArgumentError.new("#{abspath} is not a directory") unless dir?(abspath)
+      unless dir?(abspath)
+        raise Zeitwerk::Error.new("#{abspath} is not a directory")
+      end
+
       if namespace = namespace_at(abspath)
         actual_eager_load_dir(abspath, namespace, force: force)
       end
