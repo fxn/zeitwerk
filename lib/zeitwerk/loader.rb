@@ -249,37 +249,37 @@ module Zeitwerk
       end
     end
 
-    def eager_load_dir(path, force: false)
+    def eager_load_dir(path)
       abspath = File.expand_path(path)
       unless dir?(abspath)
         raise Zeitwerk::Error.new("#{abspath} is not a directory")
       end
 
       if namespace = namespace_at(abspath)
-        actual_eager_load_dir(abspath, namespace, force: force)
+        actual_eager_load_dir(abspath, namespace)
       end
     end
 
-    def eager_load_namespace(mod, force: false)
+    def eager_load_namespace(mod)
       unless mod.is_a?(Module)
         raise Zeitwerk::Error, "#{mod.inspect} is not a class or module object"
       end
 
       actual_root_dirs.each do |root_dir, root_namespace|
         if mod.equal?(Object)
-          actual_eager_load_dir(root_dir, root_namespace, force: force)
+          actual_eager_load_dir(root_dir, root_namespace)
         elsif root_namespace.equal?(Object)
-          eager_load_child_namespace(mod, root_dir, root_namespace, force: force)
+          eager_load_child_namespace(mod, root_dir, root_namespace)
         else
           mod_name = real_mod_name(mod)
           root_namespace_name = real_mod_name(root_namespace)
 
           if root_namespace_name.start_with?(mod_name + "::")
-            actual_eager_load_dir(root_dir, root_namespace, force: force)
+            actual_eager_load_dir(root_dir, root_namespace)
           elsif mod_name == root_namespace_name
-            actual_eager_load_dir(root_dir, root_namespace, force: force)
+            actual_eager_load_dir(root_dir, root_namespace)
           elsif mod_name.start_with?(root_namespace_name + "::")
-            eager_load_child_namespace(mod, root_dir, root_namespace, force: force)
+            eager_load_child_namespace(mod, root_dir, root_namespace)
           else
             # Unrelated constant hierarchies, do nothing.
           end
@@ -584,7 +584,7 @@ module Zeitwerk
     end
 
     # @sig (String, Module, Boolean) -> void
-    def actual_eager_load_dir(dir, namespace, force:)
+    def actual_eager_load_dir(dir, namespace, force: false)
       honour_exclusions = !force
       return if honour_exclusions && excluded_from_eager_load?(dir)
 
@@ -619,7 +619,7 @@ module Zeitwerk
     # strict namespace descendendant of `root_namespace`.
     #
     # @sig (Module, String, Module, Boolean) -> void
-    def eager_load_child_namespace(child, root_dir, root_namespace, force:)
+    def eager_load_child_namespace(child, root_dir, root_namespace)
       suffix = real_mod_name(child)
       unless root_namespace.equal?(Object)
         suffix = suffix.delete_prefix(real_mod_name(root_namespace) + "::")
@@ -655,7 +655,7 @@ module Zeitwerk
       end
 
       dirs.each do |dir|
-        actual_eager_load_dir(dir, child, force: force)
+        actual_eager_load_dir(dir, child)
       end
     end
 

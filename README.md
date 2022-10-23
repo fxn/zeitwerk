@@ -480,7 +480,7 @@ This is useful when the loader is not eager loading the entire project, but you 
 
 Both strings and `Pathname` objects are supported as arguments. If the argument is not an existing directory, `Zeitwerk::Error` is raised. If the directory exists but it is not managed by the receiver, no error is raised, but nothing is eager loaded either.
 
-This method honours ignored files and directories, and eager load exclusions. Exclusions can be bypassed with `force: true`, however, which may be handy for test suites.
+This method honours [eager load exclusions](#eager-load-exclusions), [ignored files and directories](#ignoring-parts-of-the-project), and [shadowed files](https://github.com/fxn/zeitwerk#shadowed-files).
 
 `Zeitwerk::Loader#eager_load_dir` is idempotent, but compatible with reloading. If you eager load a directory and then reload, eager loading that directory will load its (current) contents again.
 
@@ -511,7 +511,7 @@ where `root_directory{1,2,3}` are root directories, eager loading `MyApp::Routes
 
 There might exist external source trees implementing part of the namespace. This happens trivially and routinely with the root namespace (`Object`), and in particular when deliberately [reopening third-party namespaces](reopening-third-party-namespaces). By design, that code is not eager loaded. The method is carefully scoped to what the receiver manages to avoid side-effects elsewhere.
 
-This method honours ignored files and directories, and eager load exclusions. Exclusions can be bypassed with `force: true`, however, which may be handy for test suites.
+This method honours [eager load exclusions](#eager-load-exclusions), [ignored files and directories](#ignoring-parts-of-the-project), and [shadowed files](https://github.com/fxn/zeitwerk#shadowed-files).
 
 `Zeitwerk::Loader#eager_load_namespace` is idempotent, but compatible with reloading. If you eager load a namespace and then reload, eager loading that namespace will load its (current) contents again.
 
