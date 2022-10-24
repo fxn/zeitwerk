@@ -66,7 +66,7 @@ module Zeitwerk::Loader::EagerLoad
   end
 
   # @sig (String) -> Module | nil
-  def namespace_at(path)
+  private def namespace_at(path)
     abspath = File.expand_path(path)
     return if !File.exist?(abspath) || ignores?(abspath)
 
