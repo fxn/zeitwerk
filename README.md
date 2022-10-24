@@ -31,6 +31,8 @@
     - [Eager load namespaces](#eager-load-namespaces)
     - [Global eager load](#global-eager-load)
   - [Reloading](#reloading)
+    - [Configuration and usage](#configuration-and-usage)
+    - [Thread-safety](#thread-safety)
   - [Inflection](#inflection)
     - [Zeitwerk::Inflector](#zeitwerkinflector)
     - [Zeitwerk::GemInflector](#zeitwerkgeminflector)
@@ -535,6 +537,9 @@ This method does not accept the `force` flag, since in general it wouldn't be a 
 <a id="markdown-reloading" name="reloading"></a>
 ### Reloading
 
+<a id="markdown-configuration-and-usage" name="configuration-and-usage"></a>
+#### Configuration and usage
+
 Zeitwerk is able to reload code, but you need to enable this feature:
 
 ```ruby
@@ -556,12 +561,34 @@ Reloading removes the currently loaded classes and modules and resets the loader
 
 It is important to highlight that this is an instance method. Don't worry about project dependencies managed by Zeitwerk, their loaders are independent.
 
-Reloading is not thread-safe:
+<a id="markdown-thread-safety" name="thread-safety"></a>
+#### Thread-safety
 
-* You should not reload while another thread is reloading.
-* You should not autoload while another thread is reloading.
+In order to reload safely, no other thread can be autoloading or reloading concurrently. Client code is responsible for this coordination.
 
-In order to reload in a thread-safe manner, frameworks need to implement some coordination. For example, a web framework that serves each request with its own thread may have a globally accessible read/write lock: When a request comes in, the framework acquires the lock for reading at the beginning, and releases it at the end. On the other hand, the code in the framework responsible for the call to `Zeitwerk::Loader#reload` needs to acquire the lock for writing.
+For example, a web framework that serves each request in its own thread and has reloading enabled could create a read-write lock on boot like this:
+
+```ruby
+require "concurrent/atomic/read_write_lock"
+
+MyFramework::RELOAD_RW_LOCK = Concurrent::ReadWriteLock.new
+```
+
+You acquire the lock for reading for serving each individual request:
+
+```ruby
+MyFramework::RELOAD_RW_LOCK.with_read_lock do
+  serve(request)
+end
+```
+
+Then, when a reload is triggered, just acquire the lock for writing in order to execute the method call safely:
+
+```ruby
+MyFramework::RELOAD_RW_LOCK.with_write_lock do
+  loader.reload
+end
+```
 
 On reloading, client code has to update anything that would otherwise be storing a stale object. For example, if the routing layer of a web framework stores reloadable controller class objects or instances in internal structures, on reload it has to refresh them somehow, possibly reevaluating routes.
 
