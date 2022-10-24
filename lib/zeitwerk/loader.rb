@@ -318,15 +318,6 @@ module Zeitwerk
       end
     end
 
-    def constant_path_at(path)
-      abspath = File.expand_path(path)
-      if ruby?(abspath)
-        constant_path_at_file(abspath)
-      elsif dir?(abspath)
-        constant_path_at_dir(abspath)
-      end
-    end
-
     # Says if the given constant path would be unloaded on reload. This
     # predicate returns `false` if reloading is disabled.
     #
@@ -656,32 +647,6 @@ module Zeitwerk
 
       dirs.each do |dir|
         actual_eager_load_dir(dir, child)
-      end
-    end
-
-    def constant_path_at_file(file)
-      dir, basename = File.split(file)
-      cname = inflector.camelize(basename.delete_suffix(".rb"), file)
-      if cpath = constant_path_at_dir(dir)
-        cpath.empty? ? cname : cpath + "::" + cname
-      end
-    end
-
-    def constant_path_at_dir(dir)
-      cnames = []
-
-      walk_up(dir) do |ancestor|
-        if namespace = root_dirs[ancestor]
-          cpath = cnames.reverse!.join("::")
-          return cpath if namespace.equal?(Object)
-          return real_mod_name(namespace) if cpath.empty?
-          return real_mod_name(namespace) + "::" + cpath
-        end
-
-        unless collapse?(ancestor)
-          basename = File.basename(ancestor)
-          cnames << inflector.camelize(basename.delete_suffix(".rb"), ancestor)
-        end
       end
     end
   end
