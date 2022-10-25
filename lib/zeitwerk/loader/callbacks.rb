@@ -42,7 +42,7 @@ module Zeitwerk::Loader::Callbacks
     # Without the mutex and subsequent delete call, t2 would reset the module.
     # That not only would reassign the constant (undesirable per se) but, worse,
     # the module object created by t2 wouldn't have any of the autoloads for its
-    # children, since t1 would have correctly deleted its lazy_subdirs entry.
+    # children, since t1 would have correctly deleted its namespace_dirs entry.
     mutex2.synchronize do
       if cref = autoloads.delete(dir)
         autovivified_module = cref[0].const_set(cref[1], Module.new)
@@ -71,9 +71,9 @@ module Zeitwerk::Loader::Callbacks
   # @private
   # @sig (Module) -> void
   def on_namespace_loaded(namespace)
-    if subdirs = lazy_subdirs.delete(real_mod_name(namespace))
-      subdirs.each do |subdir|
-        set_autoloads_in_dir(subdir, namespace)
+    if dirs = namespace_dirs.delete(real_mod_name(namespace))
+      dirs.each do |dir|
+        set_autoloads_in_dir(dir, namespace)
       end
     end
   end

@@ -56,7 +56,7 @@ module Zeitwerk
     # @sig Hash[String, [String, [Module, Symbol]]]
     attr_reader :to_unload
 
-    # Maps constant paths of namespaces to arrays of corresponding directories.
+    # Maps namespace constant paths to their respective directories.
     #
     # For example, given this mapping:
     #
@@ -66,13 +66,13 @@ module Zeitwerk
     #     ...
     #   ]
     #
-    # when `Admin` gets defined we know that it plays the role of a namespace and
-    # that its children are spread over those directories. We'll visit them to set
-    # up the corresponding autoloads.
+    # when `Admin` gets defined we know that it plays the role of a namespace
+    # and that its children are spread over those directories. We'll visit them
+    # to set up the corresponding autoloads.
     #
     # @private
     # @sig Hash[String, Array[String]]
-    attr_reader :lazy_subdirs
+    attr_reader :namespace_dirs
 
     # A shadowed file is a file managed by this loader that is ignored when
     # setting autoloads because its matching constant is already taken.
@@ -99,7 +99,7 @@ module Zeitwerk
       @autoloads       = {}
       @autoloaded_dirs = []
       @to_unload       = {}
-      @lazy_subdirs    = Hash.new { |h, cpath| h[cpath] = [] }
+      @namespace_dirs  = Hash.new { |h, cpath| h[cpath] = [] }
       @shadowed_files  = Set.new
       @mutex           = Mutex.new
       @mutex2          = Mutex.new
@@ -195,7 +195,7 @@ module Zeitwerk
         autoloads.clear
         autoloaded_dirs.clear
         to_unload.clear
-        lazy_subdirs.clear
+        namespace_dirs.clear
         shadowed_files.clear
 
         Registry.on_unload(self)
@@ -344,10 +344,10 @@ module Zeitwerk
         # We do not need to issue another autoload, the existing one is enough
         # no matter if it is for a file or a directory. Just remember the
         # subdirectory has to be visited if the namespace is used.
-        lazy_subdirs[cpath] << subdir
+        namespace_dirs[cpath] << subdir
       elsif !cdef?(parent, cname)
         # First time we find this namespace, set an autoload for it.
-        lazy_subdirs[cpath(parent, cname)] << subdir
+        namespace_dirs[cpath(parent, cname)] << subdir
         set_autoload(parent, cname, subdir)
       else
         # For whatever reason the constant that corresponds to this namespace has

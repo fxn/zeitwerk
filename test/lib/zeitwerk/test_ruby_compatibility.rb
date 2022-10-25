@@ -241,7 +241,7 @@ class TestRubyCompatibility < LoaderTest
     end
   end
 
-  # This is why we issue a lazy_subdirs.delete call in the tracer block, to
+  # This is why we issue a namespace_dirs.delete call in the tracer block, to
   # ignore events triggered by reopenings.
   test "tracing :class calls you back on creation and on reopening" do
     on_teardown do
