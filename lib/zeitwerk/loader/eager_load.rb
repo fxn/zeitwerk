@@ -27,6 +27,7 @@ module Zeitwerk::Loader::EagerLoad
     end
   end
 
+  # @sig (String | Pathname) -> void
   def eager_load_dir(path)
     abspath = File.expand_path(path)
     unless dir?(abspath)
@@ -42,6 +43,7 @@ module Zeitwerk::Loader::EagerLoad
     end
   end
 
+  # @sig (Module) -> void
   def eager_load_namespace(mod)
     unless mod.is_a?(Module)
       raise Zeitwerk::Error, "#{mod.inspect} is not a class or module object"
