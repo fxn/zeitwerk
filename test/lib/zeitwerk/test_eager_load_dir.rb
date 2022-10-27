@@ -21,6 +21,25 @@ class TestEagerLoadDir < LoaderTest
     end
   end
 
+  test "shortcircuits if eager loaded" do
+    with_setup([]) do
+      loader.eager_load
+
+      # Dirty way to prove we shortcircuit.
+      def loader.actual_eager_load_dir(*)
+        raise
+      end
+
+      begin
+        loader.eager_load_dir(".")
+      rescue
+        flunk
+      else
+        pass
+      end
+    end
+  end
+
   test "eager loads all files (Pathname)" do
     files = [
       ["x.rb", "X = 1"],
@@ -269,6 +288,12 @@ class TestEagerLoadDir < LoaderTest
   end
 
   test "raises Zeitwerk::Error if the argument is not a directory" do
+    e = assert_raises(Zeitwerk::Error) { loader.eager_load_dir(__FILE__) }
+    assert_equal "#{__FILE__} is not a directory", e.message
+  end
+
+  test "raises Zeitwerk::Error if the argument is not a directory, even if eager loaded" do
+    loader.eager_load
     e = assert_raises(Zeitwerk::Error) { loader.eager_load_dir(__FILE__) }
     assert_equal "#{__FILE__} is not a directory", e.message
   end

@@ -33,7 +33,11 @@ module Zeitwerk::Loader::EagerLoad
       raise Zeitwerk::Error.new("#{abspath} is not a directory")
     end
 
+    return if @eager_loaded
+
     if namespace = namespace_at(abspath)
+      # A shortcircuiting test depends on the invocation of this method. Please
+      # keep them in sync if refactored.
       actual_eager_load_dir(abspath, namespace)
     end
   end
@@ -43,8 +47,12 @@ module Zeitwerk::Loader::EagerLoad
       raise Zeitwerk::Error, "#{mod.inspect} is not a class or module object"
     end
 
+    return if @eager_loaded
+
     actual_root_dirs.each do |root_dir, root_namespace|
       if mod.equal?(Object)
+        # A shortcircuiting test depends on the invocation of this method.
+        # Please keep them in sync if refactored.
         actual_eager_load_dir(root_dir, root_namespace)
       elsif root_namespace.equal?(Object)
         eager_load_child_namespace(mod, root_dir, root_namespace)

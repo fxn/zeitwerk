@@ -10,6 +10,25 @@ class TestEagerLoadNamespaceWithObjectRootNamespace < LoaderTest
     end
   end
 
+  test "shortcircuits if eager loaded" do
+    with_setup([]) do
+      loader.eager_load
+
+      # Dirty way to prove we shortcircuit.
+      def loader.actual_eager_load_dir(*)
+        raise
+      end
+
+      begin
+        loader.eager_load_namespace(Object)
+      rescue
+        flunk
+      else
+        pass
+      end
+    end
+  end
+
   test "eader loads everything (multiple root directories)" do
     files = [
       ["a/x.rb", "X = 1"],
@@ -94,6 +113,14 @@ class TestEagerLoadNamespaceWithObjectRootNamespace < LoaderTest
   end
 
   test "raises if the argument is not a class or module object" do
+    e = assert_raises(Zeitwerk::Error) do
+      loader.eager_load_namespace(self.class.name)
+    end
+    assert_equal %Q("#{self.class.name}" is not a class or module object), e.message
+  end
+
+  test "raises if the argument is not a class or module object, even if eager loaded" do
+    loader.eager_load
     e = assert_raises(Zeitwerk::Error) do
       loader.eager_load_namespace(self.class.name)
     end

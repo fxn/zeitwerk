@@ -486,7 +486,11 @@ This method skips [eager load exclusions](#eager-load-exclusions), [ignored file
 
 `Zeitwerk::Loader#eager_load_dir` is idempotent, but compatible with reloading. If you eager load a directory and then reload, eager loading that directory will load its (current) contents again.
 
+The method checks if a regular eager load was already executed, in which case it returns fast, right after validating the argument.
+
 Nested root directories which are descendants of the argument are skipped. Those subtrees are considered to be conceptually apart.
+
+
 
 <a id="markdown-eager-load-namespaces" name="eager-load-namespaces"></a>
 #### Eager load namespaces
@@ -516,6 +520,8 @@ There might exist external source trees implementing part of the namespace. This
 This method skips [eager load exclusions](#eager-load-exclusions), [ignored files and directories](#ignoring-parts-of-the-project), and [shadowed files](https://github.com/fxn/zeitwerk#shadowed-files).
 
 `Zeitwerk::Loader#eager_load_namespace` is idempotent, but compatible with reloading. If you eager load a namespace and then reload, eager loading that namespace will load its (current) contents again.
+
+The method checks if a regular eager load was already executed, in which case it returns fast, right after validating the argument.
 
 If root directories are assigned to custom namespaces, the method behaves as you'd expect, according to the namespacing relationship between the custom namespace and the argument.
 
