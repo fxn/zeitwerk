@@ -490,8 +490,6 @@ The method checks if a regular eager load was already executed, in which case it
 
 Nested root directories which are descendants of the argument are skipped. Those subtrees are considered to be conceptually apart.
 
-
-
 <a id="markdown-eager-load-namespaces" name="eager-load-namespaces"></a>
 #### Eager load namespaces
 
