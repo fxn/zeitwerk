@@ -19,6 +19,9 @@ module Kernel
   # included in Object, and changes in ancestors don't get propagated into
   # already existing ancestor chains on Ruby < 3.0.
   alias_method :zeitwerk_original_require, :require
+  class << self
+    alias_method :zeitwerk_original_require, :require
+  end
 
   # @sig (String) -> true | false
   def require(path)
