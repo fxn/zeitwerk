@@ -76,21 +76,12 @@ module Zeitwerk::Loader::EagerLoad
   end
 
   # @sig (String) -> Module | nil
-  private def namespace_at(path)
-    abspath = File.expand_path(path)
-    return if !File.exist?(abspath) || ignores?(abspath)
-
-    unless dir?(abspath)
-      if ruby?(abspath)
-        abspath = File.dirname(abspath)
-      else
-        return
-      end
-    end
-
+  private def namespace_at(abspath)
     cnames = []
 
     walk_up(abspath) do |dir|
+      return if ignored_paths.member?(dir)
+
       if namespace = root_dirs[dir]
         cnames.reverse_each do |cname|
           # Could happen if none of these directories have Ruby files.
