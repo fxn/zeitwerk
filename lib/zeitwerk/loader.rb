@@ -290,6 +290,15 @@ module Zeitwerk
         Registry.loaders.each(&:eager_load)
       end
 
+      # Broadcasts `eager_load_namespace` to all loaders.
+      #
+      # @sig (Module) -> void
+      def eager_load_namespace(mod)
+        Registry.loaders.each do |loader|
+          loader.eager_load_namespace(mod)
+        end
+      end
+
       # Returns an array with the absolute paths of the root directories of all
       # registered loaders. This is a read-only collection.
       #

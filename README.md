@@ -29,6 +29,7 @@
     - [Eager load exclusions](#eager-load-exclusions)
     - [Eager load directories](#eager-load-directories)
     - [Eager load namespaces](#eager-load-namespaces)
+    - [Eager load namespaces shared by several loaders](#eager-load-namespaces-shared-by-several-loaders)
     - [Global eager load](#global-eager-load)
   - [Reloading](#reloading)
     - [Configuration and usage](#configuration-and-usage)
@@ -522,6 +523,19 @@ This method skips [eager load exclusions](#eager-load-exclusions), [ignored file
 The method checks if a regular eager load was already executed, in which case it returns fast, right after validating the argument.
 
 If root directories are assigned to custom namespaces, the method behaves as you'd expect, according to the namespacing relationship between the custom namespace and the argument.
+
+<a id="markdown-eager-load-namespaces-shared-by-several-loaders" name="eager-load-namespaces-shared-by-several-loaders"></a>
+#### Eager load namespaces shared by several loaders
+
+The method `Zeitwerk::Loader.eager_load_namespace` broadcasts `eager_load_namespace` to all loaders.
+
+```ruby
+Zeitwerk::Loader.eager_load_namespace(MyFramework::Routes)
+```
+
+This may be handy, for example, if a framework supports plugins and a shared namespace needs to be eager loaded for the project to function properly.
+
+Please, note that loaders only eager load namespaces they manage, as documented above. Therefore, this method does not allow you to eager load namespaces not managed by Zeitwerk loaders.
 
 <a id="markdown-global-eager-load" name="global-eager-load"></a>
 #### Global eager load

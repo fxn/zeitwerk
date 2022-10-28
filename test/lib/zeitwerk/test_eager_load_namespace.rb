@@ -271,4 +271,29 @@ class TestEagerLoadNamespaceWithCustomRootNamespace < LoaderTest
       assert required?(files[1])
     end
   end
+
+  test "the class method broadcasts the call to all registered loaders" do
+    files = [
+      ["a/m/x.rb", "M::X = 1"],
+      ["a/x.rb", "X = 1"],
+      ["b/m/y.rb", "M::Y = 1"],
+      ["b/y.rb", "Y = 1"],
+      ["c/z.rb", "Z = 1"],
+    ]
+    with_files(files) do
+      new_loader(dirs: "a")
+      new_loader(dirs: "b")
+      new_loader(dirs: "c")
+
+      Zeitwerk::Loader.eager_load_namespace(M)
+
+      assert required?(files[0])
+      assert !required?(files[1])
+
+      assert required?(files[2])
+      assert !required?(files[3])
+
+      assert !required?(files[4])
+    end
+  end
 end
