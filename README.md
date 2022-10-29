@@ -483,11 +483,11 @@ This is useful when the loader is not eager loading the entire project, but you 
 
 Both strings and `Pathname` objects are supported as arguments. If the argument is not a directory managed by the receiver, the method raises `Zeitwerk::Error`.
 
-This method skips [eager load exclusions](#eager-load-exclusions), [ignored files and directories](#ignoring-parts-of-the-project), and [shadowed files](https://github.com/fxn/zeitwerk#shadowed-files).
+[Eager load exclusions](#eager-load-exclusions), [ignored files and directories](#ignoring-parts-of-the-project), and [shadowed files](https://github.com/fxn/zeitwerk#shadowed-files) are not eager loaded.
 
 `Zeitwerk::Loader#eager_load_dir` is idempotent, but compatible with reloading. If you eager load a directory and then reload, eager loading that directory will load its (current) contents again.
 
-The method checks if a regular eager load was already executed, in which case it returns fast, right after validating the argument.
+The method checks if a regular eager load was already executed, in which case it returns fast.
 
 Nested root directories which are descendants of the argument are skipped. Those subtrees are considered to be conceptually apart.
 
@@ -502,7 +502,7 @@ loader.eager_load_namespace(MyApp::Routes)
 
 This is useful when the loader is not eager loading the entire project, but you still need some namespace to be loaded for things to function properly.
 
-The argument has to be a class or module object and the method raises `Zeitwerk::Error` otherwise. If the argument is not managed by the receiver, no error is raised, but nothing is eager loaded either.
+The argument has to be a class or module object and the method raises `Zeitwerk::Error` otherwise.
 
 If the namespace is spread over multiple directories in the receiver's source tree, they are all eager loaded. For example, if you have a structure like
 
@@ -514,13 +514,15 @@ root_dir3/my_app/routes
 
 where `root_directory{1,2,3}` are root directories, eager loading `MyApp::Routes` will eager load the contents of the three corresponding directories.
 
-There might exist external source trees implementing part of the namespace. This happens trivially and routinely with the root namespace (`Object`), and in particular when deliberately [reopening third-party namespaces](reopening-third-party-namespaces). By design, that code is not eager loaded. The method is carefully scoped to what the receiver manages to avoid side-effects elsewhere.
+There might exist external source trees implementing part of the namespace. This happens routinely, because top-level constants are stored in the globally shared `Object`. It happens also when deliberately [reopening third-party namespaces](reopening-third-party-namespaces). Such external code is not eager loaded, the implementation is carefully scoped to what the receiver manages to avoid side-effects elsewhere.
 
-This method skips [eager load exclusions](#eager-load-exclusions), [ignored files and directories](#ignoring-parts-of-the-project), and [shadowed files](https://github.com/fxn/zeitwerk#shadowed-files).
+This method is flexible about what it accepts. Its semantics have to be interpreted as: "_If_ you manage this namespace, or part of this namespace, please eager load what you got". In particular, if the receiver does not manage the namespace, it will simply do nothing, this is not an error condition.
 
-`Zeitwerk::Loader#eager_load_namespace` is idempotent, but compatible with reloading. If you eager load a namespace and then reload, eager loading that namespace will load its (current) contents again.
+[Eager load exclusions](#eager-load-exclusions), [ignored files and directories](#ignoring-parts-of-the-project), and [shadowed files](https://github.com/fxn/zeitwerk#shadowed-files) are not eager loaded.
 
-The method checks if a regular eager load was already executed, in which case it returns fast, right after validating the argument.
+`Zeitwerk::Loader#eager_load_namespace` is idempotent, but compatible with reloading. If you eager load a namespace and then reload, eager loading that namespace will load its (current) descendants again.
+
+The method checks if a regular eager load was already executed, in which case it returns fast.
 
 If root directories are assigned to custom namespaces, the method behaves as you'd expect, according to the namespacing relationship between the custom namespace and the argument.
 
