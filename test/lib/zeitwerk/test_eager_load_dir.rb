@@ -177,6 +177,28 @@ class TestEagerLoadDir < LoaderTest
     end
   end
 
+  test "does not eager load ignored directories (same)" do
+    files = [["ignored/x.rb", "IGNORED"]]
+    with_files(files) do
+      loader.ignore("ignored")
+      loader.setup
+      loader.eager_load_dir("ignored")
+
+      assert !required?(files[0])
+    end
+  end
+
+  test "does not eager load if the argument is an ignored directory (descendant)" do
+    files = [["ignored/m/x.rb", "IGNORED"]]
+    with_files(files) do
+      loader.ignore("ignored")
+      loader.setup
+      loader.eager_load_dir("ignored/m")
+
+      assert !required?(files[0])
+    end
+  end
+
   test "files under nested root directories are ignored" do
     files = [
       ["x.rb", "X = 1"],
@@ -268,30 +290,6 @@ class TestEagerLoadDir < LoaderTest
   test "raises Zeitwerk::Error if the argument is not a directory" do
     e = assert_raises(Zeitwerk::Error) { loader.eager_load_dir(__FILE__) }
     assert_equal "#{__FILE__} is not a directory", e.message
-  end
-
-  test "raises Zeitwerk::Error if the argument is an ignored directory (same)" do
-    files = [["m/x.rb", "M::X = 1"]]
-    with_files(files) do
-      loader.ignore("m")
-      loader.setup
-
-      e = assert_raises(Zeitwerk::Error) { loader.eager_load_dir("m") }
-      assert !required?(files[0])
-      assert_equal "#{File.expand_path('m')} is ignored", e.message
-    end
-  end
-
-  test "raises Zeitwerk::Error if the argument is an ignored directory (descendant)" do
-    files = [["ignored/m/x.rb", ""]]
-    with_files(files) do
-      loader.ignore("ignored")
-      loader.setup
-
-      e = assert_raises(Zeitwerk::Error) { loader.eager_load_dir("ignored/m") }
-      assert !required?(files[0])
-      assert_equal "#{File.expand_path('ignored/m')} is ignored", e.message
-    end
   end
 
   test "raises if the argument is not managed by the loader" do

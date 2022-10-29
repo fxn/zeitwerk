@@ -32,12 +32,12 @@ module Zeitwerk::Loader::EagerLoad
     abspath = File.expand_path(path)
 
     raise Zeitwerk::Error.new("#{abspath} is not a directory") unless dir?(abspath)
-    raise Zeitwerk::Error.new("#{abspath} is ignored") if ignores?(abspath)
 
     cnames = []
 
     root_namespace = nil
     walk_up(abspath) do |dir|
+      return if ignored_paths.member?(dir)
       break if root_namespace = root_dirs[dir]
 
       unless collapse?(dir)
