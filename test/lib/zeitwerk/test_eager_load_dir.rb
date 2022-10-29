@@ -21,25 +21,6 @@ class TestEagerLoadDir < LoaderTest
     end
   end
 
-  test "shortcircuits if eager loaded" do
-    with_setup([]) do
-      loader.eager_load
-
-      # Dirty way to prove we shortcircuit.
-      def loader.actual_eager_load_dir(*)
-        raise
-      end
-
-      begin
-        loader.eager_load_dir(".")
-      rescue
-        flunk
-      else
-        pass
-      end
-    end
-  end
-
   test "eager loads all files (Pathname)" do
     files = [
       ["x.rb", "X = 1"],
@@ -51,16 +32,6 @@ class TestEagerLoadDir < LoaderTest
     with_setup(files) do
       loader.eager_load_dir(Pathname.new("."))
       assert required?(files)
-    end
-  end
-
-  test "does not eager load excluded directories (same)" do
-    files = [["m/x.rb", "M::X = 1"]]
-    with_setup(files) do
-      loader.do_not_eager_load("m")
-      loader.eager_load_dir("m")
-
-      assert !required?(files)
     end
   end
 
@@ -97,7 +68,7 @@ class TestEagerLoadDir < LoaderTest
   end
 
   # This is a file system-based interface.
-  test "eager loads explicit namespaces if some subtree is not excluded" do
+  test "eager loads excluded explicit namespaces if some subtree is not excluded" do
     files = [
       ["x.rb", "X = 1"],
       ["m/n.rb", "module M::N; end"],
@@ -111,23 +82,12 @@ class TestEagerLoadDir < LoaderTest
     end
   end
 
-  test "does not eager load ignored directories (same)" do
-    files = [["m/x.rb", "M::X = 1"]]
-    with_files(files) do
-      loader.ignore("m")
-      loader.setup
-      loader.eager_load_dir("m")
-
-      assert !required?(files[0])
-    end
-  end
-
-  test "does not eager load ignored files or directories" do
+  test "does not eager load descendant ignored files or directories" do
     files = [
       ["x.rb", "X = 1"],
-      ["y.rb", "Y = 1"],
+      ["y.rb", "IGNORED"],
       ["m/n.rb", "module M::N; end"],
-      ["m/n/a.rb", "M::N::A = 1"]
+      ["m/n/a.rb", "IGNORED"]
     ]
     with_files(files) do
       loader.push_dir(".")
@@ -140,21 +100,6 @@ class TestEagerLoadDir < LoaderTest
       assert !required?(files[1])
       assert required?(files[2])
       assert !required?(files[3])
-    end
-  end
-
-  test "does not eager load ignored files or directories (descendants)" do
-    files = [
-      ["ignored/m/n.rb", "module M::N; end"],
-      ["ignored/m/n/a.rb", "M::N::A = 1"]
-    ]
-    with_files(files) do
-      loader.push_dir(".")
-      loader.ignore("ignored")
-      loader.setup
-      loader.eager_load_dir("ignored/m")
-
-      assert files.none? { |file| required?(file) }
     end
   end
 
@@ -173,8 +118,8 @@ class TestEagerLoadDir < LoaderTest
 
   test "eager loads all files in a subdirectory, ignoring what is above" do
     files = [
-      ["x.rb", "X = 1"],
-      ["m/k/x.rb"],
+      ["x.rb", "IGNORED"],
+      ["m/k/x.rb", "IGNORED"],
       ["m/n/p.rb", "module M::N::P; end"],
       ["m/n/a.rb", "M::N::A = 1"],
       ["m/n/p/q/z.rb", "M::N::P::Q::Z = 1"]
@@ -245,6 +190,21 @@ class TestEagerLoadDir < LoaderTest
     end
   end
 
+  test "files under a root directory are loaded even if it has an ignored ascendant" do
+    files = [
+      ["x.rb", "X = 1"],
+      ["ignored/x.rb", "IGNORED"],
+      ["ignored/nested_root/y.rb", "Y = 1"]
+    ]
+    with_setup(files, dirs: %w(. ignored/nested_root)) do
+      loader.eager_load_dir("ignored/nested_root")
+
+      assert !required?(files[0])
+      assert !required?(files[1])
+      assert required?(files[2])
+    end
+  end
+
   test "can be called recursively" do
     $test_loader = loader
     files = [
@@ -272,7 +232,7 @@ class TestEagerLoadDir < LoaderTest
     end
   end
 
-  test "non-Ruby files are ignored" do
+  test "non-Ruby files are just ignored" do
     files = [
       ["x.rb", "X = 1"],
       ["README.md", ""],
@@ -283,7 +243,25 @@ class TestEagerLoadDir < LoaderTest
       loader.eager_load_dir(".")
 
       assert required?(files[0])
-      assert files[1..-1].none? { | file| required?(file) }
+    end
+  end
+
+  test "shortcircuits if eager loaded" do
+    with_setup([]) do
+      loader.eager_load
+
+      # Dirty way to prove we shortcircuit.
+      def loader.actual_eager_load_dir(*)
+        raise
+      end
+
+      begin
+        loader.eager_load_dir(".")
+      rescue
+        flunk
+      else
+        pass
+      end
     end
   end
 
@@ -292,9 +270,34 @@ class TestEagerLoadDir < LoaderTest
     assert_equal "#{__FILE__} is not a directory", e.message
   end
 
-  test "raises Zeitwerk::Error if the argument is not a directory, even if eager loaded" do
-    loader.eager_load
-    e = assert_raises(Zeitwerk::Error) { loader.eager_load_dir(__FILE__) }
-    assert_equal "#{__FILE__} is not a directory", e.message
+  test "raises Zeitwerk::Error if the argument is an ignored directory (same)" do
+    files = [["m/x.rb", "M::X = 1"]]
+    with_files(files) do
+      loader.ignore("m")
+      loader.setup
+
+      e = assert_raises(Zeitwerk::Error) { loader.eager_load_dir("m") }
+      assert !required?(files[0])
+      assert_equal "#{File.expand_path('m')} is ignored", e.message
+    end
+  end
+
+  test "raises Zeitwerk::Error if the argument is an ignored directory (descendant)" do
+    files = [["ignored/m/x.rb", ""]]
+    with_files(files) do
+      loader.ignore("ignored")
+      loader.setup
+
+      e = assert_raises(Zeitwerk::Error) { loader.eager_load_dir("ignored/m") }
+      assert !required?(files[0])
+      assert_equal "#{File.expand_path('ignored/m')} is ignored", e.message
+    end
+  end
+
+  test "raises if the argument is not managed by the loader" do
+    with_setup([]) do
+      e = assert_raises(Zeitwerk::Error) { loader.eager_load_dir(__dir__) }
+      assert_equal "I do not manage #{__dir__}", e.message
+    end
   end
 end

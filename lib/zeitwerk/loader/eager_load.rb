@@ -30,17 +30,37 @@ module Zeitwerk::Loader::EagerLoad
   # @sig (String | Pathname) -> void
   def eager_load_dir(path)
     abspath = File.expand_path(path)
-    unless dir?(abspath)
-      raise Zeitwerk::Error.new("#{abspath} is not a directory")
+
+    raise Zeitwerk::Error.new("#{abspath} is not a directory") unless dir?(abspath)
+    raise Zeitwerk::Error.new("#{abspath} is ignored") if ignores?(abspath)
+
+    cnames = []
+
+    root_namespace = nil
+    walk_up(abspath) do |dir|
+      break if root_namespace = root_dirs[dir]
+
+      unless collapse?(dir)
+        basename = File.basename(dir)
+        cnames << inflector.camelize(basename, dir).to_sym
+      end
     end
+
+    raise Zeitwerk::Error.new("I do not manage #{abspath}") unless root_namespace
 
     return if @eager_loaded
 
-    if namespace = namespace_at(abspath)
-      # A shortcircuiting test depends on the invocation of this method. Please
-      # keep them in sync if refactored.
-      actual_eager_load_dir(abspath, namespace)
+    namespace = root_namespace
+    cnames.reverse_each do |cname|
+      # Can happen if there are no Ruby files. This is not an error condition,
+      # the directory is actually managed. Could have Ruby files later.
+      return unless cdef?(namespace, cname)
+      namespace = cget(namespace, cname)
     end
+
+    # A shortcircuiting test depends on the invocation of this method. Please
+    # keep them in sync if refactored.
+    actual_eager_load_dir(abspath, namespace)
   end
 
   # @sig (Module) -> void
@@ -71,29 +91,6 @@ module Zeitwerk::Loader::EagerLoad
         else
           # Unrelated constant hierarchies, do nothing.
         end
-      end
-    end
-  end
-
-  # @sig (String) -> Module | nil
-  private def namespace_at(abspath)
-    cnames = []
-
-    walk_up(abspath) do |dir|
-      return if ignored_paths.member?(dir)
-
-      if namespace = root_dirs[dir]
-        cnames.reverse_each do |cname|
-          # Could happen if none of these directories have Ruby files.
-          return unless cdef?(namespace, cname)
-          namespace = cget(namespace, cname)
-        end
-        return namespace
-      end
-
-      unless collapse?(dir)
-        basename = File.basename(dir)
-        cnames << inflector.camelize(basename, dir).to_sym
       end
     end
   end
