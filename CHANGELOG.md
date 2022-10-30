@@ -1,5 +1,32 @@
 # CHANGELOG
 
+## 2.6.2 (Unreleased)
+
+* `Zeitwerk::Loader#load_file` allows you to load an individual Ruby file. Check
+  its [documentation](https://github.com/fxn/zeitwerk#loading-individual-files)
+  for further details.
+
+* `Zeitwerk::Loader#eager_load_dir` allows you to eager load a directory,
+  recursively. Check its
+  [documentation](https://github.com/fxn/zeitwerk#eager-load-directories) for
+  further details.
+
+* `Zeitwerk::Loader#eager_load_namespace` allows you to eager a namespace,
+  recursively. Namespaces are global, this method loads only what the receiver
+  manages from tha namespace, if anything. Check its
+  [documentation](https://github.com/fxn/zeitwerk#eager-load-namespaces) for
+  details.
+
+* `Zeitwerk::Loader.eager_load_namespace` broadcasts `eager_load_namespace` to
+  all registered loaders. Check its
+  [documentation](https://github.com/fxn/zeitwerk#eager-load-namespaces-shared-by-several-loaders)
+  for details.
+
+* Documents [shadowed files](https://github.com/fxn/zeitwerk#shadowed-files).
+  They always existed, but were not covered by the documentation.
+
+* Other assorted Documentation improvements.
+
 ## 2.6.1 (1 October 2022)
 
 * `Zeitwerk::Loader#dirs` allows you to instrospect the root directories
