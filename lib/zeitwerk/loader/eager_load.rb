@@ -38,6 +38,8 @@ module Zeitwerk::Loader::EagerLoad
     root_namespace = nil
     walk_up(abspath) do |dir|
       return if ignored_paths.member?(dir)
+      return if eager_load_exclusions.member?(dir)
+
       break if root_namespace = root_dirs[dir]
 
       unless collapse?(dir)

@@ -82,6 +82,16 @@ class TestEagerLoadDir < LoaderTest
     end
   end
 
+  test "does not load intermediate files if the target is an excluded descendant" do
+    files = [["excluded.rb", "module Excluded; end"], ["excluded/n/x.rb", "EXCLUDED"]]
+    with_setup(files) do
+      loader.do_not_eager_load("excluded")
+      loader.eager_load_dir("excluded/n")
+
+      assert !required?(files[0])
+    end
+  end
+
   test "does not eager load descendant ignored files or directories" do
     files = [
       ["x.rb", "X = 1"],
