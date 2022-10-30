@@ -31,6 +31,7 @@
     - [Eager load namespaces](#eager-load-namespaces)
     - [Eager load namespaces shared by several loaders](#eager-load-namespaces-shared-by-several-loaders)
     - [Global eager load](#global-eager-load)
+  - [Loading individual files](#loading-individual-files)
   - [Reloading](#reloading)
     - [Configuration and usage](#configuration-and-usage)
     - [Thread-safety](#thread-safety)
@@ -553,6 +554,23 @@ This may be handy in top-level services, like web applications.
 Note that thanks to idempotence `Zeitwerk::Loader.eager_load_all` won't eager load twice if any of the instances already eager loaded.
 
 This method does not accept the `force` flag, since in general it wouldn't be a good idea to force eager loading in 3rd party code.
+
+<a id="markdown-loading-individual-files" name="loading-individual-files"></a>
+### Loading individual files
+
+The method `Zeitwerk::Loader#load_file` loads an individual Ruby file:
+
+```ruby
+loader.load_file("#{__dir__}/custom_web_app/routes.rb")
+```
+
+This is useful when the loader is not eager loading the entire project, but you still need an individual file to be loaded for things to function properly.
+
+Both strings and `Pathname` objects are supported as arguments. The method raises `Zeitwerk::Error` if the argument is not a Ruby file, is [ignored](#ignoring-parts-of-the-project), is [shadowed](https://github.com/fxn/zeitwerk#shadowed-files), or is not managed by the receiver.
+
+`Zeitwerk::Loader#load_file` is idempotent, but compatible with reloading. If you load a file and then reload, a new call will load its (current) contents again.
+
+If you want to eager load a directory, `Zeitwerk::Loader#eager_load_dir` is more efficient than invoking `Zeitwerk::Loader#load_file` on its files.
 
 <a id="markdown-reloading" name="reloading"></a>
 ### Reloading

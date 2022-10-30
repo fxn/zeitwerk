@@ -97,6 +97,50 @@ module Zeitwerk::Loader::EagerLoad
     end
   end
 
+  # Loads the given Ruby file.
+  #
+  # Raises if the argument is ignored, shadowed, or not managed by the receiver.
+  #
+  # The method is implemented as `constantize` for files, in a sense, to be able
+  # to descend orderly and make sure the file is loadable.
+  #
+  # @sig (String | Pathname) -> void
+  def load_file(path)
+    abspath = File.expand_path(path)
+
+    raise Zeitwerk::Error.new("#{abspath} does not exist") unless File.exist?(abspath)
+    raise Zeitwerk::Error.new("#{abspath} is not a Ruby file") if dir?(abspath) || !ruby?(abspath)
+    raise Zeitwerk::Error.new("#{abspath} is ignored") if ignored_paths.member?(abspath)
+
+    basename = File.basename(abspath, ".rb")
+    base_cname = inflector.camelize(basename, abspath).to_sym
+
+    root_namespace = nil
+    cnames = []
+
+    walk_up(File.dirname(abspath)) do |dir|
+      raise Zeitwerk::Error.new("#{abspath} is ignored") if ignored_paths.member?(dir)
+
+      break if root_namespace = root_dirs[dir]
+
+      unless collapse?(dir)
+        basename = File.basename(dir)
+        cnames << inflector.camelize(basename, dir).to_sym
+      end
+    end
+
+    raise Zeitwerk::Error.new("I do not manage #{abspath}") unless root_namespace
+
+    namespace = root_namespace
+    cnames.reverse_each do |cname|
+      namespace = cget(namespace, cname)
+    end
+
+    raise Zeitwerk::Error.new("#{abspath} is shadowed") if shadowed_file?(abspath)
+
+    cget(namespace, base_cname)
+  end
+
   # The caller is responsible for making sure `namespace` is the namespace that
   # corresponds to `dir`.
   #
