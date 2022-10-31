@@ -536,7 +536,7 @@ The method `Zeitwerk::Loader.eager_load_namespace` broadcasts `eager_load_namesp
 Zeitwerk::Loader.eager_load_namespace(MyFramework::Routes)
 ```
 
-This may be handy, for example, if a framework supports plugins and a shared namespace needs to be eager loaded for the project to function properly.
+This may be handy, for example, if a framework supports plugins and a shared namespace needs to be eager loaded for the framework to function properly.
 
 Please, note that loaders only eager load namespaces they manage, as documented above. Therefore, this method does not allow you to eager load namespaces not managed by Zeitwerk loaders.
 
