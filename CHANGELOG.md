@@ -13,7 +13,7 @@
 
 * `Zeitwerk::Loader#eager_load_namespace` allows you to eager a namespace,
   recursively. Namespaces are global, this method loads only what the receiver
-  manages from tha namespace, if anything. Check its
+  manages from that namespace, if anything. Check its
   [documentation](https://github.com/fxn/zeitwerk#eager-load-namespaces) for
   details.
 
@@ -25,7 +25,7 @@
 * Documents [shadowed files](https://github.com/fxn/zeitwerk#shadowed-files).
   They always existed, but were not covered by the documentation.
 
-* Other assorted Documentation improvements.
+* Other assorted documentation improvements.
 
 ## 2.6.1 (1 October 2022)
 
