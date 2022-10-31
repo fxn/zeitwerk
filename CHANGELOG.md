@@ -4,12 +4,12 @@
 
 * `Zeitwerk::Loader#load_file` allows you to load an individual Ruby file. Check
   its [documentation](https://github.com/fxn/zeitwerk#loading-individual-files)
-  for further details.
+  for details.
 
 * `Zeitwerk::Loader#eager_load_dir` allows you to eager load a directory,
   recursively. Check its
   [documentation](https://github.com/fxn/zeitwerk#eager-load-directories) for
-  further details.
+  details.
 
 * `Zeitwerk::Loader#eager_load_namespace` allows you to eager a namespace,
   recursively. Namespaces are global, this method loads only what the receiver
