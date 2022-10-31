@@ -445,15 +445,15 @@ module Zeitwerk
           next if loader == self
           next if loader.ignores?(dir)
 
-          dir = dir + "/"
+          suffixed_dir = dir + "/"
           loader.root_dirs.each do |root_dir, _namespace|
             next if ignores?(root_dir)
 
             root_dir = root_dir + "/"
-            if dir.start_with?(root_dir) || root_dir.start_with?(dir)
+            if suffixed_dir.start_with?(root_dir) || root_dir.start_with?(suffixed_dir)
               require "pp" # Needed for pretty_inspect, even in Ruby 2.5.
               raise Error,
-                "loader\n\n#{pretty_inspect}\n\nwants to manage directory #{dir.chop}," \
+                "loader\n\n#{pretty_inspect}\n\nwants to manage directory #{dir}," \
                 " which is already managed by\n\n#{loader.pretty_inspect}\n"
               EOS
             end
