@@ -154,36 +154,36 @@ class TestIgnore < LoaderTest
 
   test "returns true if a directory is ignored as is" do
     loader.ignore(this_dir)
-    assert loader.ignores?(this_dir)
+    assert loader.__ignores?(this_dir)
   end
 
   test "returns true if a file is ignored as is" do
     loader.ignore(this_file)
-    assert loader.ignores?(this_file)
+    assert loader.__ignores?(this_file)
   end
 
   test "returns true for a descendant of an ignored directory" do
     loader.ignore(ascendant)
-    assert loader.ignores?(this_dir)
+    assert loader.__ignores?(this_dir)
   end
 
   test "returns true for a file in a descendant of an ignored directory" do
     loader.ignore(ascendant)
-    assert loader.ignores?(this_file)
+    assert loader.__ignores?(this_file)
   end
 
   test "returns false for the directory of an ignored file" do
     loader.ignore(this_file)
-    assert !loader.ignores?(this_dir)
+    assert !loader.__ignores?(this_dir)
   end
 
   test "returns false for an ascendant directory of an ignored directory" do
     loader.ignore(this_dir)
-    assert !loader.ignores?(ascendant)
+    assert !loader.__ignores?(ascendant)
   end
 
   test "returns false if nothing is ignored" do
-    assert !loader.ignores?(this_dir)
-    assert !loader.ignores?(this_file)
+    assert !loader.__ignores?(this_dir)
+    assert !loader.__ignores?(this_file)
   end
 end

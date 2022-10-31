@@ -4,6 +4,8 @@ require "set"
 require "securerandom"
 
 module Zeitwerk::Loader::Config
+  extend Zeitwerk::Internal
+
   # Absolute paths of the root directories. Stored in a hash to preserve order,
   # easily handle duplicates, have a fast lookup needed for detecting nested
   # paths, and store namespaces as values.
@@ -275,9 +277,8 @@ module Zeitwerk::Loader::Config
   # Returns true if the argument has been configured to be ignored, or is a
   # descendant of an ignored directory.
   #
-  # @private
   # @sig (String) -> bool
-  def ignores?(abspath)
+  internal def ignores?(abspath)
     # Common use case.
     return false if ignored_paths.empty?
 

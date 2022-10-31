@@ -445,7 +445,7 @@ module Zeitwerk
 
         Registry.loaders.each do |loader|
           next if loader == self
-          next if loader.ignores?(dir)
+          next if loader.__ignores?(dir)
 
           loader.root_dirs.each do |root_dir, _namespace|
             next if ignores?(root_dir)
