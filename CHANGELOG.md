@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 2.6.2 (Unreleased)
+## 2.6.2 (31 October 2022)
 
 * `Zeitwerk::Loader#load_file` allows you to load an individual Ruby file. Check
   its [documentation](https://github.com/fxn/zeitwerk#loading-individual-files)
