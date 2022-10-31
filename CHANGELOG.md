@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 2.6.3 (31 October 2022)
+
+* `v2.6.2` introduced a regression in the logic that checks whether two loaders
+  want to manage the same root directories. It has been fixed.
+
 ## 2.6.2 (31 October 2022)
 
 * `Zeitwerk::Loader#load_file` allows you to load an individual Ruby file. Check
