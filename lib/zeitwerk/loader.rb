@@ -441,16 +441,17 @@ module Zeitwerk
     # @sig (String) -> void
     def raise_if_conflicting_directory(dir)
       MUTEX.synchronize do
+        dir_slash = dir + "/"
+
         Registry.loaders.each do |loader|
           next if loader == self
           next if loader.ignores?(dir)
 
-          suffixed_dir = dir + "/"
           loader.root_dirs.each do |root_dir, _namespace|
             next if ignores?(root_dir)
 
-            root_dir = root_dir + "/"
-            if suffixed_dir.start_with?(root_dir) || root_dir.start_with?(suffixed_dir)
+            root_dir_slash = root_dir + "/"
+            if dir_slash.start_with?(root_dir_slash) || root_dir_slash.start_with?(dir_slash)
               require "pp" # Needed for pretty_inspect, even in Ruby 2.5.
               raise Error,
                 "loader\n\n#{pretty_inspect}\n\nwants to manage directory #{dir}," \
