@@ -12,13 +12,14 @@ module Zeitwerk::Loader::Config
   # @sig #call | #debug | nil
   attr_accessor :logger
 
-  # Absolute paths of the root directories. Stored in a hash to preserve order,
-  # easily handle duplicates, have a fast lookup needed for detecting nested
-  # paths, and store namespaces as values.
+  # Absolute paths of the root directories, mapped to their respective root namespaces:
   #
   #   "/Users/fxn/blog/app/channels" => Object,
   #   "/Users/fxn/blog/app/adapters" => ActiveJob::QueueAdapters,
   #   ...
+  #
+  # Stored in a hash to preserve order, easily handle duplicates, and have a
+  # fast lookup by directory.
   #
   # This is a private collection maintained by the loader. The public
   # interface for it is `push_dir` and `dirs`.
