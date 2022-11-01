@@ -73,10 +73,10 @@ module Zeitwerk::Loader::Config
 
   # User-oriented callbacks to be fired before constants are removed.
   #
-  # @private
   # @sig Hash[String, Array[{ (Object, String) -> void }]]
   #      Hash[Symbol, Array[{ (String, Object, String) -> void }]]
   attr_reader :on_unload_callbacks
+  private :on_unload_callbacks
 
   # @sig #call | #debug | nil
   attr_accessor :logger
