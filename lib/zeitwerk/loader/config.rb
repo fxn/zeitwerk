@@ -48,9 +48,9 @@ module Zeitwerk::Loader::Config
   # The actual collection of absolute directory names at the time the collapse
   # glob patterns were expanded. Computed on setup, and recomputed on reload.
   #
-  # @private
   # @sig Set[String]
   attr_reader :collapse_dirs
+  private :collapse_dirs
 
   # Absolute paths of files or directories not to be eager loaded.
   #
