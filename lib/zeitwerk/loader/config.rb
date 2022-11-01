@@ -35,9 +35,9 @@ module Zeitwerk::Loader::Config
   # ignored glob patterns were expanded. Computed on setup, and recomputed on
   # reload.
   #
-  # @private
   # @sig Set[String]
   attr_reader :ignored_paths
+  private :ignored_paths
 
   # Absolute paths of directories or glob patterns to be collapsed.
   #
