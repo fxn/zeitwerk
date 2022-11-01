@@ -6,6 +6,12 @@ require "securerandom"
 module Zeitwerk::Loader::Config
   extend Zeitwerk::Internal
 
+  # @sig #camelize
+  attr_accessor :inflector
+
+  # @sig #call | #debug | nil
+  attr_accessor :logger
+
   # Absolute paths of the root directories. Stored in a hash to preserve order,
   # easily handle duplicates, have a fast lookup needed for detecting nested
   # paths, and store namespaces as values.
@@ -20,9 +26,6 @@ module Zeitwerk::Loader::Config
   # @private
   # @sig Hash[String, Module]
   attr_reader :root_dirs
-
-  # @sig #camelize
-  attr_accessor :inflector
 
   # Absolute paths of files, directories, or glob patterns to be totally
   # ignored.
@@ -78,13 +81,12 @@ module Zeitwerk::Loader::Config
   attr_reader :on_unload_callbacks
   private :on_unload_callbacks
 
-  # @sig #call | #debug | nil
-  attr_accessor :logger
-
   def initialize
+    @inflector              = Zeitwerk::Inflector.new
+    @logger                 = self.class.default_logger
+    @tag                    = SecureRandom.hex(3)
     @initialized_at         = Time.now
     @root_dirs              = {}
-    @inflector              = Zeitwerk::Inflector.new
     @ignored_glob_patterns  = Set.new
     @ignored_paths          = Set.new
     @collapse_glob_patterns = Set.new
@@ -94,8 +96,6 @@ module Zeitwerk::Loader::Config
     @on_setup_callbacks     = []
     @on_load_callbacks      = {}
     @on_unload_callbacks    = {}
-    @logger                 = self.class.default_logger
-    @tag                    = SecureRandom.hex(3)
   end
 
   # Pushes `path` to the list of root directories.
