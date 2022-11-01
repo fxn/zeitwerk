@@ -447,7 +447,7 @@ module Zeitwerk
           next if loader == self
           next if loader.__ignores?(dir)
 
-          loader.__roots.each do |root_dir, _root_namespace|
+          loader.__roots.each_key do |root_dir|
             next if ignores?(root_dir)
 
             root_dir_slash = root_dir + "/"
