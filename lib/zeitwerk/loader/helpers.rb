@@ -31,7 +31,7 @@ module Zeitwerk::Loader::Helpers
       next if ignored_paths.member?(abspath)
 
       if dir?(abspath)
-        next if root_dirs.key?(abspath)
+        next if roots.key?(abspath)
         next if !has_at_least_one_ruby_file?(abspath)
       else
         next unless ruby?(abspath)

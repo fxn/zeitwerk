@@ -116,8 +116,8 @@ module Zeitwerk
       mutex.synchronize do
         break if @setup
 
-        actual_root_dirs.each do |root_dir, namespace|
-          set_autoloads_in_dir(root_dir, namespace)
+        actual_roots.each do |root_dir, root_namespace|
+          set_autoloads_in_dir(root_dir, root_namespace)
         end
 
         on_setup_callbacks.each(&:call)
@@ -447,7 +447,7 @@ module Zeitwerk
           next if loader == self
           next if loader.__ignores?(dir)
 
-          loader.root_dirs.each do |root_dir, _namespace|
+          loader.__roots.each do |root_dir, _root_namespace|
             next if ignores?(root_dir)
 
             root_dir_slash = root_dir + "/"

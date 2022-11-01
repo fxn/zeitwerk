@@ -12,8 +12,8 @@ module Zeitwerk::Loader::EagerLoad
 
       log("eager load start") if logger
 
-      actual_root_dirs.each do |root_dir, namespace|
-        actual_eager_load_dir(root_dir, namespace, force: force)
+      actual_roots.each do |root_dir, root_namespace|
+        actual_eager_load_dir(root_dir, root_namespace, force: force)
       end
 
       autoloaded_dirs.each do |autoloaded_dir|
@@ -40,7 +40,7 @@ module Zeitwerk::Loader::EagerLoad
       return if ignored_paths.member?(dir)
       return if eager_load_exclusions.member?(dir)
 
-      break if root_namespace = root_dirs[dir]
+      break if root_namespace = roots[dir]
 
       unless collapse?(dir)
         basename = File.basename(dir)
@@ -76,7 +76,7 @@ module Zeitwerk::Loader::EagerLoad
     mod_name = real_mod_name(mod)
     return unless mod_name
 
-    actual_root_dirs.each do |root_dir, root_namespace|
+    actual_roots.each do |root_dir, root_namespace|
       if mod.equal?(Object)
         # A shortcircuiting test depends on the invocation of this method.
         # Please keep them in sync if refactored.
@@ -122,7 +122,7 @@ module Zeitwerk::Loader::EagerLoad
     walk_up(File.dirname(abspath)) do |dir|
       raise Zeitwerk::Error.new("#{abspath} is ignored") if ignored_paths.member?(dir)
 
-      break if root_namespace = root_dirs[dir]
+      break if root_namespace = roots[dir]
 
       unless collapse?(dir)
         basename = File.basename(dir)

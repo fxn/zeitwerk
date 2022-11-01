@@ -7,16 +7,16 @@ class TesPushDir < LoaderTest
   module Namespace; end
 
   def check_dirs
-    root_dirs = loader.root_dirs # this is private interface
+    roots = loader.__roots
 
     dirs = loader.dirs
-    assert_equal root_dirs.keys, dirs
+    assert_equal roots.keys, dirs
     assert dirs.frozen?
 
     dirs = loader.dirs(namespaces: true)
-    assert_equal root_dirs, dirs
+    assert_equal roots, dirs
     assert dirs.frozen?
-    assert !dirs.equal?(root_dirs)
+    assert !dirs.equal?(roots)
   end
 
   test "accepts dirs as strings and associates them to the Object namespace" do

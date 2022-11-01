@@ -23,9 +23,9 @@ module Zeitwerk::Loader::Config
   # This is a private collection maintained by the loader. The public
   # interface for it is `push_dir` and `dirs`.
   #
-  # @private
   # @sig Hash[String, Module]
-  attr_reader :root_dirs
+  attr_reader :roots
+  internal :roots
 
   # Absolute paths of files, directories, or glob patterns to be totally
   # ignored.
@@ -86,7 +86,7 @@ module Zeitwerk::Loader::Config
     @logger                 = self.class.default_logger
     @tag                    = SecureRandom.hex(3)
     @initialized_at         = Time.now
-    @root_dirs              = {}
+    @roots                  = {}
     @ignored_glob_patterns  = Set.new
     @ignored_paths          = Set.new
     @collapse_glob_patterns = Set.new
@@ -115,7 +115,7 @@ module Zeitwerk::Loader::Config
     abspath = File.expand_path(path)
     if dir?(abspath)
       raise_if_conflicting_directory(abspath)
-      root_dirs[abspath] = namespace
+      roots[abspath] = namespace
     else
       raise Zeitwerk::Error, "the root directory #{abspath} does not exist"
     end
@@ -148,9 +148,9 @@ module Zeitwerk::Loader::Config
   # @sig () -> Array[String] | Hash[String, Module]
   def dirs(namespaces: false)
     if namespaces
-      root_dirs.clone
+      roots.clone
     else
-      root_dirs.keys
+      roots.keys
     end.freeze
   end
 
@@ -284,22 +284,22 @@ module Zeitwerk::Loader::Config
 
     walk_up(abspath) do |abspath|
       return true  if ignored_paths.member?(abspath)
-      return false if root_dirs.key?(abspath)
+      return false if roots.key?(abspath)
     end
 
     false
   end
 
   # @sig () -> Array[String]
-  private def actual_root_dirs
-    root_dirs.reject do |root_dir, _namespace|
+  private def actual_roots
+    roots.reject do |root_dir, _root_namespace|
       !dir?(root_dir) || ignored_paths.member?(root_dir)
     end
   end
 
   # @sig (String) -> bool
   private def root_dir?(dir)
-    root_dirs.key?(dir)
+    roots.key?(dir)
   end
 
   # @sig (String) -> bool
@@ -309,7 +309,7 @@ module Zeitwerk::Loader::Config
 
     walk_up(abspath) do |abspath|
       return true  if eager_load_exclusions.member?(abspath)
-      return false if root_dirs.key?(abspath)
+      return false if roots.key?(abspath)
     end
 
     false
