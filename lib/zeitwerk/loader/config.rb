@@ -60,9 +60,9 @@ module Zeitwerk::Loader::Config
 
   # User-oriented callbacks to be fired on setup and on reload.
   #
-  # @private
   # @sig Array[{ () -> void }]
   attr_reader :on_setup_callbacks
+  private :on_setup_callbacks
 
   # User-oriented callbacks to be fired when a constant is loaded.
   #
