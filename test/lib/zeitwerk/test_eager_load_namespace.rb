@@ -29,6 +29,15 @@ class TestEagerLoadNamespaceWithObjectRootNamespace < LoaderTest
     end
   end
 
+  test "does not assume the namespace has a name" do
+    files = [["x.rb", "X = 1"]]
+    with_setup(files) do
+      loader.eager_load_namespace(Module.new)
+
+      assert !required?(files[0])
+    end
+  end
+
   test "eader loads everything (multiple root directories)" do
     files = [
       ["a/x.rb", "X = 1"],
@@ -234,6 +243,15 @@ class TestEagerLoadNamespaceWithCustomRootNamespace < LoaderTest
           assert !required?(files[2])
           assert !required?(files[3])
         end
+      end
+    end
+
+    test "does not assume the namespace has a name" do
+      files = [["x.rb", "X = 1"]]
+      with_setup(files, namespace: CN) do
+        loader.eager_load_namespace(Module.new)
+
+        assert !required?(files[0])
       end
     end
 

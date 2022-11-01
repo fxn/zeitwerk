@@ -73,23 +73,24 @@ module Zeitwerk::Loader::EagerLoad
 
     return if @eager_loaded
 
+    mod_name = real_mod_name(mod)
+    return unless mod_name
+
     actual_root_dirs.each do |root_dir, root_namespace|
       if mod.equal?(Object)
         # A shortcircuiting test depends on the invocation of this method.
         # Please keep them in sync if refactored.
         actual_eager_load_dir(root_dir, root_namespace)
       elsif root_namespace.equal?(Object)
-        eager_load_child_namespace(mod, root_dir, root_namespace)
+        eager_load_child_namespace(mod, mod_name, root_dir, root_namespace)
       else
-        mod_name = real_mod_name(mod)
         root_namespace_name = real_mod_name(root_namespace)
-
         if root_namespace_name.start_with?(mod_name + "::")
           actual_eager_load_dir(root_dir, root_namespace)
         elsif mod_name == root_namespace_name
           actual_eager_load_dir(root_dir, root_namespace)
         elsif mod_name.start_with?(root_namespace_name + "::")
-          eager_load_child_namespace(mod, root_dir, root_namespace)
+          eager_load_child_namespace(mod, mod_name, root_dir, root_namespace)
         else
           # Unrelated constant hierarchies, do nothing.
         end
@@ -180,8 +181,8 @@ module Zeitwerk::Loader::EagerLoad
   # strict namespace descendendant of `root_namespace`.
   #
   # @sig (Module, String, Module, Boolean) -> void
-  private def eager_load_child_namespace(child, root_dir, root_namespace)
-    suffix = real_mod_name(child)
+  private def eager_load_child_namespace(child, child_name, root_dir, root_namespace)
+    suffix = child_name
     unless root_namespace.equal?(Object)
       suffix = suffix.delete_prefix(real_mod_name(root_namespace) + "::")
     end
