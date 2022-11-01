@@ -290,22 +290,20 @@ module Zeitwerk::Loader::Config
     false
   end
 
-  private
-
   # @sig () -> Array[String]
-  def actual_root_dirs
+  private def actual_root_dirs
     root_dirs.reject do |root_dir, _namespace|
       !dir?(root_dir) || ignored_paths.member?(root_dir)
     end
   end
 
   # @sig (String) -> bool
-  def root_dir?(dir)
+  private def root_dir?(dir)
     root_dirs.key?(dir)
   end
 
   # @sig (String) -> bool
-  def excluded_from_eager_load?(abspath)
+  private def excluded_from_eager_load?(abspath)
     # Optimize this common use case.
     return false if eager_load_exclusions.empty?
 
@@ -318,29 +316,29 @@ module Zeitwerk::Loader::Config
   end
 
   # @sig (String) -> bool
-  def collapse?(dir)
+  private def collapse?(dir)
     collapse_dirs.member?(dir)
   end
 
   # @sig (String | Pathname | Array[String | Pathname]) -> Array[String]
-  def expand_paths(paths)
+  private def expand_paths(paths)
     paths.flatten.map! { |path| File.expand_path(path) }
   end
 
   # @sig (Array[String]) -> Array[String]
-  def expand_glob_patterns(glob_patterns)
+  private def expand_glob_patterns(glob_patterns)
     # Note that Dir.glob works with regular file names just fine. That is,
     # glob patterns technically need no wildcards.
     glob_patterns.flat_map { |glob_pattern| Dir.glob(glob_pattern) }
   end
 
   # @sig () -> void
-  def recompute_ignored_paths
+  private def recompute_ignored_paths
     ignored_paths.replace(expand_glob_patterns(ignored_glob_patterns))
   end
 
   # @sig () -> void
-  def recompute_collapse_dirs
+  private def recompute_collapse_dirs
     collapse_dirs.replace(expand_glob_patterns(collapse_glob_patterns))
   end
 end
