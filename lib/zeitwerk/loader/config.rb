@@ -66,10 +66,10 @@ module Zeitwerk::Loader::Config
 
   # User-oriented callbacks to be fired when a constant is loaded.
   #
-  # @private
   # @sig Hash[String, Array[{ (Object, String) -> void }]]
   #      Hash[Symbol, Array[{ (String, Object, String) -> void }]]
   attr_reader :on_load_callbacks
+  private :on_load_callbacks
 
   # User-oriented callbacks to be fired before constants are removed.
   #

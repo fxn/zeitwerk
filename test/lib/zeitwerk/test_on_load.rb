@@ -185,10 +185,10 @@ class TestOnLoad < LoaderTest
       x = 0; loader.on_load("A") { x = 1 }
       loader.setup
 
-      assert !loader.on_load_callbacks.empty?
+      assert !loader.send(:on_load_callbacks).empty?
       assert A
       assert_equal 1, x
-      assert loader.on_load_callbacks.empty?
+      assert loader.send(:on_load_callbacks).empty?
     end
   end
 end
