@@ -54,9 +54,9 @@ module Zeitwerk::Loader::Config
 
   # Absolute paths of files or directories not to be eager loaded.
   #
-  # @private
   # @sig Set[String]
   attr_reader :eager_load_exclusions
+  private :eager_load_exclusions
 
   # User-oriented callbacks to be fired on setup and on reload.
   #
