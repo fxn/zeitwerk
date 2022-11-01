@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## 2.6.4 (1 November 2022)
+
+Ruby does not have gem-level visibility, so sometimes you need things to be
+`public` for them to be accessible internally. But they do not belong to the
+public interface of the gem.
+
+A method that is undocumented and marked as `@private` in the source code is
+clearly private API, regardless of its formal Ruby visibility.
+
+This release starts a series of gradual patches in which private interface is
+enforced with stricter formal visibility.
+
 ## 2.6.3 (31 October 2022)
 
 * `v2.6.2` introduced a regression in the logic that checks whether two loaders
