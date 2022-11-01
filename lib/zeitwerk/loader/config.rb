@@ -27,9 +27,9 @@ module Zeitwerk::Loader::Config
   # Absolute paths of files, directories, or glob patterns to be totally
   # ignored.
   #
-  # @private
   # @sig Set[String]
   attr_reader :ignored_glob_patterns
+  private :ignored_glob_patterns
 
   # The actual collection of absolute file and directory names at the time the
   # ignored glob patterns were expanded. Computed on setup, and recomputed on
