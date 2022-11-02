@@ -1,12 +1,10 @@
 # frozen_string_literal: true
 
 module Zeitwerk::Loader::Helpers
-  private
-
   # --- Logging -----------------------------------------------------------------------------------
 
   # @sig (String) -> void
-  def log(message)
+  private def log(message)
     method_name = logger.respond_to?(:debug) ? :debug : :call
     logger.send(method_name, "Zeitwerk@#{tag}: #{message}")
   end
@@ -14,7 +12,7 @@ module Zeitwerk::Loader::Helpers
   # --- Files and directories ---------------------------------------------------------------------
 
   # @sig (String) { (String, String) -> void } -> void
-  def ls(dir)
+  private def ls(dir)
     children = Dir.children(dir)
 
     # The order in which a directory is listed depends on the file system.
@@ -44,7 +42,7 @@ module Zeitwerk::Loader::Helpers
   end
 
   # @sig (String) -> bool
-  def has_at_least_one_ruby_file?(dir)
+  private def has_at_least_one_ruby_file?(dir)
     to_visit = [dir]
 
     while dir = to_visit.shift
@@ -61,22 +59,22 @@ module Zeitwerk::Loader::Helpers
   end
 
   # @sig (String) -> bool
-  def ruby?(path)
+  private def ruby?(path)
     path.end_with?(".rb")
   end
 
   # @sig (String) -> bool
-  def dir?(path)
+  private def dir?(path)
     File.directory?(path)
   end
 
   # @sig (String) -> bool
-  def hidden?(basename)
+  private def hidden?(basename)
     basename.start_with?(".")
   end
 
   # @sig (String) { (String) -> void } -> void
-  def walk_up(abspath)
+  private def walk_up(abspath)
     loop do
       yield abspath
       abspath, basename = File.split(abspath)
@@ -104,11 +102,11 @@ module Zeitwerk::Loader::Helpers
   #
   # @sig (Module, Symbol) -> String?
   if method(:autoload?).arity == 1
-    def strict_autoload_path(parent, cname)
+    private def strict_autoload_path(parent, cname)
       parent.autoload?(cname) if cdef?(parent, cname)
     end
   else
-    def strict_autoload_path(parent, cname)
+    private def strict_autoload_path(parent, cname)
       parent.autoload?(cname, false)
     end
   end
@@ -117,23 +115,23 @@ module Zeitwerk::Loader::Helpers
   if Symbol.method_defined?(:name)
     # Symbol#name was introduced in Ruby 3.0. It returns always the same
     # frozen object, so we may save a few string allocations.
-    def cpath(parent, cname)
+    private def cpath(parent, cname)
       Object == parent ? cname.name : "#{real_mod_name(parent)}::#{cname.name}"
     end
   else
-    def cpath(parent, cname)
+    private def cpath(parent, cname)
       Object == parent ? cname.to_s : "#{real_mod_name(parent)}::#{cname}"
     end
   end
 
   # @sig (Module, Symbol) -> bool
-  def cdef?(parent, cname)
+  private def cdef?(parent, cname)
     parent.const_defined?(cname, false)
   end
 
   # @raise [NameError]
   # @sig (Module, Symbol) -> Object
-  def cget(parent, cname)
+  private def cget(parent, cname)
     parent.const_get(cname, false)
   end
 end
