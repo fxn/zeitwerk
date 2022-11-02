@@ -28,7 +28,7 @@ module Zeitwerk::Loader::Helpers
       next if hidden?(basename)
 
       abspath = File.join(dir, basename)
-      next if ignored_paths.member?(abspath)
+      next if ignored_path?(abspath)
 
       if dir?(abspath)
         next if roots.key?(abspath)

@@ -284,17 +284,22 @@ module Zeitwerk::Loader::Config
     return false if ignored_paths.empty?
 
     walk_up(abspath) do |abspath|
-      return true  if ignored_paths.member?(abspath)
+      return true  if ignored_path?(abspath)
       return false if roots.key?(abspath)
     end
 
     false
   end
 
+  # @sig (String) -> bool
+  private def ignored_path?(abspath)
+    ignored_paths.member?(abspath)
+  end
+
   # @sig () -> Array[String]
   private def actual_roots
     roots.reject do |root_dir, _root_namespace|
-      !dir?(root_dir) || ignored_paths.member?(root_dir)
+      !dir?(root_dir) || ignored_path?(root_dir)
     end
   end
 

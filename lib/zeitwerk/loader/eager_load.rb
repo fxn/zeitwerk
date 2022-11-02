@@ -37,7 +37,7 @@ module Zeitwerk::Loader::EagerLoad
 
     root_namespace = nil
     walk_up(abspath) do |dir|
-      return if ignored_paths.member?(dir)
+      return if ignored_path?(dir)
       return if eager_load_exclusions.member?(dir)
 
       break if root_namespace = roots[dir]
@@ -111,7 +111,7 @@ module Zeitwerk::Loader::EagerLoad
 
     raise Zeitwerk::Error.new("#{abspath} does not exist") unless File.exist?(abspath)
     raise Zeitwerk::Error.new("#{abspath} is not a Ruby file") if dir?(abspath) || !ruby?(abspath)
-    raise Zeitwerk::Error.new("#{abspath} is ignored") if ignored_paths.member?(abspath)
+    raise Zeitwerk::Error.new("#{abspath} is ignored") if ignored_path?(abspath)
 
     basename = File.basename(abspath, ".rb")
     base_cname = inflector.camelize(basename, abspath).to_sym
@@ -120,7 +120,7 @@ module Zeitwerk::Loader::EagerLoad
     cnames = []
 
     walk_up(File.dirname(abspath)) do |dir|
-      raise Zeitwerk::Error.new("#{abspath} is ignored") if ignored_paths.member?(dir)
+      raise Zeitwerk::Error.new("#{abspath} is ignored") if ignored_path?(dir)
 
       break if root_namespace = roots[dir]
 
