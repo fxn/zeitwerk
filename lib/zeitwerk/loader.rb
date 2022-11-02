@@ -199,7 +199,7 @@ module Zeitwerk
         shadowed_files.clear
 
         Registry.on_unload(self)
-        ExplicitNamespace.unregister_loader(self)
+        ExplicitNamespace.__unregister_loader(self)
 
         @setup        = false
         @eager_loaded = false
@@ -245,7 +245,7 @@ module Zeitwerk
     # @sig () -> void
     def unregister
       Registry.unregister_loader(self)
-      ExplicitNamespace.unregister_loader(self)
+      ExplicitNamespace.__unregister_loader(self)
     end
 
     # The return value of this predicate is only meaningful if the loader has
@@ -435,7 +435,7 @@ module Zeitwerk
 
     # @sig (String) -> void
     def register_explicit_namespace(cpath)
-      ExplicitNamespace.register(cpath, self)
+      ExplicitNamespace.__register(cpath, self)
     end
 
     # @sig (String) -> void

@@ -37,8 +37,8 @@ class LoaderTest < Minitest::Test
   end
 
   def reset_explicit_namespace
-    Zeitwerk::ExplicitNamespace.cpaths.clear
-    Zeitwerk::ExplicitNamespace.tracer.disable
+    Zeitwerk::ExplicitNamespace.send(:cpaths).clear
+    Zeitwerk::ExplicitNamespace.send(:tracer).disable
   end
 
   def teardown

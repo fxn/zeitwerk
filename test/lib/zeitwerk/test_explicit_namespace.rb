@@ -122,7 +122,7 @@ class TestExplicitNamespace < LoaderTest
   #
   # goes forward.
   def tracer
-    Zeitwerk::ExplicitNamespace.tracer
+    Zeitwerk::ExplicitNamespace.send(:tracer)
   end
 
   test "the tracer starts disabled" do

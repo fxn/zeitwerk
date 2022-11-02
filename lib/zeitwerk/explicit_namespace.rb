@@ -11,28 +11,28 @@ module Zeitwerk
   module ExplicitNamespace # :nodoc: all
     class << self
       include RealModName
+      extend Internal
 
       # Maps constant paths that correspond to explicit namespaces according to
       # the file system, to the loader responsible for them.
       #
-      # @private
       # @sig Hash[String, Zeitwerk::Loader]
       attr_reader :cpaths
+      private :cpaths
 
-      # @private
       # @sig Mutex
       attr_reader :mutex
+      private :mutex
 
-      # @private
       # @sig TracePoint
       attr_reader :tracer
+      private :tracer
 
       # Asserts `cpath` corresponds to an explicit namespace for which `loader`
       # is responsible.
       #
-      # @private
       # @sig (String, Zeitwerk::Loader) -> void
-      def register(cpath, loader)
+      internal def register(cpath, loader)
         mutex.synchronize do
           cpaths[cpath] = loader
           # We check enabled? because, looking at the C source code, enabling an
@@ -41,24 +41,21 @@ module Zeitwerk
         end
       end
 
-      # @private
       # @sig (Zeitwerk::Loader) -> void
-      def unregister_loader(loader)
+      internal def unregister_loader(loader)
         cpaths.delete_if { |_cpath, l| l == loader }
         disable_tracer_if_unneeded
       end
 
-      private
-
       # @sig () -> void
-      def disable_tracer_if_unneeded
+      private def disable_tracer_if_unneeded
         mutex.synchronize do
           tracer.disable if cpaths.empty?
         end
       end
 
       # @sig (TracePoint) -> void
-      def tracepoint_class_callback(event)
+      private def tracepoint_class_callback(event)
         # If the class is a singleton class, we won't do anything with it so we
         # can bail out immediately. This is several orders of magnitude faster
         # than accessing its name.
