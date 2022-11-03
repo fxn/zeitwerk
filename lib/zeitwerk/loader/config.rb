@@ -5,6 +5,7 @@ require "securerandom"
 
 module Zeitwerk::Loader::Config
   extend Zeitwerk::Internal
+  include Zeitwerk::RealModName
 
   # @sig #camelize
   attr_accessor :inflector
@@ -111,6 +112,10 @@ module Zeitwerk::Loader::Config
     # Note that Class < Module.
     unless namespace.is_a?(Module)
       raise Zeitwerk::Error, "#{namespace.inspect} is not a class or module object, should be"
+    end
+
+    unless real_mod_name(namespace)
+      raise Zeitwerk::Error, "root namespaces cannot be anonymous"
     end
 
     abspath = File.expand_path(path)
