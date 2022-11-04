@@ -35,7 +35,7 @@ Note that Zeitwerk does not deal with file or directory objects, only with paths
 
 ## Types
 
-* All methods should have a documented signature.
+* All methods should have a documented signature using [RBS syntax](https://github.com/ruby/rbs/blob/master/docs/syntax.md).
 * Use the most concise type always. Use a set when a set is the best choice, use `Module` when a class or module object is the natural data type (rather than its name).
 * Use always symbols for constant names.
 * Use always strings for constant paths.
