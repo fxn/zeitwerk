@@ -9,6 +9,7 @@ module Zeitwerk::Loader::EagerLoad
   def eager_load(force: false)
     mutex.synchronize do
       break if @eager_loaded
+      raise Zeitwerk::SetupRequired unless @setup
 
       log("eager load start") if logger
 
@@ -29,6 +30,8 @@ module Zeitwerk::Loader::EagerLoad
 
   # @sig (String | Pathname) -> void
   def eager_load_dir(path)
+    raise Zeitwerk::SetupRequired unless @setup
+
     abspath = File.expand_path(path)
 
     raise Zeitwerk::Error.new("#{abspath} is not a directory") unless dir?(abspath)
@@ -67,6 +70,8 @@ module Zeitwerk::Loader::EagerLoad
 
   # @sig (Module) -> void
   def eager_load_namespace(mod)
+    raise Zeitwerk::SetupRequired unless @setup
+
     unless mod.is_a?(Module)
       raise Zeitwerk::Error, "#{mod.inspect} is not a class or module object"
     end

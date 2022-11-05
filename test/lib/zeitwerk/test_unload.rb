@@ -179,4 +179,10 @@ class TestUnload < LoaderTest
       assert !required?(files)
     end
   end
+
+  test "raises if called before setup" do
+    assert_raises(Zeitwerk::SetupRequired) do
+      loader.unload
+    end
+  end
 end

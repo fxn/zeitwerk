@@ -181,8 +181,7 @@ class TestLogging < LoaderTest
   end
 
   test "logs when eager loading starts" do
-    files = [["x.rb", "X = true"]]
-    with_files(files) do
+    with_setup([]) do
       assert_logged(/eager load start/) do
         loader.eager_load
       end
@@ -190,8 +189,7 @@ class TestLogging < LoaderTest
   end
 
   test "logs when eager loading ends" do
-    files = [["x.rb", "X = true"]]
-    with_files(files) do
+    with_setup([]) do
       assert_logged(/eager load end/) do
         loader.eager_load
       end

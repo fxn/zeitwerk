@@ -226,4 +226,10 @@ class TestReloading < LoaderTest
       assert X
     end
   end
+
+  test "raises if called before setup" do
+    assert_raises(Zeitwerk::SetupRequired) do
+      loader.reload
+    end
+  end
 end

@@ -12,4 +12,10 @@ module Zeitwerk
 
   class NameError < ::NameError
   end
+
+  class SetupRequired < Error
+    def initialize
+      super("please, finish your configuration and call Zeitwerk::Loader#setup once all is ready")
+    end
+  end
 end

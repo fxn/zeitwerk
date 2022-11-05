@@ -140,6 +140,8 @@ module Zeitwerk
     # @sig () -> void
     def unload
       mutex.synchronize do
+        raise Zeitwerk::SetupRequired unless @setup
+
         # We are going to keep track of the files that were required by our
         # autoloads to later remove them from $LOADED_FEATURES, thus making them
         # loadable by Kernel#require again.
@@ -216,6 +218,7 @@ module Zeitwerk
     # @sig () -> void
     def reload
       raise ReloadingDisabledError unless reloading_enabled?
+      raise Zeitwerk::SetupRequired unless @setup
 
       unload
       recompute_ignored_paths
@@ -283,19 +286,31 @@ module Zeitwerk
         Registry.loader_for_gem(called_from, warn_on_extra_files: warn_on_extra_files)
       end
 
-      # Broadcasts `eager_load` to all loaders.
+      # Broadcasts `eager_load` to all loaders. Those that have not been setup
+      # are skipped.
       #
       # @sig () -> void
       def eager_load_all
-        Registry.loaders.each(&:eager_load)
+        Registry.loaders.each do |loader|
+          begin
+            loader.eager_load
+          rescue Zeitwerk::SetupRequired
+            # This is fine, we eager load what can be eager loaded.
+          end
+        end
       end
 
-      # Broadcasts `eager_load_namespace` to all loaders.
+      # Broadcasts `eager_load_namespace` to all loaders. Those that have not
+      # been setup are skipped.
       #
       # @sig (Module) -> void
       def eager_load_namespace(mod)
         Registry.loaders.each do |loader|
-          loader.eager_load_namespace(mod)
+          begin
+            loader.eager_load_namespace(mod)
+          rescue Zeitwerk::SetupRequired
+            # This is fine, we eager load what can be eager loaded.
+          end
         end
       end
 

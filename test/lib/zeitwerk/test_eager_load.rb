@@ -88,6 +88,15 @@ class TestEagerLoad < LoaderTest
     end
   end
 
+  test "skips loaders that are not ready" do
+    files = [["x.rb", "X = 1"]]
+    with_setup(files) do
+      new_loader(setup: false) # should be skipped
+      Zeitwerk::Loader.eager_load_all
+      assert required?(files)
+    end
+  end
+
   test "eager loads gems" do
     on_teardown do
       remove_const :MyGem
@@ -381,6 +390,12 @@ class TestEagerLoad < LoaderTest
       end
 
       assert_equal ["X", "Y"], loaded
+    end
+  end
+
+  test "raises if called before setup" do
+    assert_raises(Zeitwerk::SetupRequired) do
+      loader.eager_load
     end
   end
 end

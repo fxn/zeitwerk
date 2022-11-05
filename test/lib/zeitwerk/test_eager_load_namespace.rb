@@ -166,18 +166,22 @@ class TestEagerLoadNamespaceWithObjectRootNamespace < LoaderTest
   end
 
   test "raises if the argument is not a class or module object" do
-    e = assert_raises(Zeitwerk::Error) do
-      loader.eager_load_namespace(self.class.name)
+    with_setup([]) do
+      e = assert_raises(Zeitwerk::Error) do
+        loader.eager_load_namespace(self.class.name)
+      end
+      assert_equal %Q("#{self.class.name}" is not a class or module object), e.message
     end
-    assert_equal %Q("#{self.class.name}" is not a class or module object), e.message
   end
 
   test "raises if the argument is not a class or module object, even if eager loaded" do
-    loader.eager_load
-    e = assert_raises(Zeitwerk::Error) do
-      loader.eager_load_namespace(self.class.name)
+    with_setup([]) do
+      loader.eager_load
+      e = assert_raises(Zeitwerk::Error) do
+        loader.eager_load_namespace(self.class.name)
+      end
+      assert_equal %Q("#{self.class.name}" is not a class or module object), e.message
     end
-    assert_equal %Q("#{self.class.name}" is not a class or module object), e.message
   end
 end
 
@@ -389,6 +393,12 @@ class TestEagerLoadNamespaceWithCustomRootNamespace < LoaderTest
     end
   end
 
+  test "raises if called before setup" do
+    assert_raises(Zeitwerk::SetupRequired) do
+      loader.eager_load_namespace(self.class)
+    end
+  end
+
   test "the class method broadcasts the call to all registered loaders" do
     files = [
       ["a/m/x.rb", "M::X = 1"],
@@ -411,6 +421,15 @@ class TestEagerLoadNamespaceWithCustomRootNamespace < LoaderTest
       assert !required?(files[3])
 
       assert !required?(files[4])
+    end
+  end
+
+  test "the class method skips loaders that are not ready" do
+    files = [["m/x.rb", "M::X = 1"]]
+    with_setup(files) do
+      new_loader(setup: false) # should be skipped
+      Zeitwerk::Loader.eager_load_namespace(M)
+      assert required?(files)
     end
   end
 end
