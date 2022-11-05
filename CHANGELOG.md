@@ -1,5 +1,20 @@
 # CHANGELOG
 
+## 2.6.5 (Unreleased)
+
+* Controlled errors in a couple of situations:
+
+  - Attempting to eager load or reload before invoking `setup` now raises
+    `Zeitwerk::SetupRequired`.
+
+  - The method `Zeitwerk::Loader#push_dir` raises `Zeitwerk::Error` if it gets
+    an anonymous custom namespace.
+
+  These should be backwards compatible, because they raise in circumstances that
+  didn't work anyway.
+
+* Enforcement of private interfaces continues with another gradual patch.
+
 ## 2.6.4 (1 November 2022)
 
 Ruby does not have gem-level visibility, so sometimes you need things to be
