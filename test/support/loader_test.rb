@@ -79,7 +79,7 @@ class LoaderTest < Minitest::Test
     dirs.each { |dir| $LOAD_PATH.delete(dir) }
   end
 
-  def with_setup(files, dirs: ".", namespace: Object, load_path: nil, rm: true)
+  def with_setup(files = [], dirs: ".", namespace: Object, load_path: nil, rm: true)
     with_files(files, rm: rm) do
       Array(dirs).each { |dir| loader.push_dir(dir, namespace: namespace) }
       loader.setup

@@ -62,7 +62,7 @@ end
 
 class TestLoadFileErrors < LoaderTest
   test "raises if the argument does not exist" do
-    with_setup([]) do
+    with_setup do
       e = assert_raises { loader.load_file("foo.rb") }
       assert_equal "#{File.expand_path('foo.rb')} does not exist", e.message
     end

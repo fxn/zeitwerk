@@ -11,7 +11,7 @@ class TestEagerLoadNamespaceWithObjectRootNamespace < LoaderTest
   end
 
   test "shortcircuits if eager loaded" do
-    with_setup([]) do
+    with_setup do
       loader.eager_load
 
       # Dirty way to prove we shortcircuit.
@@ -166,7 +166,7 @@ class TestEagerLoadNamespaceWithObjectRootNamespace < LoaderTest
   end
 
   test "raises if the argument is not a class or module object" do
-    with_setup([]) do
+    with_setup do
       e = assert_raises(Zeitwerk::Error) do
         loader.eager_load_namespace(self.class.name)
       end
@@ -175,7 +175,7 @@ class TestEagerLoadNamespaceWithObjectRootNamespace < LoaderTest
   end
 
   test "raises if the argument is not a class or module object, even if eager loaded" do
-    with_setup([]) do
+    with_setup do
       loader.eager_load
       e = assert_raises(Zeitwerk::Error) do
         loader.eager_load_namespace(self.class.name)

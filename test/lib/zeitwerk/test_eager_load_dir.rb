@@ -279,7 +279,7 @@ class TestEagerLoadDir < LoaderTest
   end
 
   test "shortcircuits if eager loaded" do
-    with_setup([]) do
+    with_setup do
       loader.eager_load
 
       # Dirty way to prove we shortcircuit.
@@ -298,14 +298,14 @@ class TestEagerLoadDir < LoaderTest
   end
 
   test "raises Zeitwerk::Error if the argument is not a directory" do
-    with_setup([]) do
+    with_setup do
       e = assert_raises(Zeitwerk::Error) { loader.eager_load_dir(__FILE__) }
       assert_equal "#{__FILE__} is not a directory", e.message
     end
   end
 
   test "raises if the argument is not managed by the loader" do
-    with_setup([]) do
+    with_setup do
       e = assert_raises(Zeitwerk::Error) { loader.eager_load_dir(__dir__) }
       assert_equal "I do not manage #{__dir__}", e.message
     end
