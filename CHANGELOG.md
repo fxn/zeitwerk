@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 2.6.5 (Unreleased)
+## 2.6.5 (6 November 2022)
 
 * Controlled errors in a couple of situations:
 
