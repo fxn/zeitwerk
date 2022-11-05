@@ -4,14 +4,14 @@
 
 * Controlled errors in a couple of situations:
 
-  - Attempting to eager load or reload before invoking `setup` now raises
-    `Zeitwerk::SetupRequired`.
+  - Attempting to eager load or reload without previously invoking `setup` now
+    raises `Zeitwerk::SetupRequired`.
 
   - The method `Zeitwerk::Loader#push_dir` raises `Zeitwerk::Error` if it gets
     an anonymous custom namespace.
 
   These should be backwards compatible, because they raise in circumstances that
-  didn't work anyway.
+  didn't work anyway. The goal here is to raise a meaningful error upfront.
 
 * Enforcement of private interfaces continues with another gradual patch.
 

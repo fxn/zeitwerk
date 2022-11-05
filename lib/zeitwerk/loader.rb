@@ -140,7 +140,7 @@ module Zeitwerk
     # @sig () -> void
     def unload
       mutex.synchronize do
-        raise Zeitwerk::SetupRequired unless @setup
+        raise SetupRequired unless @setup
 
         # We are going to keep track of the files that were required by our
         # autoloads to later remove them from $LOADED_FEATURES, thus making them
@@ -218,7 +218,7 @@ module Zeitwerk
     # @sig () -> void
     def reload
       raise ReloadingDisabledError unless reloading_enabled?
-      raise Zeitwerk::SetupRequired unless @setup
+      raise SetupRequired unless @setup
 
       unload
       recompute_ignored_paths
@@ -294,7 +294,7 @@ module Zeitwerk
         Registry.loaders.each do |loader|
           begin
             loader.eager_load
-          rescue Zeitwerk::SetupRequired
+          rescue SetupRequired
             # This is fine, we eager load what can be eager loaded.
           end
         end
@@ -308,7 +308,7 @@ module Zeitwerk
         Registry.loaders.each do |loader|
           begin
             loader.eager_load_namespace(mod)
-          rescue Zeitwerk::SetupRequired
+          rescue SetupRequired
             # This is fine, we eager load what can be eager loaded.
           end
         end

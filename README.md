@@ -601,7 +601,7 @@ loader.reload
 
 There is no way to undo this, either you want to reload or you don't.
 
-Enabling reloading after setup raises `Zeitwerk::Error`. Attempting to reload without having it enabled raises `Zeitwerk::ReloadingDisabledError`. Attempting to reload before calling `setup` raises `Zeitwerk::SetupRequired`.
+Enabling reloading after setup raises `Zeitwerk::Error`. Attempting to reload without having it enabled raises `Zeitwerk::ReloadingDisabledError`. Attempting to reload without previously calling `setup` raises `Zeitwerk::SetupRequired`.
 
 Generally speaking, reloading is useful while developing running services like web applications. Gems that implement regular libraries, so to speak, or services running in testing or production environments, won't normally have a use case for reloading. If reloading is not enabled, Zeitwerk is able to use less memory.
 
