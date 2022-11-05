@@ -109,7 +109,7 @@ module Zeitwerk
       Registry.register_loader(self)
     end
 
-    # Sets autoloads in the root namespace.
+    # Sets autoloads in the root namespaces.
     #
     # @sig () -> void
     def setup
