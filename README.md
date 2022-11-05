@@ -213,7 +213,7 @@ serializers/user_serializer.rb -> UserSerializer
 <a id="markdown-custom-root-namespaces" name="custom-root-namespaces"></a>
 #### Custom root namespaces
 
-While `Object` is by far the most common root namespace, you can associate a different one to a particular root directory. The method `push_dir` accepts a class or module object in the optional `namespace` keyword argument.
+While `Object` is by far the most common root namespace, you can associate a different one to a particular root directory. The method `push_dir` accepts a non-anonymous class or module object in the optional `namespace` keyword argument.
 
 For example, given:
 
@@ -449,6 +449,8 @@ In gems, the method needs to be invoked after the main namespace has been define
 
 Eager loading is synchronized and idempotent.
 
+Attempting to eager load without previously calling `setup` raises `Zeitwerk::SetupRequired`.
+
 <a id="markdown-eager-load-exclusions" name="eager-load-exclusions"></a>
 #### Eager load exclusions
 
@@ -492,6 +494,8 @@ The method checks if a regular eager load was already executed, in which case it
 
 Nested root directories which are descendants of the argument are skipped. Those subtrees are considered to be conceptually apart.
 
+Attempting to eager load a directory without previously calling `setup` raises `Zeitwerk::SetupRequired`.
+
 <a id="markdown-eager-load-namespaces" name="eager-load-namespaces"></a>
 #### Eager load namespaces
 
@@ -527,6 +531,8 @@ The method checks if a regular eager load was already executed, in which case it
 
 If root directories are assigned to custom namespaces, the method behaves as you'd expect, according to the namespacing relationship between the custom namespace and the argument.
 
+Attempting to eager load a namespace without previously calling `setup` raises `Zeitwerk::SetupRequired`.
+
 <a id="markdown-eager-load-namespaces-shared-by-several-loaders" name="eager-load-namespaces-shared-by-several-loaders"></a>
 #### Eager load namespaces shared by several loaders
 
@@ -539,6 +545,8 @@ Zeitwerk::Loader.eager_load_namespace(MyFramework::Routes)
 This may be handy, for example, if a framework supports plugins and a shared namespace needs to be eager loaded for the framework to function properly.
 
 Please, note that loaders only eager load namespaces they manage, as documented above. Therefore, this method does not allow you to eager load namespaces not managed by Zeitwerk loaders.
+
+This method does not require that all registered loaders have `setup` already invoked, since that is out of your control. If there's any in that state, it is simply skipped.
 
 <a id="markdown-global-eager-load" name="global-eager-load"></a>
 #### Global eager load
@@ -554,6 +562,8 @@ This may be handy in top-level services, like web applications.
 Note that thanks to idempotence `Zeitwerk::Loader.eager_load_all` won't eager load twice if any of the instances already eager loaded.
 
 This method does not accept the `force` flag, since in general it wouldn't be a good idea to force eager loading in 3rd party code.
+
+This method does not require that all registered loaders have `setup` already invoked, since that is out of your control. If there's any in that state, it is simply skipped.
 
 <a id="markdown-loading-individual-files" name="loading-individual-files"></a>
 ### Loading individual files
@@ -591,7 +601,7 @@ loader.reload
 
 There is no way to undo this, either you want to reload or you don't.
 
-Enabling reloading after setup raises `Zeitwerk::Error`. Attempting to reload without having it enabled raises `Zeitwerk::ReloadingDisabledError`.
+Enabling reloading after setup raises `Zeitwerk::Error`. Attempting to reload without having it enabled raises `Zeitwerk::ReloadingDisabledError`. Attempting to reload before calling `setup` raises `Zeitwerk::SetupRequired`.
 
 Generally speaking, reloading is useful while developing running services like web applications. Gems that implement regular libraries, so to speak, or services running in testing or production environments, won't normally have a use case for reloading. If reloading is not enabled, Zeitwerk is able to use less memory.
 
