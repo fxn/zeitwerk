@@ -11,7 +11,7 @@
     an anonymous custom namespace.
 
   These should be backwards compatible, because they raise in circumstances that
-  didn't work anyway. The goal here is to raise a meaningful error upfront.
+  didn't work anyway. The goal here is to provide a meaningful error upfront.
 
 * Enforcement of private interfaces continues with another gradual patch.
 
