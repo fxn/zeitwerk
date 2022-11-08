@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 2.6.6 (8 November 2022)
+
+* The new `eager_load_namespace` had a bug when eager loading certain namespaces
+  with collapsed directories. This has been fixed.
+
 ## 2.6.5 (6 November 2022)
 
 * Controlled errors in a couple of situations:
