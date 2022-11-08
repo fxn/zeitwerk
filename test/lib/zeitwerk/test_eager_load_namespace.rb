@@ -52,6 +52,25 @@ class TestEagerLoadNamespaceWithObjectRootNamespace < LoaderTest
     end
   end
 
+  test "supports collapsed directories" do
+    files = [
+      ["a/collapsed/m/x.rb", "M::X = 1"],
+      ["b/y.rb", "Y = 1"],
+      ["b/m/y.rb", "M::Y = 1"]
+    ]
+    with_files(files) do
+      loader.push_dir("a")
+      loader.push_dir("b")
+      loader.collapse("a/collapsed")
+      loader.setup
+      loader.eager_load_namespace(M)
+
+      assert required?(files[0])
+      assert !required?(files[1])
+      assert required?(files[2])
+    end
+  end
+
   test "eader loads everything (nested root directories)" do
     files = [
       ["x.rb", "X = 1"],

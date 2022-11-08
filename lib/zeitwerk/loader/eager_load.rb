@@ -208,7 +208,7 @@ module Zeitwerk::Loader::EagerLoad
           next unless dir?(abspath)
 
           if collapse?(abspath)
-            current_dirs << abspath
+            dirs << abspath
           elsif segment == inflector.camelize(basename, abspath)
             next_dirs << abspath
           end
