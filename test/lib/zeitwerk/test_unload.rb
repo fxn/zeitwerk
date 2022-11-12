@@ -68,12 +68,12 @@ class TestUnload < LoaderTest
 
   test "unload clears internal caches" do
     files = [
-      ["app/user.rb", "class User; end"],
-      ["app/api/v1/users_controller.rb", "class Api::V1::UsersController; end"],
-      ["app/admin/root.rb", "class Admin::Root; end"],
-      ["lib/user.rb", "class User; end"]
+      ["rd1/user.rb", "class User; end"],
+      ["rd1/api/v1/users_controller.rb", "class Api::V1::UsersController; end"],
+      ["rd1/admin/root.rb", "class Admin::Root; end"],
+      ["rd2/user.rb", "class User; end"]
     ]
-    with_setup(files, dirs: %w(app lib)) do
+    with_setup(files) do
       assert User
       assert Api::V1::UsersController
 

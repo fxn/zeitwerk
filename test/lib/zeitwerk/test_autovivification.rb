@@ -37,10 +37,10 @@ class TestAutovivification < LoaderTest
 
   test "autoloads several constants from the same namespace (Object)" do
     files = [
-      ["app/models/admin/hotel.rb", "class Admin::Hotel; end"],
-      ["app/controllers/admin/hotels_controller.rb", "class Admin::HotelsController; end"]
+      ["rd1/admin/hotel.rb", "class Admin::Hotel; end"],
+      ["rd2/admin/hotels_controller.rb", "class Admin::HotelsController; end"]
     ]
-    with_setup(files, dirs: %w(app/models app/controllers)) do
+    with_setup(files) do
       assert Admin::Hotel
       assert Admin::HotelsController
     end
@@ -48,10 +48,10 @@ class TestAutovivification < LoaderTest
 
   test "autoloads several constants from the same namespace (Namespace)" do
     files = [
-      ["app/models/admin/hotel.rb", "class #{Namespace}::Admin::Hotel; end"],
-      ["app/controllers/admin/hotels_controller.rb", "class #{Namespace}::Admin::HotelsController; end"]
+      ["rd1/admin/hotel.rb", "class #{Namespace}::Admin::Hotel; end"],
+      ["rd2/admin/hotels_controller.rb", "class #{Namespace}::Admin::HotelsController; end"]
     ]
-    with_setup(files, namespace: Namespace, dirs: %w(app/models app/controllers)) do
+    with_setup(files, namespace: Namespace) do
       assert Namespace::Admin::Hotel
       assert Namespace::Admin::HotelsController
     end

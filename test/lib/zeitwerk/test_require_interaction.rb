@@ -78,11 +78,10 @@ class TestRequireInteraction < LoaderTest
 
   test "require autovivifies as needed" do
     files = [
-      ["app/models/admin/user.rb", "class Admin::User; end"],
-      ["app/controllers/admin/users_controller.rb", "class Admin::UsersController; end"]
+      ["rd1/admin/user.rb", "class Admin::User; end"],
+      ["rd2/admin/users_controller.rb", "class Admin::UsersController; end"]
     ]
-    dirs = %w(app/models app/controllers)
-    with_setup(files, dirs: dirs, load_path: dirs) do
+    with_setup(files, load_path: %w(rd1 rd2)) do
       assert_required "admin/user"
 
       assert Admin::User

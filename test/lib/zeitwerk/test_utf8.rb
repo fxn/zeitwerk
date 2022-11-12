@@ -9,7 +9,7 @@ class TestUTF8 < LoaderTest
   if Encoding::UTF_8 == Encoding.find("filesystem")
     test "autoloads in a project whose root directories have accented letters" do
       files = [["líb/x.rb", "X = true"]]
-      with_setup(files, dirs: "líb") do
+      with_setup(files, dirs: ["líb"]) do
         assert X
       end
     end

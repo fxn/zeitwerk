@@ -20,35 +20,35 @@ class TestTopLevel < LoaderTest
   end
 
   test "autoloads a simple class in a top-level file (Object)" do
-    files = [["app/models/user.rb", "class User; end"]]
-    with_setup(files, dirs: "app/models") do
+    files = [["user.rb", "class User; end"]]
+    with_setup(files) do
       assert User
     end
   end
 
   test "autoloads a simple class in a top-level file (Namespace)" do
-    files = [["app/models/user.rb", "class #{Namespace}::User; end"]]
-    with_setup(files, namespace: Namespace, dirs: "app/models") do
+    files = [["user.rb", "class #{Namespace}::User; end"]]
+    with_setup(files, namespace: Namespace) do
       assert Namespace::User
     end
   end
 
   test "autoloads several top-level classes" do
     files = [
-      ["app/models/user.rb", "class User; end"],
-      ["app/controllers/users_controller.rb", "class UsersController; User; end"]
+      ["rd1/user.rb", "class User; end"],
+      ["rd2/users_controller.rb", "class UsersController; User; end"]
     ]
-    with_setup(files, dirs: %w(app/models app/controllers)) do
+    with_setup(files) do
       assert UsersController
     end
   end
 
   test "autoloads only the first of multiple occurrences" do
     files = [
-      ["app/models/user.rb", "User = :model"],
-      ["app/decorators/user.rb", "User = :decorator"],
+      ["rd1/user.rb", "User = :model"],
+      ["rd2/user.rb", "User = :decorator"],
     ]
-    with_setup(files, dirs: %w(app/models app/decorators)) do
+    with_setup(files) do
       assert_equal :model, User
     end
   end

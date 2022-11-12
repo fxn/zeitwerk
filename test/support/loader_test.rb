@@ -79,9 +79,23 @@ class LoaderTest < Minitest::Test
     dirs.each { |dir| $LOAD_PATH.delete(dir) }
   end
 
-  def with_setup(files = [], dirs: ".", namespace: Object, load_path: nil, rm: true)
+  def with_setup(files = [], dirs: nil, namespace: Object, load_path: nil, rm: true)
+    if dirs.nil?
+      dirs = []
+      files.each do |file|
+        if file[0] =~ %r{\A(rd\d+)/}
+          dirs << $1
+        end
+      end
+      if dirs.empty?
+        dirs << "."
+      else
+        dirs.uniq!
+      end
+    end
+
     with_files(files, rm: rm) do
-      Array(dirs).each { |dir| loader.push_dir(dir, namespace: namespace) }
+      dirs.each { |dir| loader.push_dir(dir, namespace: namespace) }
       loader.setup
       if load_path
         with_load_path(load_path) { yield }

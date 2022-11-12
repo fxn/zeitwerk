@@ -40,12 +40,12 @@ class TestEagerLoadNamespaceWithObjectRootNamespace < LoaderTest
 
   test "eader loads everything (multiple root directories)" do
     files = [
-      ["a/x.rb", "X = 1"],
-      ["a/m/x.rb", "M::X = 1"],
-      ["b/y.rb", "Y = 1"],
-      ["b/m/y.rb", "M::Y = 1"]
+      ["rd1/x.rb", "X = 1"],
+      ["rd1/m/x.rb", "M::X = 1"],
+      ["rd2/y.rb", "Y = 1"],
+      ["rd2/m/y.rb", "M::Y = 1"]
     ]
-    with_setup(files, dirs: %w(a b)) do
+    with_setup(files) do
       loader.eager_load_namespace(Object)
 
       assert required?(files)
@@ -118,8 +118,8 @@ class TestEagerLoadNamespaceWithObjectRootNamespace < LoaderTest
   end
 
   test "does not eager load shadowed files" do
-    files = [["a/x.rb", "X = 1"], ["b/x.rb", "X = 1"]]
-    with_setup(files, dirs: %w(a b)) do
+    files = [["rd1/x.rb", "X = 1"], ["rd2/x.rb", "X = 1"]]
+    with_setup(files) do
       loader.eager_load_namespace(Object)
 
       assert required?(files[0])
@@ -129,7 +129,7 @@ class TestEagerLoadNamespaceWithObjectRootNamespace < LoaderTest
 
   test "skips root directories which are excluded from eager loading (Object)" do
     files = [["rd1/a.rb", "A = 1"], ["rd2/b.rb", "B = 1"]]
-    with_setup(files, dirs: %w(rd1 rd2)) do
+    with_setup(files) do
       loader.do_not_eager_load("rd1")
       loader.eager_load_namespace(Object)
 
@@ -140,7 +140,7 @@ class TestEagerLoadNamespaceWithObjectRootNamespace < LoaderTest
 
   test "skips directories which are excluded from eager loading (namespace, ancestor)" do
     files = [["rd1/m/a.rb", "M::A = 1"], ["rd2/m/b.rb", "M::B = 1"]]
-    with_setup(files, dirs: %w(rd1 rd2)) do
+    with_setup(files) do
       loader.do_not_eager_load("rd1/m")
       loader.eager_load_namespace(Object)
 
@@ -151,7 +151,7 @@ class TestEagerLoadNamespaceWithObjectRootNamespace < LoaderTest
 
   test "skips directories which are excluded from eager loading (namespace, self)" do
     files = [["rd1/m/a.rb", "M::A = 1"], ["rd2/m/b.rb", "M::B = 1"]]
-    with_setup(files, dirs: %w(rd1 rd2)) do
+    with_setup(files) do
       loader.do_not_eager_load("rd1/m")
       loader.eager_load_namespace(M)
 
@@ -162,7 +162,7 @@ class TestEagerLoadNamespaceWithObjectRootNamespace < LoaderTest
 
   test "skips directories which are excluded from eager loading (namespace, descendant)" do
     files = [["rd1/m/n/a.rb", "M::N::A = 1"], ["rd2/m/n/b.rb", "M::N::B = 1"]]
-    with_setup(files, dirs: %w(rd1 rd2)) do
+    with_setup(files) do
       loader.do_not_eager_load("rd1/m")
       loader.eager_load_namespace(M::N)
 
@@ -220,12 +220,12 @@ class TestEagerLoadNamespaceWithCustomRootNamespace < LoaderTest
 
     test "eader loads everything (multiple root directories) #{ancestor}" do
       files = [
-        ["a/x.rb", "#{CN}::X = 1"],
-        ["a/m/x.rb", "#{CN}::M::X = 1"],
-        ["b/y.rb", "#{CN}::Y = 1"],
-        ["b/m/y.rb", "#{CN}::M::Y = 1"]
+        ["rd1/x.rb", "#{CN}::X = 1"],
+        ["rd1/m/x.rb", "#{CN}::M::X = 1"],
+        ["rd2/y.rb", "#{CN}::Y = 1"],
+        ["rd2/m/y.rb", "#{CN}::M::Y = 1"]
       ]
-      with_setup(files, dirs: %w(a b), namespace: CN) do
+      with_setup(files, namespace: CN) do
         loader.eager_load_namespace(ancestor)
 
         assert required?(files)
@@ -335,8 +335,8 @@ class TestEagerLoadNamespaceWithCustomRootNamespace < LoaderTest
   end
 
   test "does not eager load shadowed files" do
-    files = [["a/x.rb", "#{CN}::X = 1"], ["b/x.rb", "#{CN}::X = 1"]]
-    with_setup(files, dirs: %w(a b), namespace: CN) do
+    files = [["rd1/x.rb", "#{CN}::X = 1"], ["rd2/x.rb", "#{CN}::X = 1"]]
+    with_setup(files, namespace: CN) do
       loader.eager_load_namespace(CN)
 
       assert required?(files[0])
@@ -346,7 +346,7 @@ class TestEagerLoadNamespaceWithCustomRootNamespace < LoaderTest
 
   test "skips root directories which are excluded from eager loading (Object)" do
     files = [["rd1/a.rb", "#{CN}::A = 1"], ["rd2/b.rb", "#{CN}::B = 1"]]
-    with_setup(files, dirs: %w(rd1 rd2), namespace: CN) do
+    with_setup(files, namespace: CN) do
       loader.do_not_eager_load("rd1")
       loader.eager_load_namespace(Object)
 
@@ -357,7 +357,7 @@ class TestEagerLoadNamespaceWithCustomRootNamespace < LoaderTest
 
   test "skips root directories which are excluded from eager loading (self)" do
     files = [["rd1/a.rb", "#{CN}::A = 1"], ["rd2/b.rb", "#{CN}::B = 1"]]
-    with_setup(files, dirs: %w(rd1 rd2), namespace: CN) do
+    with_setup(files, namespace: CN) do
       loader.do_not_eager_load("rd1")
       loader.eager_load_namespace(CN)
 
@@ -368,7 +368,7 @@ class TestEagerLoadNamespaceWithCustomRootNamespace < LoaderTest
 
   test "skips directories which are excluded from eager loading (namespace, ancestor)" do
     files = [["rd1/m/a.rb", "#{CN}::M::A = 1"], ["rd2/m/b.rb", "#{CN}::M::B = 1"]]
-    with_setup(files, dirs: %w(rd1 rd2), namespace: CN) do
+    with_setup(files, namespace: CN) do
       loader.do_not_eager_load("rd1/m")
       loader.eager_load_namespace(Object)
 
@@ -379,7 +379,7 @@ class TestEagerLoadNamespaceWithCustomRootNamespace < LoaderTest
 
   test "skips directories which are excluded from eager loading (namespace, self)" do
     files = [["rd1/m/a.rb", "#{CN}::M::A = 1"], ["rd2/m/b.rb", "#{CN}::M::B = 1"]]
-    with_setup(files, dirs: %w(rd1 rd2), namespace: CN) do
+    with_setup(files, namespace: CN) do
       loader.do_not_eager_load("rd1/m")
       loader.eager_load_namespace(CN::M)
 
@@ -390,7 +390,7 @@ class TestEagerLoadNamespaceWithCustomRootNamespace < LoaderTest
 
   test "skips directories which are excluded from eager loading (namespace, descendant)" do
     files = [["rd1/m/n/a.rb", "#{CN}::M::N::A = 1"], ["rd2/m/n/b.rb", "#{CN}::M::N::B = 1"]]
-    with_setup(files, dirs: %w(rd1 rd2), namespace: CN) do
+    with_setup(files, namespace: CN) do
       loader.do_not_eager_load("rd1/m")
       loader.eager_load_namespace(CN::M::N)
 

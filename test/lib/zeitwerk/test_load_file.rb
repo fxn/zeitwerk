@@ -116,18 +116,18 @@ class TestLoadFileErrors < LoaderTest
   end
 
   test "raises if the file exists, but it is not managed by this loader" do
-    files = [["external/x.rb", ""], ["lib/x.rb", "X = 1"]]
-    with_setup(files, dirs: ["lib"]) do
+    files = [["rd1/x.rb", "X = 1"], ["external/x.rb", ""]]
+    with_setup(files) do
       e = assert_raises { loader.load_file("external/x.rb") }
       assert_equal "I do not manage #{File.expand_path('external/x.rb')}", e.message
     end
   end
 
   test "raises if the file is shadowed" do
-    files = [["lib1/x.rb", "X = 1"], ["lib2/x.rb", "SHADOWED"]]
-    with_setup(files, dirs: %w(lib1 lib2)) do
-      e = assert_raises { loader.load_file("lib2/x.rb") }
-      assert_equal "#{File.expand_path('lib2/x.rb')} is shadowed", e.message
+    files = [["rd1/x.rb", "X = 1"], ["rd2/x.rb", "SHADOWED"]]
+    with_setup(files) do
+      e = assert_raises { loader.load_file("rd2/x.rb") }
+      assert_equal "#{File.expand_path('rd2/x.rb')} is shadowed", e.message
     end
   end
 end

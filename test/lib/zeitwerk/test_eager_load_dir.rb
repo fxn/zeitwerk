@@ -115,11 +115,11 @@ class TestEagerLoadDir < LoaderTest
 
   test "does not eager load shadowed files" do
     files = [
-      ["a/x.rb", "X = 1"],
-      ["b/x.rb", "SHADOWED"]
+      ["rd1/x.rb", "X = 1"],
+      ["rd2/x.rb", "SHADOWED"]
     ]
-    with_setup(files, dirs: %w(a b)) do
-      loader.eager_load_dir("b")
+    with_setup(files) do
+      loader.eager_load_dir("rd2")
 
       assert !required?(files[0])
       assert !required?(files[1])
@@ -162,11 +162,11 @@ class TestEagerLoadDir < LoaderTest
 
   test "eager loads all files, ignoring other directories (same namespace)" do
     files = [
-      ["a/m/x.rb", "M::X = 1"],
-      ["b/m/y.rb", "M::Y = 1"],
+      ["rd1/m/x.rb", "M::X = 1"],
+      ["rd2/m/y.rb", "M::Y = 1"],
     ]
-    with_setup(files, dirs: %w(a b)) do
-      loader.eager_load_dir("a/m")
+    with_setup(files) do
+      loader.eager_load_dir("rd1/m")
 
       assert required?(files[0])
       assert !required?(files[1])
@@ -228,7 +228,11 @@ class TestEagerLoadDir < LoaderTest
       ["ignored/x.rb", "IGNORED"],
       ["ignored/nested_root/y.rb", "Y = 1"]
     ]
-    with_setup(files, dirs: %w(. ignored/nested_root)) do
+    with_files(files) do
+      loader.push_dir(".")
+      loader.push_dir("ignored/nested_root")
+      loader.ignore("ignored")
+      loader.setup
       loader.eager_load_dir("ignored/nested_root")
 
       assert !required?(files[0])

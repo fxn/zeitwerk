@@ -172,12 +172,12 @@ class TestReloading < LoaderTest
   end
 
   test "reloading supports deleted root directories" do
-    files = [["a/x.rb", "X = 1"], ["b/y.rb", "Y = 1"]]
-    with_setup(files, dirs: %w(a b)) do
+    files = [["rd1/x.rb", "X = 1"], ["rd2/y.rb", "Y = 1"]]
+    with_setup(files) do
       assert X
       assert Y
 
-      FileUtils.rm_rf("b")
+      FileUtils.rm_rf("rd2")
       loader.reload
 
       assert X

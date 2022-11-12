@@ -7,10 +7,10 @@ class TestExplicitNamespace < LoaderTest
 
   test "explicit namespaces are loaded correctly (Object)" do
     files = [
-      ["app/models/hotel.rb", "class Hotel; X = 1; end"],
-      ["app/models/hotel/pricing.rb", "class Hotel::Pricing; end"]
+      ["hotel.rb", "class Hotel; X = 1; end"],
+      ["hotel/pricing.rb", "class Hotel::Pricing; end"]
     ]
-    with_setup(files, dirs: "app/models") do
+    with_setup(files) do
       assert_kind_of Class, Hotel
       assert Hotel::X
       assert Hotel::Pricing
@@ -19,10 +19,10 @@ class TestExplicitNamespace < LoaderTest
 
   test "explicit namespaces are loaded correctly (Namespace)" do
     files = [
-      ["app/models/hotel.rb", "class #{Namespace}::Hotel; X = 1; end"],
-      ["app/models/hotel/pricing.rb", "class #{Namespace}::Hotel::Pricing; end"]
+      ["hotel.rb", "class #{Namespace}::Hotel; X = 1; end"],
+      ["hotel/pricing.rb", "class #{Namespace}::Hotel::Pricing; end"]
     ]
-    with_setup(files, namespace: Namespace, dirs: "app/models") do
+    with_setup(files, namespace: Namespace) do
       assert_kind_of Class, Namespace::Hotel
       assert Namespace::Hotel::X
       assert Namespace::Hotel::Pricing
@@ -31,16 +31,16 @@ class TestExplicitNamespace < LoaderTest
 
   test "explicit namespaces are loaded correctly even if #name is overridden" do
     files = [
-      ["app/models/hotel.rb", <<~RUBY],
+      ["hotel.rb", <<~RUBY],
         class Hotel
           def self.name
             "X"
           end
         end
       RUBY
-      ["app/models/hotel/pricing.rb", "class Hotel::Pricing; end"]
+      ["hotel/pricing.rb", "class Hotel::Pricing; end"]
     ]
-    with_setup(files, dirs: "app/models") do
+    with_setup(files) do
       assert Hotel::Pricing
     end
   end
@@ -105,12 +105,12 @@ class TestExplicitNamespace < LoaderTest
     # We use two root directories to make sure the loader visits the implicit
     # a/m first, and the explicit b/m.rb after it.
     files = [
-      ["a/m/x.rb", "M::X = true"],
-      ["b/m.rb", "module M; end"]
+      ["rd1/m/x.rb", "M::X = true"],
+      ["rd2/m.rb", "module M; end"]
     ]
-    with_setup(files, dirs: ["a", "b"]) do
-      assert_nil Zeitwerk::Registry.loader_for(File.expand_path("a/m"))
-      assert_same loader, Zeitwerk::Registry.loader_for(File.expand_path("b/m.rb"))
+    with_setup(files) do
+      assert_nil Zeitwerk::Registry.loader_for(File.expand_path("rd1/m"))
+      assert_same loader, Zeitwerk::Registry.loader_for(File.expand_path("rd2/m.rb"))
     end
   end
 
