@@ -283,7 +283,8 @@ class TestEagerLoadDir < LoaderTest
   end
 
   test "shortcircuits if eager loaded" do
-    with_setup do
+    files = [["x.rb", "X = 1"]]
+    with_setup(files) do
       loader.eager_load
 
       # Dirty way to prove we shortcircuit.

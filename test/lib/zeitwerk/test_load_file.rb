@@ -117,7 +117,7 @@ class TestLoadFileErrors < LoaderTest
 
   test "raises if the file exists, but it is not managed by this loader" do
     files = [["rd1/x.rb", "X = 1"], ["external/x.rb", ""]]
-    with_setup(files) do
+    with_setup(files, dirs: %w(rd1)) do
       e = assert_raises { loader.load_file("external/x.rb") }
       assert_equal "I do not manage #{File.expand_path('external/x.rb')}", e.message
     end

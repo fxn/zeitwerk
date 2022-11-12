@@ -80,21 +80,10 @@ class LoaderTest < Minitest::Test
   end
 
   def with_setup(files = [], dirs: nil, namespace: Object, load_path: nil, rm: true)
-    if dirs.nil?
-      dirs = []
-      files.each do |file|
-        if file[0] =~ %r{\A(rd\d+)/}
-          dirs << $1
-        end
-      end
-      if dirs.empty?
-        dirs << "."
-      else
-        dirs.uniq!
-      end
-    end
-
     with_files(files, rm: rm) do
+      dirs ||= files.map do |file|
+        file[0] =~ %r{\A(rd\d+)/} ? $1 : "."
+      end.uniq
       dirs.each { |dir| loader.push_dir(dir, namespace: namespace) }
       loader.setup
       if load_path
