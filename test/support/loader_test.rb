@@ -85,6 +85,15 @@ class LoaderTest < Minitest::Test
         file[0] =~ %r{\A(rd\d+)/} ? $1 : "."
       end.uniq
       dirs.each { |dir| loader.push_dir(dir, namespace: namespace) }
+
+      files.each do |file|
+        if File.basename(file[0]) == "ignored.rb"
+          loader.ignore(file[0])
+        elsif file[0] =~ %r{\A(ignored|.+/ignored)/}
+          loader.ignore($1)
+        end
+      end
+
       loader.setup
       if load_path
         with_load_path(load_path) { yield }

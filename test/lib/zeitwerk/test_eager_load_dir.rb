@@ -189,9 +189,7 @@ class TestEagerLoadDir < LoaderTest
 
   test "does not eager load ignored directories (same)" do
     files = [["ignored/x.rb", "IGNORED"]]
-    with_files(files) do
-      loader.ignore("ignored")
-      loader.setup
+    with_setup(files) do
       loader.eager_load_dir("ignored")
 
       assert !required?(files[0])
@@ -200,9 +198,7 @@ class TestEagerLoadDir < LoaderTest
 
   test "does not eager load if the argument is an ignored directory (descendant)" do
     files = [["ignored/m/x.rb", "IGNORED"]]
-    with_files(files) do
-      loader.ignore("ignored")
-      loader.setup
+    with_setup(files) do
       loader.eager_load_dir("ignored/m")
 
       assert !required?(files[0])
@@ -226,14 +222,10 @@ class TestEagerLoadDir < LoaderTest
     files = [
       ["x.rb", "X = 1"],
       ["ignored/x.rb", "IGNORED"],
-      ["ignored/nested_root/y.rb", "Y = 1"]
+      ["ignored/nested-rd/y.rb", "Y = 1"]
     ]
-    with_files(files) do
-      loader.push_dir(".")
-      loader.push_dir("ignored/nested_root")
-      loader.ignore("ignored")
-      loader.setup
-      loader.eager_load_dir("ignored/nested_root")
+    with_setup(files, dirs: %w(. ignored/nested-rd)) do
+      loader.eager_load_dir("ignored/nested-rd")
 
       assert !required?(files[0])
       assert !required?(files[1])

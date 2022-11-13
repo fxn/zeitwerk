@@ -105,11 +105,8 @@ class TestEagerLoadNamespaceWithObjectRootNamespace < LoaderTest
   end
 
   test "does not eager load ignored files" do
-    files = [["x.rb", "X = 1"], ["y.rb", "Y = 1"]]
-    with_files(files) do
-      loader.push_dir(".")
-      loader.ignore("y.rb")
-      loader.setup
+    files = [["x.rb", "X = 1"], ["ignored.rb", "IGNORED"]]
+    with_setup(files) do
       loader.eager_load_namespace(Object)
 
       assert required?(files[0])
@@ -322,11 +319,8 @@ class TestEagerLoadNamespaceWithCustomRootNamespace < LoaderTest
   end
 
   test "does not eager load ignored files" do
-    files = [["x.rb", "#{CN}::X = 1"], ["y.rb", "#{CN}::Y = 1"]]
-    with_files(files) do
-      loader.push_dir(".", namespace: CN)
-      loader.ignore("y.rb")
-      loader.setup
+    files = [["x.rb", "#{CN}::X = 1"], ["ignored.rb", "IGNORED"]]
+    with_setup(files, namespace: CN) do
       loader.eager_load_namespace(CN)
 
       assert required?(files[0])

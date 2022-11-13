@@ -119,19 +119,13 @@ class TestAutovivification < LoaderTest
   end
 
   test "defines no namespace for directories whose Ruby files are all ignored" do
-    with_files([["foo/bar/baz.rb", ""]]) do
-      loader.push_dir(".")
-      loader.ignore("foo/bar/baz.rb")
-      loader.setup
+    with_setup([["foo/bar/ignored.rb", "IGNORED"]]) do
       assert !Object.autoload?(:Foo)
     end
   end
 
   test "defines no namespace for directories that have Ruby files below ignored directories" do
-    with_files([["foo/bar/baz.rb", ""]]) do
-      loader.push_dir(".")
-      loader.ignore("foo/bar")
-      loader.setup
+    with_setup([["foo/ignored/baz.rb", "IGNORED"]]) do
       assert !Object.autoload?(:Foo)
     end
   end

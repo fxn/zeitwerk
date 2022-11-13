@@ -83,33 +83,22 @@ class TestLoadFileErrors < LoaderTest
   end
 
   test "raises if the argument is ignored" do
-    with_files([["ignored.rb", "IGNORED"]]) do
-      loader.push_dir(".")
-      loader.ignore("ignored.rb")
-      loader.setup
-
+    with_setup([["ignored.rb", "IGNORED"]]) do
       e = assert_raises { loader.load_file("ignored.rb") }
       assert_equal "#{File.expand_path('ignored.rb')} is ignored", e.message
     end
   end
 
   test "raises if the argument is a descendant of an ignored directory" do
-    with_files([["ignored/n/x.rb", "IGNORED"]]) do
-      loader.push_dir(".")
-      loader.ignore("ignored")
-      loader.setup
-
+    with_setup([["ignored/n/x.rb", "IGNORED"]]) do
       e = assert_raises { loader.load_file("ignored/n/x.rb") }
       assert_equal "#{File.expand_path('ignored/n/x.rb')} is ignored", e.message
     end
   end
 
   test "raises if the argument lives in an ignored root directory" do
-    with_files([["ignored/n/x.rb", "IGNORED"]]) do
-      loader.push_dir("ignored")
-      loader.ignore("ignored")
-      loader.setup
-
+    files = [["ignored/n/x.rb", "IGNORED"]]
+    with_setup(files, dirs: %w(ignored)) do
       e = assert_raises { loader.load_file("ignored/n/x.rb") }
       assert_equal "#{File.expand_path('ignored/n/x.rb')} is ignored", e.message
     end

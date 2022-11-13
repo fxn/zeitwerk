@@ -334,10 +334,8 @@ class TestEagerLoad < LoaderTest
   end
 
   test "force eager load honours ignored root directories" do
-    files = [["foo.rb", "Foo = true"]]
-    with_files(files) do
-      loader.ignore(".")
-      loader.setup
+    files = [["ignored/foo.rb", "Foo = true"]]
+    with_setup(files, dirs: %w(ignored)) do
       loader.eager_load(force: true)
 
       assert !required?(files)
@@ -345,10 +343,8 @@ class TestEagerLoad < LoaderTest
   end
 
   test "force eager load honours ignored subdirectories" do
-    files = [["m/foo.rb", "M::Foo = true"]]
-    with_files(files) do
-      loader.ignore("m")
-      loader.setup
+    files = [["ignored/foo.rb", "IGNORED"]]
+    with_setup(files) do
       loader.eager_load(force: true)
 
       assert !required?(files)
@@ -356,10 +352,8 @@ class TestEagerLoad < LoaderTest
   end
 
   test "force eager load honours root files" do
-    files = [["foo.rb", "Foo = true"]]
-    with_files(files) do
-      loader.ignore("foo.rb")
-      loader.setup
+    files = [["ignored.rb", "IGNORED"]]
+    with_setup(files) do
       loader.eager_load(force: true)
 
       assert !required?(files)
@@ -367,10 +361,8 @@ class TestEagerLoad < LoaderTest
   end
 
   test "force eager load honours namespaced files" do
-    files = [["m/foo.rb", "M::Foo = true"]]
-    with_files(files) do
-      loader.ignore("foo.rb")
-      loader.setup
+    files = [["m/ignored.rb", "IGNORED"]]
+    with_setup(files) do
       loader.eager_load(force: true)
 
       assert !required?(files)
