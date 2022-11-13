@@ -58,9 +58,8 @@
   - [Encodings](#encodings)
   - [Rules of thumb](#rules-of-thumb)
   - [Debuggers](#debuggers)
-    - [debug.rb](#debugrb)
-    - [Byebug](#byebug)
-    - [Break](#break)
+    - [Compatible debuggers](#compatible-debuggers)
+    - [Not so compatible debuggers](#not-so-compatible-debuggers)
 - [Pronunciation](#pronunciation)
 - [Supported Ruby versions](#supported-ruby-versions)
 - [Testing](#testing)
@@ -1201,22 +1200,15 @@ The test suite passes on Windows with codepage `Windows-1252` if all the involve
 <a id="markdown-debuggers" name="debuggers"></a>
 ### Debuggers
 
-<a id="markdown-debugrb" name="debugrb"></a>
-#### debug.rb
+<a id="markdown-compatible-debuggers" name="compatible-debuggers"></a>
+#### Compatible debuggers
 
-The new [debug.rb](https://github.com/ruby/debug) gem and Zeitwerk are mostly compatible. This is the new debugger that is going to ship with Ruby 3.1.
+Zeitwerk works fine with [debug.rb](https://github.com/ruby/debug) and [Break](https://github.com/gsamokovarov/break).
 
-There's one exception, though: Due to a technical limitation of tracepoints, explicit namespaces are not autoloaded while expressions are evaluated in the REPL. See [ruby/debug#408](https://github.com/ruby/debug/issues/408).
+<a id="markdown-not-so-compatible-debuggers" name="not-so-compatible-debuggers"></a>
+#### Not so compatible debuggers
 
-<a id="markdown-byebug" name="byebug"></a>
-#### Byebug
-
-Zeitwerk and [Byebug](https://github.com/deivid-rodriguez/byebug) have a similar edge incompatibility.
-
-<a id="markdown-break" name="break"></a>
-#### Break
-
-Zeitwerk works fine with [@gsamokovarov](https://github.com/gsamokovarov)'s [Break](https://github.com/gsamokovarov/break) debugger.
+Zeitwerk and [Byebug](https://github.com/deivid-rodriguez/byebug) are mostly compatible, except for an edge case explained in [deivid-rodriguez/byebug#564](https://github.com/deivid-rodriguez/byebug/issues/564).
 
 <a id="markdown-pronunciation" name="pronunciation"></a>
 ## Pronunciation
