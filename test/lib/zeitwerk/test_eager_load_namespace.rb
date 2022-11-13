@@ -54,17 +54,12 @@ class TestEagerLoadNamespaceWithObjectRootNamespace < LoaderTest
 
   test "supports collapsed directories" do
     files = [
-      ["a/collapsed/m/x.rb", "M::X = 1"],
-      ["b/y.rb", "Y = 1"],
-      ["b/m/y.rb", "M::Y = 1"]
+      ["rd1/collapsed/m/x.rb", "M::X = 1"],
+      ["rd2/y.rb", "Y = 1"],
+      ["rd2/m/y.rb", "M::Y = 1"]
     ]
-    with_files(files) do
-      loader.push_dir("a")
-      loader.push_dir("b")
-      loader.collapse("a/collapsed")
-      loader.setup
+    with_setup(files) do
       loader.eager_load_namespace(M)
-
       assert required?(files[0])
       assert !required?(files[1])
       assert required?(files[2])

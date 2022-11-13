@@ -6,7 +6,6 @@ class TestLoadFile < LoaderTest
     files = [["x.rb", "X = 1"]]
     with_setup(files) do
       loader.load_file("x.rb")
-
       assert required?(files[0])
     end
   end
@@ -15,7 +14,6 @@ class TestLoadFile < LoaderTest
     files = [["x.rb", "X = 1"]]
     with_setup(files) do
       loader.load_file(Pathname.new("x.rb"))
-
       assert required?(files[0])
     end
   end
@@ -24,7 +22,6 @@ class TestLoadFile < LoaderTest
     files = [["x.rb", "#{self.class}::X = 1"]]
     with_setup(files, namespace: self.class) do
       loader.load_file("x.rb")
-
       assert required?(files[0])
     end
   end
@@ -33,7 +30,6 @@ class TestLoadFile < LoaderTest
     files = [["m/x.rb", "M::X = 1"]]
     with_setup(files) do
       loader.load_file("m/x.rb")
-
       assert required?(files[0])
     end
   end
@@ -42,19 +38,14 @@ class TestLoadFile < LoaderTest
     files = [["m/x.rb", "#{self.class}::M::X = 1"]]
     with_setup(files, namespace: self.class) do
       loader.load_file("m/x.rb")
-
       assert required?(files[0])
     end
   end
 
   test "supports collapsed directories" do
     files = [["m/collapsed/x.rb", "M::X = 1"]]
-    with_files(files) do
-      loader.push_dir(".")
-      loader.collapse("m/collapsed")
-      loader.setup
+    with_setup(files) do
       loader.load_file("m/collapsed/x.rb")
-
       assert required?(files[0])
     end
   end

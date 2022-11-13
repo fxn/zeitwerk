@@ -92,6 +92,10 @@ class LoaderTest < Minitest::Test
         elsif file[0] =~ %r{\A(ignored|.+/ignored)/}
           loader.ignore($1)
         end
+
+        if file[0] =~ %r{\A(collapsed|.+/collapsed)/}
+          loader.collapse($1)
+        end
       end
 
       loader.setup
