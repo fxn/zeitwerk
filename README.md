@@ -58,8 +58,6 @@
   - [Encodings](#encodings)
   - [Rules of thumb](#rules-of-thumb)
   - [Debuggers](#debuggers)
-    - [Compatible debuggers](#compatible-debuggers)
-    - [Not so compatible debuggers](#not-so-compatible-debuggers)
 - [Pronunciation](#pronunciation)
 - [Supported Ruby versions](#supported-ruby-versions)
 - [Testing](#testing)
@@ -1200,15 +1198,9 @@ The test suite passes on Windows with codepage `Windows-1252` if all the involve
 <a id="markdown-debuggers" name="debuggers"></a>
 ### Debuggers
 
-<a id="markdown-compatible-debuggers" name="compatible-debuggers"></a>
-#### Compatible debuggers
-
 Zeitwerk works fine with [debug.rb](https://github.com/ruby/debug) and [Break](https://github.com/gsamokovarov/break).
 
-<a id="markdown-not-so-compatible-debuggers" name="not-so-compatible-debuggers"></a>
-#### Not so compatible debuggers
-
-Zeitwerk and [Byebug](https://github.com/deivid-rodriguez/byebug) are mostly compatible, except for an edge case explained in [deivid-rodriguez/byebug#564](https://github.com/deivid-rodriguez/byebug/issues/564).
+[Byebug](https://github.com/deivid-rodriguez/byebug) is compatible except for an edge case explained in [deivid-rodriguez/byebug#564](https://github.com/deivid-rodriguez/byebug/issues/564).
 
 <a id="markdown-pronunciation" name="pronunciation"></a>
 ## Pronunciation
