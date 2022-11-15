@@ -28,6 +28,20 @@ class TestIgnore < LoaderTest
     end
   end
 
+  test "ignored root directories are ignored, but nested ones are not" do
+    files = [["x.rb", "X = true"], ["nested/y.rb", "Y = true"]]
+    with_files(files) do
+      loader.push_dir(".")
+      loader.push_dir("nested")
+      loader.ignore(".")
+      loader.setup
+
+      assert !Object.autoload?(:X)
+      assert_raises(NameError) { ::X }
+      assert Y
+    end
+  end
+
   test "ignored files are ignored" do
     files = [
       ["x.rb", "X = true"],

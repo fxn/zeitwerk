@@ -948,6 +948,8 @@ However, sometimes it might still be convenient to tell Zeitwerk to completely i
 
 You can ignore file names, directory names, and glob patterns. Glob patterns are expanded when they are added and again on each reload.
 
+There is an edge case related to nested root directories. Conceptually, root directories are independent source trees. If you ignore a parent of a nested root directory, the nested root directory is not affected. You need to ignore it explictly if you want it ignored too.
+
 Let's see some use cases.
 
 <a id="markdown-use-case-files-that-do-not-follow-the-conventions" name="use-case-files-that-do-not-follow-the-conventions"></a>
