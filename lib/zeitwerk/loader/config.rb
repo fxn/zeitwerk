@@ -149,14 +149,24 @@ module Zeitwerk::Loader::Config
   # instead. Keys are the absolute paths of the root directories as strings,
   # values are their corresponding namespaces, class or module objects.
   #
+  # If `ignored` is falsey (default), ignored root directories are filtered out.
+  #
   # These are read-only collections, please add to them with `push_dir`.
   #
   # @sig () -> Array[String] | Hash[String, Module]
-  def dirs(namespaces: false)
+  def dirs(namespaces: false, ignored: false)
     if namespaces
-      roots.clone
+      if ignored || ignored_paths.empty?
+        roots.clone
+      else
+        roots.reject { |root_dir, _namespace| ignored_path?(root_dir) }
+      end
     else
-      roots.keys
+      if ignored || ignored_paths.empty?
+        roots.keys
+      else
+        roots.keys.reject { |root_dir| ignored_path?(root_dir) }
+      end
     end.freeze
   end
 

@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 2.6.7 (Unreleased)
+
+* By default, `Zeitwerk::Loader#dirs` filters ignored root directories out.
+  Please, pass `ignored: true` if you want them included.
+
 ## 2.6.6 (8 November 2022)
 
 * The new `eager_load_namespace` had a bug when eager loading certain namespaces

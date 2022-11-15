@@ -1166,6 +1166,8 @@ loader.push_dir(Pathname.new("/bar"), namespace: Bar)
 loader.dirs(namespaces: true) # => { "/foo" => Object, "/bar" => Bar }
 ```
 
+By default, ignored root directories are filtered out. If you want them included, please pass `ignored: true`.
+
 These collections are read-only. Please add to them with `Zeitwerk::Loader#push_dir`.
 
 <a id="markdown-encodings" name="encodings"></a>
