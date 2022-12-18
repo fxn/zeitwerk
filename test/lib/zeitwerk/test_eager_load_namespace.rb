@@ -1,7 +1,7 @@
 require "test_helper"
 
 class TestEagerLoadNamespaceWithObjectRootNamespace < LoaderTest
-  test "eader loads everything" do
+  test "eager loads everything" do
     files = [["x.rb", "X = 1"], ["m/x.rb", "M::X = 1"]]
     with_setup(files) do
       loader.eager_load_namespace(Object)
@@ -38,7 +38,7 @@ class TestEagerLoadNamespaceWithObjectRootNamespace < LoaderTest
     end
   end
 
-  test "eader loads everything (multiple root directories)" do
+  test "eager loads everything (multiple root directories)" do
     files = [
       ["rd1/x.rb", "X = 1"],
       ["rd1/m/x.rb", "M::X = 1"],
@@ -66,7 +66,7 @@ class TestEagerLoadNamespaceWithObjectRootNamespace < LoaderTest
     end
   end
 
-  test "eader loads everything (nested root directories)" do
+  test "eager loads everything (nested root directories)" do
     files = [
       ["x.rb", "X = 1"],
       ["m/x.rb", "M::X = 1"],
@@ -201,7 +201,7 @@ class TestEagerLoadNamespaceWithCustomRootNamespace < LoaderTest
   ancestors = [Object, self, CN]
 
   ancestors.each do |ancestor|
-    test "eader loads everything #{ancestor}" do
+    test "eager loads everything #{ancestor}" do
       files = [["x.rb", "#{CN}::X = 1"], ["m/x.rb", "#{CN}::M::X = 1"]]
       with_setup(files, namespace: CN) do
         loader.eager_load_namespace(ancestor)
@@ -210,7 +210,7 @@ class TestEagerLoadNamespaceWithCustomRootNamespace < LoaderTest
       end
     end
 
-    test "eader loads everything (multiple root directories) #{ancestor}" do
+    test "eager loads everything (multiple root directories) #{ancestor}" do
       files = [
         ["rd1/x.rb", "#{CN}::X = 1"],
         ["rd1/m/x.rb", "#{CN}::M::X = 1"],
@@ -224,7 +224,7 @@ class TestEagerLoadNamespaceWithCustomRootNamespace < LoaderTest
       end
     end
 
-    test "eader loads everything (nested root directories) #{ancestor}" do
+    test "eager loads everything (nested root directories) #{ancestor}" do
       files = [
         ["x.rb", "#{CN}::X = 1"],
         ["m/x.rb", "#{CN}::M::X = 1"],
@@ -238,7 +238,7 @@ class TestEagerLoadNamespaceWithCustomRootNamespace < LoaderTest
       end
     end
 
-    test "eader loads everything (nested root directories, different namespaces 1) #{ancestor}" do
+    test "eager loads everything (nested root directories, different namespaces 1) #{ancestor}" do
       files = [
         ["x.rb", "#{CN}::X = 1"],
         ["m/x.rb", "#{CN}::M::X = 1"],
@@ -261,7 +261,7 @@ class TestEagerLoadNamespaceWithCustomRootNamespace < LoaderTest
       end
     end
 
-    test "eader loads everything (nested root directories, different namespaces 2) #{ancestor}" do
+    test "eager loads everything (nested root directories, different namespaces 2) #{ancestor}" do
       files = [
         ["x.rb", "X = 1"],
         ["m/x.rb", "M::X = 1"],
