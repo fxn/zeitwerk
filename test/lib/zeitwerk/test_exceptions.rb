@@ -13,6 +13,8 @@ class TestExceptions < LoaderTest
   end
 
   test "raises NameError if the expected constant is not defined" do
+    on_teardown { remove_const :TyPo }
+
     files = [["typo.rb", "TyPo = 1"]]
     with_setup(files) do
       typo_rb = File.expand_path("typo.rb")
