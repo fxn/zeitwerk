@@ -1084,8 +1084,9 @@ For technical reasons, raw constant assignment is not supported:
 
 ```ruby
 # trip.rb
-Trip = Class.new { ... }  # NOT SUPPORTED
-Trip = Struct.new { ... } # NOT SUPPORTED
+Trip = Class { ...}        # NOT SUPPORTED
+Trip = Struct.new { ... }  # NOT SUPPORTED
+Trip = Data.define { ... } # NOT SUPPORTED
 ```
 
 This only affects explicit namespaces, those idioms work well for any other ordinary class or module.
