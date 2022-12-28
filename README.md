@@ -483,7 +483,7 @@ This is useful when the loader is not eager loading the entire project, but you 
 
 Both strings and `Pathname` objects are supported as arguments. If the argument is not a directory managed by the receiver, the method raises `Zeitwerk::Error`.
 
-[Eager load exclusions](#eager-load-exclusions), [ignored files and directories](#ignoring-parts-of-the-project), and [shadowed files](https://github.com/fxn/zeitwerk#shadowed-files) are not eager loaded.
+[Eager load exclusions](#eager-load-exclusions), [ignored files and directories](#ignoring-parts-of-the-project), and [shadowed files](#shadowed-files) are not eager loaded.
 
 `Zeitwerk::Loader#eager_load_dir` is idempotent, but compatible with reloading. If you eager load a directory and then reload, eager loading that directory will load its (current) contents again.
 
@@ -520,7 +520,7 @@ There might exist external source trees implementing part of the namespace. This
 
 This method is flexible about what it accepts. Its semantics have to be interpreted as: "_If_ you manage this namespace, or part of this namespace, please eager load what you got". In particular, if the receiver does not manage the namespace, it will simply do nothing, this is not an error condition.
 
-[Eager load exclusions](#eager-load-exclusions), [ignored files and directories](#ignoring-parts-of-the-project), and [shadowed files](https://github.com/fxn/zeitwerk#shadowed-files) are not eager loaded.
+[Eager load exclusions](#eager-load-exclusions), [ignored files and directories](#ignoring-parts-of-the-project), and [shadowed files](#shadowed-files) are not eager loaded.
 
 `Zeitwerk::Loader#eager_load_namespace` is idempotent, but compatible with reloading. If you eager load a namespace and then reload, eager loading that namespace will load its (current) descendants again.
 
@@ -573,7 +573,7 @@ loader.load_file("#{__dir__}/custom_web_app/routes.rb")
 
 This is useful when the loader is not eager loading the entire project, but you still need an individual file to be loaded for things to function properly.
 
-Both strings and `Pathname` objects are supported as arguments. The method raises `Zeitwerk::Error` if the argument is not a Ruby file, is [ignored](#ignoring-parts-of-the-project), is [shadowed](https://github.com/fxn/zeitwerk#shadowed-files), or is not managed by the receiver.
+Both strings and `Pathname` objects are supported as arguments. The method raises `Zeitwerk::Error` if the argument is not a Ruby file, is [ignored](#ignoring-parts-of-the-project), is [shadowed](#shadowed-files), or is not managed by the receiver.
 
 `Zeitwerk::Loader#load_file` is idempotent, but compatible with reloading. If you load a file and then reload, a new call will load its (current) contents again.
 
