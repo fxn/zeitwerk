@@ -406,7 +406,7 @@ Zeitwerk::Loader.for_gem(warn_on_extra_files: false)
 
 This method is idempotent when invoked from the same file, to support gems that want to reload (unlikely).
 
-If the entry point of your gem lives in a subdirectory of `lib` because it is reopening a namespace defined somewhere else, please use the generic API to setup the loader, and make sure you check the section [_Reopening third-party namespaces_](https://github.com/fxn/zeitwerk#reopening-third-party-namespaces) down below.
+If the entry point of your gem lives in a subdirectory of `lib` because it is reopening a namespace defined somewhere else, please use the generic API to setup the loader, and make sure you check the section [_Reopening third-party namespaces_](#reopening-third-party-namespaces) down below.
 
 <a id="markdown-autoloading" name="autoloading"></a>
 ### Autoloading
@@ -516,7 +516,7 @@ root_dir3/my_app/routes
 
 where `root_directory{1,2,3}` are root directories, eager loading `MyApp::Routes` will eager load the contents of the three corresponding directories.
 
-There might exist external source trees implementing part of the namespace. This happens routinely, because top-level constants are stored in the globally shared `Object`. It happens also when deliberately [reopening third-party namespaces](reopening-third-party-namespaces). Such external code is not eager loaded, the implementation is carefully scoped to what the receiver manages to avoid side-effects elsewhere.
+There might exist external source trees implementing part of the namespace. This happens routinely, because top-level constants are stored in the globally shared `Object`. It happens also when deliberately [reopening third-party namespaces](#reopening-third-party-namespaces). Such external code is not eager loaded, the implementation is carefully scoped to what the receiver manages to avoid side-effects elsewhere.
 
 This method is flexible about what it accepts. Its semantics have to be interpreted as: "_If_ you manage this namespace, or part of this namespace, please eager load what you got". In particular, if the receiver does not manage the namespace, it will simply do nothing, this is not an error condition.
 
