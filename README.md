@@ -173,7 +173,7 @@ class HttpCrawler
 end
 ```
 
-The first example needs a custom [inflection](https://github.com/fxn/zeitwerk#inflection) rule:
+The first example needs a custom [inflection](#inflection) rule:
 
 ```ruby
 loader.inflector.inflect("max_retries" => "MAX_RETRIES")
@@ -406,7 +406,7 @@ Zeitwerk::Loader.for_gem(warn_on_extra_files: false)
 
 This method is idempotent when invoked from the same file, to support gems that want to reload (unlikely).
 
-If the entry point of your gem lives in a subdirectory of `lib` because it is reopening a namespace defined somewhere else, please use the generic API to setup the loader, and make sure you check the section [_Reopening third-party namespaces_](https://github.com/fxn/zeitwerk#reopening-third-party-namespaces) down below.
+If the entry point of your gem lives in a subdirectory of `lib` because it is reopening a namespace defined somewhere else, please use the generic API to setup the loader, and make sure you check the section [_Reopening third-party namespaces_](#reopening-third-party-namespaces) down below.
 
 <a id="markdown-autoloading" name="autoloading"></a>
 ### Autoloading
@@ -442,7 +442,7 @@ loader.eager_load
 
 That skips [ignored files and directories](#ignoring-parts-of-the-project).
 
-In gems, the method needs to be invoked after the main namespace has been defined, as shown in [Synopsis](https://github.com/fxn/zeitwerk#synopsis).
+In gems, the method needs to be invoked after the main namespace has been defined, as shown in [Synopsis](#synopsis).
 
 Eager loading is synchronized and idempotent.
 
@@ -483,7 +483,7 @@ This is useful when the loader is not eager loading the entire project, but you 
 
 Both strings and `Pathname` objects are supported as arguments. If the argument is not a directory managed by the receiver, the method raises `Zeitwerk::Error`.
 
-[Eager load exclusions](#eager-load-exclusions), [ignored files and directories](#ignoring-parts-of-the-project), and [shadowed files](https://github.com/fxn/zeitwerk#shadowed-files) are not eager loaded.
+[Eager load exclusions](#eager-load-exclusions), [ignored files and directories](#ignoring-parts-of-the-project), and [shadowed files](#shadowed-files) are not eager loaded.
 
 `Zeitwerk::Loader#eager_load_dir` is idempotent, but compatible with reloading. If you eager load a directory and then reload, eager loading that directory will load its (current) contents again.
 
@@ -516,11 +516,11 @@ root_dir3/my_app/routes
 
 where `root_directory{1,2,3}` are root directories, eager loading `MyApp::Routes` will eager load the contents of the three corresponding directories.
 
-There might exist external source trees implementing part of the namespace. This happens routinely, because top-level constants are stored in the globally shared `Object`. It happens also when deliberately [reopening third-party namespaces](reopening-third-party-namespaces). Such external code is not eager loaded, the implementation is carefully scoped to what the receiver manages to avoid side-effects elsewhere.
+There might exist external source trees implementing part of the namespace. This happens routinely, because top-level constants are stored in the globally shared `Object`. It happens also when deliberately [reopening third-party namespaces](#reopening-third-party-namespaces). Such external code is not eager loaded, the implementation is carefully scoped to what the receiver manages to avoid side-effects elsewhere.
 
 This method is flexible about what it accepts. Its semantics have to be interpreted as: "_If_ you manage this namespace, or part of this namespace, please eager load what you got". In particular, if the receiver does not manage the namespace, it will simply do nothing, this is not an error condition.
 
-[Eager load exclusions](#eager-load-exclusions), [ignored files and directories](#ignoring-parts-of-the-project), and [shadowed files](https://github.com/fxn/zeitwerk#shadowed-files) are not eager loaded.
+[Eager load exclusions](#eager-load-exclusions), [ignored files and directories](#ignoring-parts-of-the-project), and [shadowed files](#shadowed-files) are not eager loaded.
 
 `Zeitwerk::Loader#eager_load_namespace` is idempotent, but compatible with reloading. If you eager load a namespace and then reload, eager loading that namespace will load its (current) descendants again.
 
@@ -573,7 +573,7 @@ loader.load_file("#{__dir__}/custom_web_app/routes.rb")
 
 This is useful when the loader is not eager loading the entire project, but you still need an individual file to be loaded for things to function properly.
 
-Both strings and `Pathname` objects are supported as arguments. The method raises `Zeitwerk::Error` if the argument is not a Ruby file, is [ignored](#ignoring-parts-of-the-project), is [shadowed](https://github.com/fxn/zeitwerk#shadowed-files), or is not managed by the receiver.
+Both strings and `Pathname` objects are supported as arguments. The method raises `Zeitwerk::Error` if the argument is not a Ruby file, is [ignored](#ignoring-parts-of-the-project), is [shadowed](#shadowed-files), or is not managed by the receiver.
 
 `Zeitwerk::Loader#load_file` is idempotent, but compatible with reloading. If you load a file and then reload, a new call will load its (current) contents again.
 
