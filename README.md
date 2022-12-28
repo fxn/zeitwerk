@@ -442,7 +442,7 @@ loader.eager_load
 
 That skips [ignored files and directories](#ignoring-parts-of-the-project).
 
-In gems, the method needs to be invoked after the main namespace has been defined, as shown in [Synopsis](https://github.com/fxn/zeitwerk#synopsis).
+In gems, the method needs to be invoked after the main namespace has been defined, as shown in [Synopsis](#synopsis).
 
 Eager loading is synchronized and idempotent.
 
