@@ -388,6 +388,12 @@ module MyGem
 end
 ```
 
+Due to technical reasons, the entry point of the gem has to be loaded with `Kernel#require`, which is the standard way to load a gem. Loading that file with `Kernel#load` or `Kernel#require_relative` won't generally work.
+
+`Zeitwerk::Loader.for_gem` is idempotent when invoked from the same file, to support gems that want to reload (unlikely).
+
+If the entry point of your gem lives in a subdirectory of `lib` because it is reopening a namespace defined somewhere else, please use the generic API to setup the loader, and make sure you check the section [_Reopening third-party namespaces_](#reopening-third-party-namespaces) down below.
+
 Loaders returned by `Zeitwerk::Loader.for_gem` issue warnings if `lib` has extra Ruby files or directories.
 
 For example, if the gem has Rails generators under `lib/generators`, by convention that directory defines a `Generators` Ruby module. If `generators` is just a container for non-autoloadable code and templates, not acting as a project namespace, you need to setup things accordingly.
@@ -403,10 +409,6 @@ Otherwise, there's a flag to say the extra stuff is OK:
 ```ruby
 Zeitwerk::Loader.for_gem(warn_on_extra_files: false)
 ```
-
-This method is idempotent when invoked from the same file, to support gems that want to reload (unlikely).
-
-If the entry point of your gem lives in a subdirectory of `lib` because it is reopening a namespace defined somewhere else, please use the generic API to setup the loader, and make sure you check the section [_Reopening third-party namespaces_](#reopening-third-party-namespaces) down below.
 
 <a id="markdown-autoloading" name="autoloading"></a>
 ### Autoloading
