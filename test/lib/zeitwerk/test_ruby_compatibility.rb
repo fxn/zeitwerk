@@ -4,8 +4,9 @@ require "test_helper"
 require "pathname"
 
 class TestRubyCompatibility < LoaderTest
-  # We decorate Kernel#require in lib/zeitwerk/kernel.rb to be able to log
-  # autoloads and to record what has been autoloaded so far.
+  # We decorate Kernel#require in lib/zeitwerk/kernel.rb be able to trigger
+  # callbacks, autovivify implicit namespaces, keep track of what has been
+  # autoloaded, and more.
   test "autoload calls Kernel#require" do
     files = [["x.rb", "X = true"]]
     with_files(files) do
@@ -36,8 +37,10 @@ class TestRubyCompatibility < LoaderTest
     end
   end
 
-  # Used to check if the constant being autoloaded was actually defined by the
-  # require call. We raise Zeitwerk::NameError if not.
+  # Once a managed file is autoloaded, Zeitwerk verifies the expected constant
+  # has been defined and raises Zeitwerk::NameError if not. This happens within
+  # the context of the require call and is correct because an autoload does not
+  # define the constant by itself, it has to be a side-effect.
   test "within a file triggered by an autoload, the constant being autoloaded is not defined" do
     files = [["x.rb", "$const_defined_for_X = Object.const_defined?(:X); X = 1"]]
     with_setup(files) do
@@ -48,9 +51,10 @@ class TestRubyCompatibility < LoaderTest
     end
   end
 
-  # Zeitwerk sets autoloads using absolute paths, and the root dirs are joined
-  # as given. Thanks to this property, we are able to identify the files we
-  # manage in our decorated Kernel#require.
+  # Zeitwerk sets autoloads using absolute paths and string concatenation with
+  # the root directories. These paths could contain symlinks, but we can still
+  # identify managed files in our decorated Kernel#require because Ruby stores
+  # the paths as they are in $LOADED_FEATURES with no symlink resolution.
   test "absolute paths passed to require end up in $LOADED_FEATURES as is" do
     on_teardown { $LOADED_FEATURES.pop }
 
@@ -70,8 +74,8 @@ class TestRubyCompatibility < LoaderTest
   # body is interpreted. If explicit namespaces are found, Zeitwerk sets a trace
   # point on the :class event with that purpose.
   #
-  # This is key because the body could reference child constants at the
-  # top-level, mixins are a common use case.
+  # This is key because the body of explicit namespaces could reference child
+  # constants at the top-level. Mixins are a common use case.
   test "TracePoint emits :class events" do
     on_teardown do
       @tp.disable
@@ -112,9 +116,9 @@ class TestRubyCompatibility < LoaderTest
   # We exploit this one to simplify the detection of explicit namespaces.
   #
   # Let's suppose `Admin` is an explicit namespace and scanning finds first a
-  # directory called `admin`. We set at that point an autoload for `Admin` and
-  # that will require that directory. If later on, scanning finds `admin.rb`, we
-  # just set the autoload again, and change the target file.
+  # directory called `admin`. We set at that point an autoload for `Admin` that
+  # will require that directory. If later on, scanning finds `admin.rb`, we just
+  # set the autoload again, and change the target file.
   #
   # This way, we do not need to keep state or do an a posteriori pass, can set
   # autoloads linearly as scanning progresses.
@@ -133,8 +137,13 @@ class TestRubyCompatibility < LoaderTest
     end
   end
 
-  # I believe Zeitwerk does not exploit this one now. Let's leave it here to
-  # keep track of undocumented corner cases anyway.
+  # In some spots like shadowed files detection we need to check if constants
+  # are already defined in the parent class or module. In order to do this and
+  # still be lazy, we rely on this property of const_defined?
+  #
+  # This also matters for autoloads already set by 3rd-party code, for example
+  # in reopened namespaces. Zeitwerk won't override them, but thanks to this
+  # characteristic of const_defined? if won't trigger them either.
   test "const_defined? is true for autoloads and does not load the file, if the file exists" do
     on_teardown { remove_const :X }
 
@@ -162,9 +171,11 @@ class TestRubyCompatibility < LoaderTest
     end
   end
 
-  # Zeitwerk uses this property when unloading to be able to differentiate when
-  # it is removing an autoload, and when it is unloading an actual loaded
-  # object.
+  # Loaders use this property when unloading to be able tell if the autoloads
+  # that are pending according to their state are still pending. While things
+  # are autoloaded that collection is maintained, this should not be needed. But
+  # client code doing unsupported stuff like using require_relative on managed
+  # files could introduce weird state we need to be defensive about.
   test "autoloading removes the autoload configuration in the parent" do
     on_teardown do
       remove_const :X
@@ -195,7 +206,7 @@ class TestRubyCompatibility < LoaderTest
   end
 
   # This edge case justifies the need for the inceptions collection in the
-  # registry.
+  # registry. See Zeitwerk::Registry.inceptions.
   test "an autoload on yourself is ignored" do
     files = [["foo.rb", <<-EOS]]
       Object.autoload(:Foo, __FILE__)
@@ -307,7 +318,7 @@ class TestRubyCompatibility < LoaderTest
 
   # This allows Zeitwerk to be thread-safe on regular file autoloads. Module
   # autovivification is custom, has its own test.
-  test "autoloads are synchronized" do
+  test "autoloads and constant references are synchronized" do
     $ensure_M_is_autoloaded_by_the_thread = Queue.new
 
     files = [["m.rb", <<-EOS]]
