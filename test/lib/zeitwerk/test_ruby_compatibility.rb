@@ -163,7 +163,7 @@ class TestRubyCompatibility < LoaderTest
   end
 
   # Zeitwerk uses this property when unloading to be able to differentiate when
-  # it is removing and autoload, and when it is unloading an actual loaded
+  # it is removing an autoload, and when it is unloading an actual loaded
   # object.
   test "autoloading removes the autoload configuration in the parent" do
     on_teardown do
