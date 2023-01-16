@@ -134,7 +134,7 @@ module Zeitwerk
     # unload them.
     #
     # This method is public but undocumented. Main interface is `reload`, which
-    # means `unload` + `setup`. This one is avaiable to be used together with
+    # means `unload` + `setup`. This one is available to be used together with
     # `unregister`, which is undocumented too.
     #
     # @sig () -> void
