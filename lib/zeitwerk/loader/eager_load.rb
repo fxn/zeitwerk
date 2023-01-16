@@ -183,7 +183,7 @@ module Zeitwerk::Loader::EagerLoad
   end
 
   # In order to invoke this method, the caller has to ensure `child` is a
-  # strict namespace descendendant of `root_namespace`.
+  # strict namespace descendant of `root_namespace`.
   #
   # @sig (Module, String, Module, Boolean) -> void
   private def eager_load_child_namespace(child, child_name, root_dir, root_namespace)
