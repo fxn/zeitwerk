@@ -7,4 +7,5 @@ gemspec
 gem "rake"
 gem "minitest"
 gem "minitest-focus"
+gem "minitest-proveit"
 gem "minitest-reporters"
