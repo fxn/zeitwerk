@@ -2,6 +2,7 @@
 
 require "minitest/autorun"
 require "minitest/focus"
+require "minitest/proveit"
 
 require "minitest/reporters"
 Minitest::Reporters.use!(Minitest::Reporters::DefaultReporter.new)
@@ -20,4 +21,6 @@ Minitest::Test.class_eval do
   include DeleteLoadedFeature
   include RemoveConst
   include OnTeardown
+
+  prove_it!
 end
