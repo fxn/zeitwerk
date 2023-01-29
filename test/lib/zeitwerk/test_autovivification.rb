@@ -57,6 +57,16 @@ class TestAutovivification < LoaderTest
     end
   end
 
+  test "does not register the namespace as explicit" do
+    files = [
+      ["rd1/admin/x.rb", "Admin::X = true"],
+      ["rd2/admin/y.rb", "Admin::Y = true"]
+    ]
+    with_setup(files) do
+      assert Zeitwerk::ExplicitNamespace.send(:cpaths).empty?
+    end
+  end
+
   test "autovivification is synchronized" do
     $test_admin_const_set_queue = Queue.new
 
