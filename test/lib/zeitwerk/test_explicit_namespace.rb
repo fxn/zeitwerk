@@ -127,7 +127,7 @@ class TestExplicitNamespace < LoaderTest
 
   test "namespace promotion updates the registry" do
     # We use two root directories to make sure the loader visits the implicit
-    # a/m first, and the explicit b/m.rb after it.
+    # rd1/m first, and the explicit rd2/m.rb after it.
     files = [
       ["rd1/m/x.rb", "M::X = true"],
       ["rd2/m.rb", "module M; end"]
