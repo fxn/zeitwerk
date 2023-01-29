@@ -364,10 +364,19 @@ module Zeitwerk
     def autoload_subdir(parent, cname, subdir)
       if autoload_path = autoload_path_set_by_me_for?(parent, cname)
         cpath = cpath(parent, cname)
-        register_explicit_namespace(cpath) if ruby?(autoload_path)
-        # We do not need to issue another autoload, the existing one is enough
-        # no matter if it is for a file or a directory. Just remember the
-        # subdirectory has to be visited if the namespace is used.
+        if ruby?(autoload_path)
+          # Scanning visited a Ruby file first, and now a directory for the same
+          # constant has been found. This means we are dealing with an explicit
+          # namespace whose definition was seen first.
+          #
+          # Registering is idempotent, and we have to keep the autoload pointing
+          # to the file. This may run again if more directories are found later
+          # on, no big deal.
+          register_explicit_namespace(cpath)
+        end
+        # If the existing autoload points to a file, it has to be preserved, if
+        # not, it is fine as it is. In either case, we do not need to override.
+        # Just remember the subdirectory conforms this namespace.
         namespace_dirs[cpath] << subdir
       elsif !cdef?(parent, cname)
         # First time we find this namespace, set an autoload for it.

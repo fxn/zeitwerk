@@ -5,7 +5,7 @@ require "test_helper"
 class TestExplicitNamespace < LoaderTest
   module Namespace; end
 
-  test "explicit namespaces are loaded correctly (Object)" do
+  test "explicit namespaces are loaded correctly (directory first, Object)" do
     files = [
       ["hotel.rb", "class Hotel; X = 1; end"],
       ["hotel/pricing.rb", "class Hotel::Pricing; end"]
@@ -17,10 +17,34 @@ class TestExplicitNamespace < LoaderTest
     end
   end
 
-  test "explicit namespaces are loaded correctly (Namespace)" do
+  test "explicit namespaces are loaded correctly (directory first, Namespace)" do
     files = [
       ["hotel.rb", "class #{Namespace}::Hotel; X = 1; end"],
       ["hotel/pricing.rb", "class #{Namespace}::Hotel::Pricing; end"]
+    ]
+    with_setup(files, namespace: Namespace) do
+      assert_kind_of Class, Namespace::Hotel
+      assert Namespace::Hotel::X
+      assert Namespace::Hotel::Pricing
+    end
+  end
+
+  test "explicit namespaces are loaded correctly (file first, Object)" do
+    files = [
+      ["rd1/hotel.rb", "class Hotel; X = 1; end"],
+      ["rd2/hotel/pricing.rb", "class Hotel::Pricing; end"]
+    ]
+    with_setup(files) do
+      assert_kind_of Class, Hotel
+      assert Hotel::X
+      assert Hotel::Pricing
+    end
+  end
+
+  test "explicit namespaces are loaded correctly (file first, Namespace)" do
+    files = [
+      ["rd1/hotel.rb", "class #{Namespace}::Hotel; X = 1; end"],
+      ["rd2/hotel/pricing.rb", "class #{Namespace}::Hotel::Pricing; end"]
     ]
     with_setup(files, namespace: Namespace) do
       assert_kind_of Class, Namespace::Hotel
