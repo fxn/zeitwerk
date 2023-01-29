@@ -363,12 +363,10 @@ module Zeitwerk
     # @sig (Module, Symbol, String) -> void
     def autoload_subdir(parent, cname, subdir)
       if autoload_path = autoload_path_set_by_me_for?(parent, cname)
-        cpath = cpath(parent, cname)
-        register_explicit_namespace(cpath) if ruby?(autoload_path)
         # We do not need to issue another autoload, the existing one is enough
         # no matter if it is for a file or a directory. Just remember the
         # subdirectory has to be visited if the namespace is used.
-        namespace_dirs[cpath] << subdir
+        namespace_dirs[cpath(parent, cname)] << subdir
       elsif !cdef?(parent, cname)
         # First time we find this namespace, set an autoload for it.
         namespace_dirs[cpath(parent, cname)] << subdir
