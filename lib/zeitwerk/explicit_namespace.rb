@@ -47,6 +47,13 @@ module Zeitwerk
         disable_tracer_if_unneeded
       end
 
+      # This is an internal method only used by the test suite.
+      #
+      # @sig (String) -> bool
+      internal def registered?(cpath)
+        cpaths.key?(cpath)
+      end
+
       # @sig () -> void
       private def disable_tracer_if_unneeded
         mutex.synchronize do
