@@ -36,4 +36,8 @@ class TestGemInflector < LoaderTest
   test "works as expected for other files" do
     with_setup { assert MyGem::Foo }
   end
+
+  test "TODO" do
+    1 + 1 == 2
+  end
 end
