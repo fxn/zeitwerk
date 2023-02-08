@@ -7,12 +7,12 @@ require "minitest/proveit"
 require "minitest/reporters"
 Minitest::Reporters.use!(Minitest::Reporters::DefaultReporter.new)
 
-# require "support/no_warnings_policy"
-require "support/test_macro"
-require "support/delete_loaded_feature"
-require "support/loader_test"
-require "support/remove_const"
-require "support/on_teardown"
+# require_relative "support/no_warnings_policy"
+require_relative "support/test_macro"
+require_relative "support/delete_loaded_feature"
+require_relative "support/loader_test"
+require_relative "support/remove_const"
+require_relative "support/on_teardown"
 
 require "zeitwerk"
 
