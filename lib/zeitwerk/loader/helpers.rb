@@ -134,4 +134,10 @@ module Zeitwerk::Loader::Helpers
   private def cget(parent, cname)
     parent.const_get(cname, false)
   end
+
+  # @raise [NameError]
+  # @sig (Module, Symbol) -> Object
+  private def crem(parent, cname)
+    parent.__send__(:remove_const, cname)
+  end
 end
