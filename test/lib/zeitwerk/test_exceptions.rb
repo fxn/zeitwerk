@@ -25,12 +25,7 @@ class TestExceptions < LoaderTest
   end
 
   test "eager loading raises NameError if files do not define the expected constants" do
-    on_teardown do
-      remove_const :X # should be unnecessary, but $LOADED_FEATURES.reject! redefines it
-      remove_const :Y
-    end
-
-    files = [["x.rb", "Y = 1"]]
+    files = [["x.rb", ""]]
     with_setup(files) do
       x_rb = File.expand_path("x.rb")
       error = assert_raises(Zeitwerk::NameError) { loader.eager_load }

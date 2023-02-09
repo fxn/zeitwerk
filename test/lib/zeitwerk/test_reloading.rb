@@ -205,8 +205,16 @@ class TestReloading < LoaderTest
     with_setup(files) do
       assert_raises(Zeitwerk::NameError) { X }
 
+      assert !Object.constants.include?(:X)
+      assert !Object.const_defined?(:X, false)
+      assert !Object.autoload?(:X)
+
       loader.reload
       File.write("x.rb", "X = true")
+
+      assert Object.constants.include?(:X)
+      assert Object.const_defined?(:X, false)
+      assert Object.autoload?(:X)
 
       assert X
     end
@@ -220,8 +228,16 @@ class TestReloading < LoaderTest
       loader.on_unload {}
       assert_raises(Zeitwerk::NameError) { X }
 
+      assert !Object.constants.include?(:X)
+      assert !Object.const_defined?(:X, false)
+      assert !Object.autoload?(:X)
+
       loader.reload
       File.write("x.rb", "X = true")
+
+      assert Object.constants.include?(:X)
+      assert Object.const_defined?(:X, false)
+      assert Object.autoload?(:X)
 
       assert X
     end
