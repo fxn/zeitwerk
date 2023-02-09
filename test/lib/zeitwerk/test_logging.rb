@@ -133,6 +133,17 @@ class TestLogging < LoaderTest
     end
   end
 
+  test "logs failed autoloads, provided the require call succeeded" do
+    files = [["x.rb", ""]]
+    with_files(files) do
+      assert_logged(/expected file #{File.expand_path("x.rb")} to define constant X, but didn't/) do
+        loader.push_dir(".")
+        loader.setup
+        assert_raises(Zeitwerk::NameError) { X }
+      end
+    end
+  end
+
   test "logs autoload configured for directories" do
     files = [["admin/user.rb", "class Admin::User; end"]]
     with_files(files) do

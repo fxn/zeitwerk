@@ -22,7 +22,9 @@ module Zeitwerk::Loader::Callbacks
       log("constant #{cpath} loaded from file #{file}") if logger
       run_on_load_callbacks(cpath, cget(*cref), file) unless on_load_callbacks.empty?
     else
-      raise Zeitwerk::NameError.new("expected file #{file} to define constant #{cpath}, but didn't", cref.last)
+      msg = "expected file #{file} to define constant #{cpath}, but didn't"
+      log(msg) if logger
+      raise Zeitwerk::NameError.new(msg, cref.last)
     end
   end
 
