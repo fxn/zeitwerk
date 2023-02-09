@@ -2,8 +2,32 @@
 
 ## 2.6.7 (Unreleased)
 
+* Reset module state on `Zeitwerk::NameError`.
+
+  If an autoload is triggered, the file is loaded successfully, but the expected
+  constant does not get defined, Ruby resets the state of the module. In
+  particular, `autoload?` returns `nil` for that constant name, and `constants`
+  does not include the constant name (starting with Ruby 3.1).
+
+  Zeitwerk is more strict, not defining the expected constant is an error
+  condition and the loader raises `Zeitwerk::NameError`. But this happens during
+  the `require` call and the exception prevents Ruby from doing that cleanup.
+
+  With this change, the parent module is left in a state that makes more sense
+  and is consistent with what Ruby does.
+
+* A message is logged if an autoload did not define the expected constant.
+
+  When that happens, `Zeitwerk::NameError` is raised and you normally see the
+  exception. But if the error is shallowed, and you are inspecting the logs to
+  investigate something, this new message may be helpful.
+
 * By default, `Zeitwerk::Loader#dirs` filters ignored root directories out.
   Please, pass `ignored: true` if you want them included.
+
+* Documentation improvements.
+
+* Internals improvements.
 
 ## 2.6.6 (8 November 2022)
 
