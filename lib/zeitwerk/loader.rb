@@ -324,10 +324,8 @@ module Zeitwerk
       end
     end
 
-    private # -------------------------------------------------------------------------------------
-
     # @sig (String, Module) -> void
-    def set_autoloads_in_dir(dir, parent)
+    private def set_autoloads_in_dir(dir, parent)
       ls(dir) do |basename, abspath|
         begin
           if ruby?(basename)
@@ -362,7 +360,7 @@ module Zeitwerk
     end
 
     # @sig (Module, Symbol, String) -> void
-    def autoload_subdir(parent, cname, subdir)
+    private def autoload_subdir(parent, cname, subdir)
       if autoload_path = autoload_path_set_by_me_for?(parent, cname)
         cpath = cpath(parent, cname)
         if ruby?(autoload_path)
@@ -392,7 +390,7 @@ module Zeitwerk
     end
 
     # @sig (Module, Symbol, String) -> void
-    def autoload_file(parent, cname, file)
+    private def autoload_file(parent, cname, file)
       if autoload_path = strict_autoload_path(parent, cname) || Registry.inception?(cpath(parent, cname))
         # First autoload for a Ruby file wins, just ignore subsequent ones.
         if ruby?(autoload_path)
@@ -418,7 +416,7 @@ module Zeitwerk
     # the file where we've found the namespace is explicitly defined.
     #
     # @sig (dir: String, file: String, parent: Module, cname: Symbol) -> void
-    def promote_namespace_from_implicit_to_explicit(dir:, file:, parent:, cname:)
+    private def promote_namespace_from_implicit_to_explicit(dir:, file:, parent:, cname:)
       autoloads.delete(dir)
       Registry.unregister_autoload(dir)
 
@@ -429,7 +427,7 @@ module Zeitwerk
     end
 
     # @sig (Module, Symbol, String) -> void
-    def set_autoload(parent, cname, abspath)
+    private def set_autoload(parent, cname, abspath)
       parent.autoload(cname, abspath)
 
       if logger
@@ -450,7 +448,7 @@ module Zeitwerk
     end
 
     # @sig (Module, Symbol) -> String?
-    def autoload_path_set_by_me_for?(parent, cname)
+    private def autoload_path_set_by_me_for?(parent, cname)
       if autoload_path = strict_autoload_path(parent, cname)
         autoload_path if autoloads.key?(autoload_path)
       else
@@ -459,12 +457,12 @@ module Zeitwerk
     end
 
     # @sig (String) -> void
-    def register_explicit_namespace(cpath)
+    private def register_explicit_namespace(cpath)
       ExplicitNamespace.__register(cpath, self)
     end
 
     # @sig (String) -> void
-    def raise_if_conflicting_directory(dir)
+    private def raise_if_conflicting_directory(dir)
       MUTEX.synchronize do
         dir_slash = dir + "/"
 
@@ -489,20 +487,20 @@ module Zeitwerk
     end
 
     # @sig (String, Object, String) -> void
-    def run_on_unload_callbacks(cpath, value, abspath)
+    private def run_on_unload_callbacks(cpath, value, abspath)
       # Order matters. If present, run the most specific one.
       on_unload_callbacks[cpath]&.each { |c| c.call(value, abspath) }
       on_unload_callbacks[:ANY]&.each { |c| c.call(cpath, value, abspath) }
     end
 
     # @sig (Module, Symbol) -> void
-    def unload_autoload(parent, cname)
+    private def unload_autoload(parent, cname)
       crem(parent, cname)
       log("autoload for #{cpath(parent, cname)} removed") if logger
     end
 
     # @sig (Module, Symbol) -> void
-    def unload_cref(parent, cname)
+    private def unload_cref(parent, cname)
       # Let's optimistically remove_const. The way we use it, this is going to
       # succeed always if all is good.
       crem(parent, cname)
