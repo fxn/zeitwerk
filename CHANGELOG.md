@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 2.6.7 (Unreleased)
+## 2.6.7 (10 February 2023)
 
 * Reset module state on `Zeitwerk::NameError`.
 
