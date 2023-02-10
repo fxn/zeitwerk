@@ -10,7 +10,7 @@ class TestShadowedFiles < LoaderTest
 
     files = [["x.rb", "X = 2"]]
     with_setup(files) do
-      assert loader.shadowed_file?(File.expand_path("x.rb"))
+      assert loader.__shadowed_file?(File.expand_path("x.rb"))
 
       assert_equal 1, ::X
       loader.reload
@@ -25,8 +25,8 @@ class TestShadowedFiles < LoaderTest
       loader.push_dir("b")
       loader.setup
 
-      assert !loader.shadowed_file?(File.expand_path("a/x.rb"))
-      assert loader.shadowed_file?(File.expand_path("b/x.rb"))
+      assert !loader.__shadowed_file?(File.expand_path("a/x.rb"))
+      assert loader.__shadowed_file?(File.expand_path("b/x.rb"))
 
       assert_equal 1, ::X
       loader.reload
@@ -40,8 +40,8 @@ class TestShadowedFiles < LoaderTest
       first_loader = new_loader(dirs: "a")
       second_loader = new_loader(dirs: "b")
 
-      assert !first_loader.shadowed_file?(File.expand_path("a/x.rb"))
-      assert second_loader.shadowed_file?(File.expand_path("b/x.rb"))
+      assert !first_loader.__shadowed_file?(File.expand_path("a/x.rb"))
+      assert second_loader.__shadowed_file?(File.expand_path("b/x.rb"))
 
       assert_equal 1, ::X
       second_loader.reload
