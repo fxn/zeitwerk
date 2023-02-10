@@ -87,9 +87,9 @@ module Zeitwerk
     attr_reader :shadowed_files
     internal :shadowed_files
 
-    # @private
     # @sig Mutex
     attr_reader :mutex
+    private :mutex
 
     # @private
     # @sig Mutex
