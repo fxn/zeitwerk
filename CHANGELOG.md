@@ -27,7 +27,7 @@
 
   It is very strange to configure a root directory and also ignore it, the edge
   case is supported only for completeness. However, in that case, client code
-  listing namespaces rarely needs the ignored ones.
+  listing root directories rarely needs the ignored ones.
 
 * Documentation improvements.
 
