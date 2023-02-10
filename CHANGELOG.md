@@ -25,9 +25,13 @@
 * By default, `Zeitwerk::Loader#dirs` filters ignored root directories out.
   Please, pass `ignored: true` if you want them included.
 
+  It is very strange to configure a root directory and also ignore it, the edge
+  case is supported only for completeness. However, in that case, client code
+  listing namespaces rarely needs the ignored ones.
+
 * Documentation improvements.
 
-* Internals improvements.
+* Enforcement of private interfaces continues with another gradual patch.
 
 ## 2.6.6 (8 November 2022)
 
