@@ -72,9 +72,9 @@ module Zeitwerk
     # and that its children are spread over those directories. We'll visit them
     # to set up the corresponding autoloads.
     #
-    # @private
     # @sig Hash[String, Array[String]]
     attr_reader :namespace_dirs
+    internal :namespace_dirs
 
     # A shadowed file is a file managed by this loader that is ignored when
     # setting autoloads because its matching constant is already taken.
