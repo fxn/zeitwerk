@@ -68,7 +68,7 @@ class TestTopLevel < LoaderTest
       [".idea/workspace.xml", ""] # RubyMine
     ]
     with_setup(files) do
-      assert_empty loader.autoloads
+      assert_empty loader.__autoloads
     end
   end
 end
