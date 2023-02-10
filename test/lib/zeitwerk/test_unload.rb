@@ -152,9 +152,9 @@ class TestUnload < LoaderTest
       loader.push_dir("b")
       loader.setup
 
-      assert !loader.shadowed_files.empty? # precondition
+      assert !loader.__shadowed_files.empty? # precondition
       loader.unload
-      assert loader.shadowed_files.empty?
+      assert loader.__shadowed_files.empty?
     end
   end
 
