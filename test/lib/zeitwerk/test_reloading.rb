@@ -134,7 +134,7 @@ class TestReloading < LoaderTest
       assert_equal 1, Z::A
 
       assert loader.autoloads.empty?
-      assert loader.to_unload.empty?
+      assert loader.__to_unload.empty?
     end
   end
 
@@ -167,7 +167,7 @@ class TestReloading < LoaderTest
 
       assert loader.autoloads.empty?
       assert Zeitwerk::Registry.autoloads.empty?
-      assert loader.to_unload.empty?
+      assert loader.__to_unload.empty?
     end
   end
 

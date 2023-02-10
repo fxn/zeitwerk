@@ -68,7 +68,7 @@ class TestUnloadableCpath < LoaderTest
       assert Z
 
       assert_empty loader.unloadable_cpaths
-      assert loader.to_unload.empty?
+      assert loader.__to_unload.empty?
     end
   end
 end

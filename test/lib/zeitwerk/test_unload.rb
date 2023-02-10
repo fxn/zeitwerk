@@ -79,14 +79,14 @@ class TestUnload < LoaderTest
 
       assert !loader.autoloads.empty?
       assert !loader.autoloaded_dirs.empty?
-      assert !loader.to_unload.empty?
+      assert !loader.__to_unload.empty?
       assert !loader.namespace_dirs.empty?
 
       loader.unload
 
       assert loader.autoloads.empty?
       assert loader.autoloaded_dirs.empty?
-      assert loader.to_unload.empty?
+      assert loader.__to_unload.empty?
       assert loader.namespace_dirs.empty?
     end
   end
