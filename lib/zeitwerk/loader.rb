@@ -38,9 +38,9 @@ module Zeitwerk
     # Files are removed as they are autoloaded, but directories need to wait due
     # to concurrency (see why in Zeitwerk::Loader::Callbacks#on_dir_autoloaded).
     #
-    # @private
     # @sig Array[String]
     attr_reader :autoloaded_dirs
+    internal :autoloaded_dirs
 
     # Stores metadata needed for unloading. Its entries look like this:
     #
