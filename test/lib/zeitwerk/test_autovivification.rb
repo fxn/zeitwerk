@@ -94,8 +94,8 @@ class TestAutovivification < LoaderTest
 
       concurrent_autovivifications.each(&:join)
 
-      assert_equal 1, $test_admin_const_set_calls
       assert $test_admin_const_set_queue.empty?
+      assert_equal 1, $test_admin_const_set_calls
     end
   end
 
