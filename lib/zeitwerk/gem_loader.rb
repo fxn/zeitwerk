@@ -3,27 +3,31 @@
 module Zeitwerk
   # @private
   class GemLoader < Loader
+    include RealModName
+
     # Users should not create instances directly, the public interface is
     # `Zeitwerk::Loader.for_gem`.
     private_class_method :new
 
     # @private
     # @sig (String, bool) -> Zeitwerk::GemLoader
-    def self._new(root_file, warn_on_extra_files:)
-      new(root_file, warn_on_extra_files: warn_on_extra_files)
+    def self._new(root_file, namespace:, warn_on_extra_files:)
+      new(root_file, namespace: namespace, warn_on_extra_files: warn_on_extra_files)
     end
 
     # @sig (String, bool) -> void
-    def initialize(root_file, warn_on_extra_files:)
+    def initialize(root_file, namespace:, warn_on_extra_files:)
       super()
 
-      @tag                 = File.basename(root_file, ".rb")
+      @tag = File.basename(root_file, ".rb")
+      @tag = real_mod_name(namespace) + "-" + @tag unless namespace.equal?(Object)
+
       @inflector           = GemInflector.new(root_file)
       @root_file           = File.expand_path(root_file)
-      @lib                 = File.dirname(root_file)
+      @root_dir            = File.dirname(root_file)
       @warn_on_extra_files = warn_on_extra_files
 
-      push_dir(@lib)
+      push_dir(@root_dir, namespace: namespace)
     end
 
     # @sig () -> void
@@ -38,7 +42,7 @@ module Zeitwerk
     def warn_on_extra_files
       expected_namespace_dir = @root_file.delete_suffix(".rb")
 
-      ls(@lib) do |basename, abspath|
+      ls(@root_dir) do |basename, abspath|
         next if abspath == @root_file
         next if abspath == expected_namespace_dir
 

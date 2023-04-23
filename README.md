@@ -24,6 +24,7 @@
   - [Setup](#setup)
     - [Generic](#generic)
     - [for_gem](#for_gem)
+    - [for_gem_extension](#for_gem_extension)
   - [Autoloading](#autoloading)
   - [Eager loading](#eager-loading)
     - [Eager load exclusions](#eager-load-exclusions)
@@ -409,6 +410,42 @@ Otherwise, there's a flag to say the extra stuff is OK:
 ```ruby
 Zeitwerk::Loader.for_gem(warn_on_extra_files: false)
 ```
+
+<a id="markdown-for_gem_extension" name="for_gem_extension"></a>
+#### for_gem_extension
+
+Let's suppose you are writing a gem to extend `Net::HTTP` with some niche feature. By [convention](https://guides.rubygems.org/name-your-gem/):
+
+* The gem should be called `net-http-niche_feature`. That is, dashes for the extended part, a dash, and underscores for yours.
+* The namespace should be `Net::HTTP::NicheFeature`.
+* The entry point should be `lib/net/http/niche_feature.rb`.
+* Optionally, the gem could have a top-level `lib/net-http-niche_feature.rb`, but, if defined, that one should have just a `require` call for the entry point.
+
+Gem extensions following the conventions above have a dedicated loader constructor:
+
+```ruby
+# lib/net/http/niche_feature.rb
+
+require "net/http"
+require "zeitwerk"
+
+loader = Zeitwerk::Loader.for_gem_extension(Net::HTTP)
+loader.setup
+
+module Net::HTTP::NicheFeature
+  # Since the setup has been performed, at this point we are already able
+  # to reference project constants, in this case Net::HTTP::NicheFeature::MyMixin.
+  include MyMixin
+end
+```
+
+`for_gem_extension` expects as argument the the namespace being extended, which has to be a class or module object.
+
+The file `lib/net/http/niche_feature/version.rb` is expected to define `Net::HTTP::NicheFeature::VERSION`.
+
+Due to technical reasons, the entry point of the gem has to be loaded with `Kernel#require`. Loading that file with `Kernel#load` or `Kernel#require_relative` won't generally work. This is important if you load the entry point from the optional dasherized top-level file.
+
+`Zeitwerk::Loader.for_gem_extension` is idempotent when invoked from the same file, to support gems that want to reload (unlikely).
 
 <a id="markdown-autoloading" name="autoloading"></a>
 ### Autoloading

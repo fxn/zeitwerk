@@ -270,6 +270,7 @@ module Zeitwerk
       # This is a shortcut for
       #
       #   require "zeitwerk"
+      #
       #   loader = Zeitwerk::Loader.new
       #   loader.tag = File.basename(__FILE__, ".rb")
       #   loader.inflector = Zeitwerk::GemInflector.new(__FILE__)
@@ -284,7 +285,28 @@ module Zeitwerk
       # @sig (bool) -> Zeitwerk::GemLoader
       def for_gem(warn_on_extra_files: true)
         called_from = caller_locations(1, 1).first.path
-        Registry.loader_for_gem(called_from, warn_on_extra_files: warn_on_extra_files)
+        Registry.loader_for_gem(called_from, namespace: Object, warn_on_extra_files: warn_on_extra_files)
+      end
+
+      # This is a shortcut for
+      #
+      #   require "zeitwerk"
+      #
+      #   loader = Zeitwerk::Loader.new
+      #   loader.tag = namespace.name + "-" + File.basename(__FILE__, ".rb")
+      #   loader.inflector = Zeitwerk::GemInflector.new(__FILE__)
+      #   loader.push_dir(__dir__, namespace: namespace)
+      #
+      # except that this method returns the same object in subsequent calls from
+      # the same file, in the unlikely case the gem wants to be able to reload.
+      #
+      # This method returns a subclass of Zeitwerk::Loader, but the exact type
+      # is private, client code can only rely on the interface.
+      #
+      # @sig (bool) -> Zeitwerk::GemLoader
+      def for_gem_extension(namespace)
+        called_from = caller_locations(1, 1).first.path
+        Registry.loader_for_gem(called_from, namespace: namespace, warn_on_extra_files: false)
       end
 
       # Broadcasts `eager_load` to all loaders. Those that have not been setup
