@@ -439,7 +439,7 @@ module Net::HTTP::NicheFeature
 end
 ```
 
-`for_gem_extension` expects as argument the the namespace being extended, which has to be a class or module object.
+`for_gem_extension` expects as argument the namespace being extended, which has to be a class or module object.
 
 The file `lib/net/http/niche_feature/version.rb` is expected to define `Net::HTTP::NicheFeature::VERSION`.
 
