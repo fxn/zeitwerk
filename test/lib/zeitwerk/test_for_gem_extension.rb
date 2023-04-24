@@ -91,4 +91,14 @@ class TestForGemExtension < LoaderTest
       assert self.class::MyGemExtension
     end
   end
+
+  test "raises if the namespace is not a class or module object" do
+    e = assert_raises(Zeitwerk::Error) { Zeitwerk::Loader.for_gem_extension(:foo) }
+    assert_equal ":foo is not a class or module object, should be", e.message
+  end
+
+  test "raises if the namespace is anonymous" do
+    e = assert_raises(Zeitwerk::Error) { Zeitwerk::Loader.for_gem_extension(Module.new) }
+    assert_equal "extending anonymous namespaces is unsupported", e.message
+  end
 end

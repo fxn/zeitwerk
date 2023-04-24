@@ -109,8 +109,7 @@ module Zeitwerk::Loader::Config
   # @raise [Zeitwerk::Error]
   # @sig (String | Pathname, Module) -> void
   def push_dir(path, namespace: Object)
-    # Note that Class < Module.
-    unless namespace.is_a?(Module)
+    unless namespace.is_a?(Module) # Note that Class < Module.
       raise Zeitwerk::Error, "#{namespace.inspect} is not a class or module object, should be"
     end
 

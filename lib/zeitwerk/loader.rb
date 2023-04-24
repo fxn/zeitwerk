@@ -264,6 +264,8 @@ module Zeitwerk
     # --- Class methods ---------------------------------------------------------------------------
 
     class << self
+      include RealModName
+
       # @sig #call | #debug | nil
       attr_accessor :default_logger
 
@@ -305,6 +307,14 @@ module Zeitwerk
       #
       # @sig (bool) -> Zeitwerk::GemLoader
       def for_gem_extension(namespace)
+        unless namespace.is_a?(Module) # Note that Class < Module.
+          raise Zeitwerk::Error, "#{namespace.inspect} is not a class or module object, should be"
+        end
+
+        unless real_mod_name(namespace)
+          raise Zeitwerk::Error, "extending anonymous namespaces is unsupported"
+        end
+
         called_from = caller_locations(1, 1).first.path
         Registry.loader_for_gem(called_from, namespace: namespace, warn_on_extra_files: false)
       end
