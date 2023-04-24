@@ -439,9 +439,9 @@ module Net::HTTP::NicheFeature
 end
 ```
 
-`for_gem_extension` expects as argument the namespace being extended, which has to be a non-anonymous class or module object.
+`Zeitwerk::Loader.for_gem_extension` expects as argument the namespace being extended, which has to be a non-anonymous class or module object.
 
-If it exists, the file `lib/net/http/niche_feature/version.rb` is expected to define `Net::HTTP::NicheFeature::VERSION`.
+If it exists, `lib/net/http/niche_feature/version.rb` is expected to define `Net::HTTP::NicheFeature::VERSION`.
 
 Due to technical reasons, the entry point of the gem has to be loaded with `Kernel#require`. Loading that file with `Kernel#load` or `Kernel#require_relative` won't generally work. This is important if you load the entry point from the optional dasherized top-level file.
 
