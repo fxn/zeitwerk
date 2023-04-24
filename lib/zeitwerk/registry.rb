@@ -87,7 +87,7 @@ module Zeitwerk
       # @private
       # @sig (String) -> Zeitwerk::Loader
       def loader_for_gem(root_file, namespace:, warn_on_extra_files:)
-        gem_loaders_by_root_file[root_file] ||= GemLoader._new(root_file, namespace: namespace, warn_on_extra_files: warn_on_extra_files)
+        gem_loaders_by_root_file[root_file] ||= GemLoader.__new(root_file, namespace: namespace, warn_on_extra_files: warn_on_extra_files)
       end
 
       # @private

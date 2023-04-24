@@ -11,7 +11,7 @@ module Zeitwerk
 
     # @private
     # @sig (String, bool) -> Zeitwerk::GemLoader
-    def self._new(root_file, namespace:, warn_on_extra_files:)
+    def self.__new(root_file, namespace:, warn_on_extra_files:)
       new(root_file, namespace: namespace, warn_on_extra_files: warn_on_extra_files)
     end
 
