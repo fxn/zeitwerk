@@ -421,9 +421,25 @@ Let's suppose you are writing a gem to extend `Net::HTTP` with some niche featur
 * The entry point should be `lib/net/http/niche_feature.rb`.
 * Optionally, the gem could have a top-level `lib/net-http-niche_feature.rb`, but, if defined, that one should have just a `require` call for the entry point.
 
-Gem extensions following the conventions above have a dedicated loader constructor:
+The top-level file mentioned in the last point is optional. In particular, from
 
 ```ruby
+gem "net-http-niche_feature"
+```
+
+if the dasherized file does not exist, Bundler notes the conventional dasherized pattern and issues a `require` for `net/http/niche_feature`.
+
+Gem extensions following the conventions above have a dedicated loader constructor: `Zeitwerk::Loader.for_gem_extension`.
+
+The structure of the gem would be like this:
+
+```ruby
+# lib/net-http-niche_feature.rb (optional)
+
+# For technical reasons, this cannot be require_relative.
+require "net/http/niche_feature"
+
+
 # lib/net/http/niche_feature.rb
 
 require "net/http"
@@ -436,6 +452,13 @@ module Net::HTTP::NicheFeature
   # Since the setup has been performed, at this point we are already able
   # to reference project constants, in this case Net::HTTP::NicheFeature::MyMixin.
   include MyMixin
+end
+
+
+# lib/net/http/niche_feature/version.rb
+
+module Net::HTTP::NicheFeature
+  VERSION = "1.0.0"
 end
 ```
 
