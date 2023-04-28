@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 2.6.8 (28 April 2023)
+
+* The new `Zeitwerk::Loader.for_gem_extension` gives you a loader configured
+  according to the conventions of a [gem
+  extension](https://guides.rubygems.org/name-your-gem/).
+
+  Please check its
+  [documentation](https://github.com/fxn/zeitwerk#for_gem_extension) for further
+  details.
+
 ## 2.6.7 (10 February 2023)
 
 * Reset module state on `Zeitwerk::NameError`.
