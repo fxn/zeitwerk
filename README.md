@@ -416,7 +416,7 @@ Zeitwerk::Loader.for_gem(warn_on_extra_files: false)
 
 Let's suppose you are writing a gem to extend `Net::HTTP` with some niche feature. By [convention](https://guides.rubygems.org/name-your-gem/):
 
-* The gem should be called `net-http-niche_feature`. That is, dashes for the extended part, a dash, and underscores for yours.
+* The gem should be called `net-http-niche_feature`. That is, hyphens for the extended part, a hyphen, and underscores for yours.
 * The namespace should be `Net::HTTP::NicheFeature`.
 * The entry point should be `lib/net/http/niche_feature.rb`.
 * Optionally, the gem could have a top-level `lib/net-http-niche_feature.rb`, but, if defined, that one should have just a `require` call for the entry point.
@@ -427,7 +427,7 @@ The top-level file mentioned in the last point is optional. In particular, from
 gem "net-http-niche_feature"
 ```
 
-if the dasherized file does not exist, Bundler notes the conventional dasherized pattern and issues a `require` for `net/http/niche_feature`.
+if the hyphenated file does not exist, Bundler notes the conventional hyphenated pattern and issues a `require` for `net/http/niche_feature`.
 
 Gem extensions following the conventions above have a dedicated loader constructor: `Zeitwerk::Loader.for_gem_extension`.
 
@@ -466,7 +466,7 @@ end
 
 If it exists, `lib/net/http/niche_feature/version.rb` is expected to define `Net::HTTP::NicheFeature::VERSION`.
 
-Due to technical reasons, the entry point of the gem has to be loaded with `Kernel#require`. Loading that file with `Kernel#load` or `Kernel#require_relative` won't generally work. This is important if you load the entry point from the optional dasherized top-level file.
+Due to technical reasons, the entry point of the gem has to be loaded with `Kernel#require`. Loading that file with `Kernel#load` or `Kernel#require_relative` won't generally work. This is important if you load the entry point from the optional hyphenated top-level file.
 
 `Zeitwerk::Loader.for_gem_extension` is idempotent when invoked from the same file, to support gems that want to reload (unlikely).
 

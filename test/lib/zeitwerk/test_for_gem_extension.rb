@@ -81,7 +81,7 @@ class TestForGemExtension < LoaderTest
     end
   end
 
-  test "works too if going through a dasherized entry point (require)" do
+  test "works too if going through a hyphenated entry point (require)" do
     files = [
       ["lib/my-gem-extension.rb", "require 'test_for_gem_extension/my_gem_extension'"],
       MY_GEM_EXTENSION,
