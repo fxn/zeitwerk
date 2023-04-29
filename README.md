@@ -3,7 +3,8 @@
 
 
 [![Gem Version](https://img.shields.io/gem/v/zeitwerk.svg?style=for-the-badge)](https://rubygems.org/gems/zeitwerk)
-[![Build Status](https://img.shields.io/github/actions/workflow/status/fxn/zeitwerk/ci.yml?branch=main&event=push&style=for-the-badge)](https://github.com/fxn/zeitwerk/actions/workflows/ci.yml?query=branch%3main)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/fxn/zeitwerk/ci.yml?branch=main&event=push&style=for-the-badge)](https://github.com/fxn/zeitwerk/actions/workflows/ci.yml?query=branch%3Amain)
+
 
 <!-- TOC -->
 
