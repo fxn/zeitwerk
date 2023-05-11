@@ -233,7 +233,7 @@ Please, note that the given root namespace must be non-reloadable, though autolo
 <a id="markdown-nested-root-directories" name="nested-root-directories"></a>
 #### Nested root directories
 
-Root directories should not be ideally nested, but Zeitwerk supports them because in Rails, for example, both `app/models` and `app/models/concerns` belong to the autoload paths.
+Root directories should ideally not be nested, but Zeitwerk supports them because in Rails, for example, both `app/models` and `app/models/concerns` belong to the autoload paths.
 
 Zeitwerk detects nested root directories, and treats them as roots only. In the example above, `concerns` is not considered to be a namespace below `app/models`. For example, the file:
 
