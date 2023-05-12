@@ -511,7 +511,6 @@ module Zeitwerk
               raise Error,
                 "loader\n\n#{pretty_inspect}\n\nwants to manage directory #{dir}," \
                 " which is already managed by\n\n#{loader.pretty_inspect}\n"
-              EOS
             end
           end
         end
