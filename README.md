@@ -734,9 +734,34 @@ loader.inflector.inflect "html_parser" => "HTMLParser"
 loader.inflector.inflect "mysql_adapter" => "MySQLAdapter"
 ```
 
+Overrides have to match exactly directory or file (without extension) _basenames_. For example, if you configure
+
+```ruby
+loader.inflector.inflect("xml" => "XML")
+```
+
+then the following constants are expected:
+
+```
+xml.rb         -> XML
+foo/xml        -> Foo::XML
+foo/bar/xml.rb -> Foo::Bar::XML
+```
+
+As you see, any directory whose basename is exactly `xml`, and any file whose basename is exactly `xml.rb` are expected to define the constant `XML` in the corresponding namespace. On the other hand, partial matches are ignored. For example, `xml_parser.rb` would be inflected as `XmlParser` because `xml_parser` is not equal to `xml`. You'd need an additional override:
+
+```ruby
+loader.inflector.inflect(
+  "xml"        => "XML",
+  "xml_parser" => "XMLParser"
+)
+```
+
+If you need more flexibility, you can define a custom inflector, as explained down below.
+
 Overrides need to be configured before calling `setup`.
 
- The inflectors of different loaders are independent of each other. There are no global inflection rules or global configuration that can affect this inflector. It is deterministic.
+The inflectors of different loaders are independent of each other. There are no global inflection rules or global configuration that can affect this inflector. It is deterministic.
 
 <a id="markdown-zeitwerkgeminflector" name="zeitwerkgeminflector"></a>
 #### Zeitwerk::GemInflector
