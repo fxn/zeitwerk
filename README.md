@@ -1293,7 +1293,7 @@ The test suite passes on Windows with codepage `Windows-1252` if all the involve
 
 Zeitwerk works fine with [debug.rb](https://github.com/ruby/debug) and [Break](https://github.com/gsamokovarov/break).
 
-[Byebug](https://github.com/deivid-rodriguez/byebug) is compatible except for an edge case explained in [deivid-rodriguez/byebug#564](https://github.com/deivid-rodriguez/byebug/issues/564).
+[Byebug](https://github.com/deivid-rodriguez/byebug) is compatible except for an edge case explained in [deivid-rodriguez/byebug#564](https://github.com/deivid-rodriguez/byebug/issues/564). Prior to CRuby 3.1, debug.rb has a similar edge incompatibility.
 
 <a id="markdown-pronunciation" name="pronunciation"></a>
 ## Pronunciation
