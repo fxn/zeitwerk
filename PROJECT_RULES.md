@@ -47,6 +47,7 @@ Documented public methods conform the public interface. In particular:
 
 * Public methods tagged as `@private` do not belong to the public interface.
 * Undocumented public methods do not belong to the public interface. They are probably exploratory and may change or be deleted without warning. These are private interface in practice.
+* Public methods whose name starts with two underscores, as in `__autoloads`, do not belong to the public interface.
 * Undocumented public methods can be used in the Rails integration. We control both repositories, and Rails usage may help refine the actual public interface.
 
 Any release can change the private interface, including patch releases.
