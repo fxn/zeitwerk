@@ -1288,7 +1288,7 @@ loader.cpath_at("a/b/collapsed")   # => "A::B", edge case
 loader.cpath_at("a/b")             # => "A::B"
 ```
 
-If the argument corresponds to a hidden or ignored file or directory, the method returns `nil`. Same if the argument is not managed by the loader.
+If the argument corresponds to an [ignored file or directory](#ignoring-parts-of-the-project), the method returns `nil`. Same if the argument is not managed by the loader.
 
 `Zeitwerk::Error` is raised if the given path does not exist, or a constant path cannot be derived from it:
 
