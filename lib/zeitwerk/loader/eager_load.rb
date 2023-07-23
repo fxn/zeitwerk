@@ -45,8 +45,10 @@ module Zeitwerk::Loader::EagerLoad
 
       break if root_namespace = roots[dir]
 
+      basename = File.basename(dir)
+      return if hidden?(basename)
+
       unless collapse?(dir)
-        basename = File.basename(dir)
         cnames << inflector.camelize(basename, dir).to_sym
       end
     end

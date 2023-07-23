@@ -230,6 +230,17 @@ class TestEagerLoadDir < LoaderTest
     end
   end
 
+  test "does not eager load hidden directories" do
+    files = [["a/x.rb", "X = 1"], ["a/.b/c/x.rb", nil]]
+    with_setup(files) do
+      loader.eager_load_dir("a/.b")
+      assert !required?(files[0])
+
+      loader.eager_load_dir("a/.b/c")
+      assert !required?(files[0])
+    end
+  end
+
   test "can be called recursively" do
     $test_loader = loader
     files = [
