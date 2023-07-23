@@ -57,6 +57,8 @@
   - [Beware of circular dependencies](#beware-of-circular-dependencies)
   - [Reopening third-party namespaces](#reopening-third-party-namespaces)
   - [Introspection](#introspection)
+    - [`Zeitwerk::Loader#dirs`](#zeitwerkloaderdirs)
+    - [`Zeitwerk::Loader#cpath_at`](#zeitwerkloadercpath_at)
   - [Encodings](#encodings)
   - [Rules of thumb](#rules-of-thumb)
   - [Debuggers](#debuggers)
@@ -1240,6 +1242,9 @@ With that, when Zeitwerk scans the file system and reaches the gem directories `
 <a id="markdown-introspection" name="introspection"></a>
 ### Introspection
 
+<a id="markdown-zeitwerkloaderdirs" name="zeitwerkloaderdirs"></a>
+#### `Zeitwerk::Loader#dirs`
+
 The method `Zeitwerk::Loader#dirs` returns an array with the absolute paths of the root directories as strings:
 
 ```ruby
@@ -1260,6 +1265,39 @@ loader.dirs(namespaces: true) # => { "/foo" => Object, "/bar" => Bar }
 By default, ignored root directories are filtered out. If you want them included, please pass `ignored: true`.
 
 These collections are read-only. Please add to them with `Zeitwerk::Loader#push_dir`.
+
+<a id="markdown-zeitwerkloadercpath_at" name="zeitwerkloadercpath_at"></a>
+#### `Zeitwerk::Loader#cpath_at`
+
+Given a path as a string or `Pathname` object, `Zeitwerk::Loader#cpath_at` returns a string with the corresponding expected constant path.
+
+Some examples, assuming that `app/models` is a root directory:
+
+```ruby
+loader.cpath_at("app/models")                  # => "Object"
+loader.cpath_at("app/models/user.rb")          # => "User"
+loader.cpath_at("app/models/hotel")            # => "Hotel"
+loader.cpath_at("app/models/hotel/billing.rb") # => "Hotel::Billing"
+```
+
+If `collapsed` is a collapsed directory:
+
+```ruby
+loader.cpath_at("a/b/collapsed/c") # => "A::B::C"
+loader.cpath_at("a/b/collapsed")   # => "A::B", edge case
+loader.cpath_at("a/b")             # => "A::B"
+```
+
+If the argument corresponds to a hidden or ignored file or directory, the method returns `nil`. Same if the argument is not managed by the loader.
+
+`Zeitwerk::Error` is raised if the given path does not exist, or a constant path cannot be derived from it:
+
+```ruby
+loader.cpath_at("non_existing_file.rb") # => Zeitwerk::Error
+loader.cpath_at("8.rb")                 # => Zeitwerk::Error
+```
+
+This method does not parse file contents and does not guarantee files define the returned constant path. It just says which is the _expected_ one.
 
 <a id="markdown-encodings" name="encodings"></a>
 ### Encodings

@@ -63,7 +63,11 @@ class LoaderTest < Minitest::Test
     Dir.chdir(TMP_DIR) do
       files.each do |fname, contents|
         FileUtils.mkdir_p(File.dirname(fname))
-        File.write(fname, contents)
+        if contents
+          File.write(fname, contents)
+        else
+          FileUtils.touch(fname)
+        end
       end
       yield
     end

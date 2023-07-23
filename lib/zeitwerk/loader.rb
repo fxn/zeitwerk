@@ -228,6 +228,69 @@ module Zeitwerk
       setup
     end
 
+  # @sig (String | Pathname) -> String?
+  def cpath_at(path)
+    abspath = File.expand_path(path)
+
+    raise Zeitwerk::Error.new("#{abspath} does not exist") unless File.exist?(abspath)
+
+    return unless dir?(abspath) || ruby?(abspath)
+    return if ignored_path?(abspath)
+
+    cnames = []
+    abspaths = []
+
+    if ruby?(abspath)
+      basename = File.basename(abspath, ".rb")
+      return if hidden?(basename)
+
+      cnames << inflector.camelize(basename, abspath).to_sym
+      abspaths << abspath
+      walk_up_from = File.dirname(abspath)
+    else
+      walk_up_from = abspath
+    end
+
+    root_namespace = nil
+
+    walk_up(walk_up_from) do |dir|
+      break if root_namespace = roots[dir]
+      return if ignored_path?(dir)
+
+      basename = File.basename(dir)
+      return if hidden?(basename)
+
+      unless collapse?(dir)
+        cnames << inflector.camelize(basename, dir).to_sym
+        abspaths << dir
+      end
+    end
+
+    return unless root_namespace
+
+    if cnames.empty?
+      real_mod_name(root_namespace)
+    else
+      # We reverse before validating the segments to report the leftmost
+      # problematic one, if any.
+      cnames.reverse!
+
+      validator = Module.new
+      cnames.each_with_index do |cname, i|
+        validator.const_defined?(cname)
+      rescue ::NameError
+        j = -(i + 1)
+        raise Zeitwerk::Error.new("cannot derive a constant name from #{abspaths[j]}")
+      end
+
+      if root_namespace == Object
+        cnames.join("::")
+      else
+        "#{real_mod_name(root_namespace)}::#{cnames.join("::")}"
+      end
+    end
+  end
+
     # Says if the given constant path would be unloaded on reload. This
     # predicate returns `false` if reloading is disabled.
     #

@@ -1,5 +1,24 @@
 # CHANGELOG
 
+## 2.6.9 (Unreleased)
+
+* Given a path as a string or `Pathname` object, `Zeitwerk::Loader#cpath_at`
+  returns a string with the corresponding expected constant path.
+
+  Some examples, assuming that `app/models` is a root directory:
+
+  ```ruby
+  loader.cpath_at("app/models")                  # => "Object"
+  loader.cpath_at("app/models/user.rb")          # => "User"
+  loader.cpath_at("app/models/hotel")            # => "Hotel"
+  loader.cpath_at("app/models/hotel/billing.rb") # => "Hotel::Billing"
+  ```
+
+  This method returns `nil` for some input like ignored files, and may raise
+  `Zeitwerk::Error` too. Please check its
+  [documentation](https://github.com/fxn/zeitwerk#zeitwerkloadercpath_at) for
+  further details.
+
 ## 2.6.8 (28 April 2023)
 
 * The new `Zeitwerk::Loader.for_gem_extension` gives you a loader configured
