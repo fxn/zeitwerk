@@ -109,6 +109,14 @@ class TestLoadFileErrors < LoaderTest
     end
   end
 
+  test "the root directory can be hidden" do
+    files = [[".rd/n/x.rb", "N::X = 1"]]
+    with_setup(files, dirs: [".rd"]) do
+      loader.load_file(".rd/n/x.rb")
+      assert required?(files[0])
+    end
+  end
+
   test "raises if the file exists, but it is not managed by this loader" do
     files = [["rd1/x.rb", "X = 1"], ["external/x.rb", ""]]
     with_setup(files, dirs: %w(rd1)) do
