@@ -95,6 +95,20 @@ class TestLoadFileErrors < LoaderTest
     end
   end
 
+  test "raises if the argument is a hidden Ruby file" do
+    with_setup([[".ignored.rb", nil]]) do
+      e = assert_raises { loader.load_file(".ignored.rb") }
+      assert_equal "#{File.expand_path('.ignored.rb')} is ignored", e.message
+    end
+  end
+
+  test "raises if the argument is a descendant of a hidden directory" do
+    with_setup([[".m/n/x.rb", nil]]) do
+      e = assert_raises { loader.load_file(".m/n/x.rb") }
+      assert_equal "#{File.expand_path('.m/n/x.rb')} is ignored", e.message
+    end
+  end
+
   test "raises if the file exists, but it is not managed by this loader" do
     files = [["rd1/x.rb", "X = 1"], ["external/x.rb", ""]]
     with_setup(files, dirs: %w(rd1)) do

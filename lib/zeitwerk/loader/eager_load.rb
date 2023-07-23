@@ -121,6 +121,8 @@ module Zeitwerk::Loader::EagerLoad
     raise Zeitwerk::Error.new("#{abspath} is ignored") if ignored_path?(abspath)
 
     basename = File.basename(abspath, ".rb")
+    raise Zeitwerk::Error.new("#{abspath} is ignored") if hidden?(basename)
+
     base_cname = inflector.camelize(basename, abspath).to_sym
 
     root_namespace = nil
@@ -131,8 +133,10 @@ module Zeitwerk::Loader::EagerLoad
 
       break if root_namespace = roots[dir]
 
+      basename = File.basename(dir)
+      raise Zeitwerk::Error.new("#{abspath} is ignored") if hidden?(basename)
+
       unless collapse?(dir)
-        basename = File.basename(dir)
         cnames << inflector.camelize(basename, dir).to_sym
       end
     end
