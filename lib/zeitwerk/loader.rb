@@ -229,7 +229,7 @@ module Zeitwerk
     end
 
   # @sig (String | Pathname) -> String?
-  def cpath_at(path)
+  def expected_cpath_at(path)
     abspath = File.expand_path(path)
 
     raise Zeitwerk::Error.new("#{abspath} does not exist") unless File.exist?(abspath)
