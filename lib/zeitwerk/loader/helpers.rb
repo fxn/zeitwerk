@@ -140,12 +140,4 @@ module Zeitwerk::Loader::Helpers
   private def crem(parent, cname)
     parent.__send__(:remove_const, cname)
   end
-
-  private def valid_cname?(maybe_cname)
-    Kernel.const_defined?(maybe_cname)
-  rescue ::NameError
-    false
-  else
-    true
-  end
 end
