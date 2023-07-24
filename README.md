@@ -1290,11 +1290,16 @@ loader.expected_cpath_at("a/b")             # => "A::B"
 
 If the argument corresponds to an [ignored file or directory](#ignoring-parts-of-the-project), the method returns `nil`. Same if the argument is not managed by the loader.
 
-`Zeitwerk::Error` is raised if the given path does not exist, or a constant path cannot be derived from it:
+`Zeitwerk::Error` is raised if the given path does not exist:
 
 ```ruby
 loader.expected_cpath_at("non_existing_file.rb") # => Zeitwerk::Error
-loader.expected_cpath_at("8.rb")                 # => Zeitwerk::Error
+```
+
+`Zeitwer::NameError` is raised if a constant path cannot be derived from it:
+
+```ruby
+loader.expected_cpath_at("8.rb") # => Zeitwerk::NameError
 ```
 
 This method does not parse file contents and does not guarantee files define the returned constant path. It just says which is the _expected_ one.

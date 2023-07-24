@@ -14,13 +14,13 @@ class TestExpectedCpathAtErrors < LoaderTest
     end
   end
 
-  test "raises Zeitwerk::Error if the argument does not yield a constant name" do
+  test "raises Zeitwerk::NameError if the argument does not yield a constant name" do
     files = [["foo-bar.rb", nil], ["1.rb", nil]]
     with_files(files) do
       loader.push_dir(".")
 
       files.each do |file, _contents|
-        error = assert_raises Zeitwerk::Error do
+        error = assert_raises Zeitwerk::NameError do
           loader.expected_cpath_at(file)
         end
         abspath = File.expand_path(file)
@@ -29,10 +29,10 @@ class TestExpectedCpathAtErrors < LoaderTest
     end
   end
 
-  test "raises Zeitwerk::Error if some intermediate segment does not yield a constant name" do
+  test "raises Zeitwerk::NameError if some intermediate segment does not yield a constant name" do
     with_files([["x/foo-bar/y/z.rb", nil]]) do
       loader.push_dir(".")
-      error = assert_raises Zeitwerk::Error do
+      error = assert_raises Zeitwerk::NameError do
         loader.expected_cpath_at("x/foo-bar/y/z.rb")
       end
       abspath = File.expand_path("x/foo-bar")

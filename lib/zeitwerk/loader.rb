@@ -275,12 +275,11 @@ module Zeitwerk
       # problematic one, if any.
       cnames.reverse!
 
-      validator = Module.new
       cnames.each_with_index do |cname, i|
-        validator.const_defined?(cname)
-      rescue ::NameError
-        j = -(i + 1)
-        raise Zeitwerk::Error.new("cannot derive a constant name from #{abspaths[j]}")
+        unless valid_cname?(cname)
+          j = -(i + 1)
+          raise Zeitwerk::NameError.new("cannot derive a constant name from #{abspaths[j]}")
+        end
       end
 
       if root_namespace == Object
