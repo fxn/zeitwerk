@@ -19,12 +19,13 @@
   [documentation](https://github.com/fxn/zeitwerk#zeitwerkloadercpath_expected_at) for
   further details.
 
-* `Zeitwerk::Loader#load_file` raises a more informative error if given a hidden
-  file or directory.
+* `Zeitwerk::Loader#load_file` raises with a more informative error if given a
+  hidden file or directory.
 
 * `Zeitwerk::Loader#eager_load_dir` does nothing if the argument is a hidden
-  file or directory. This is coherent with its existing logic for eager load
-  exclusions and ignored paths.
+  file or directory. This is coherent with its existing behavior for eager load
+  exclusions and ignored paths. Before, that kind of argument would result in a
+  non-deliberate `NameError`.
 
 * Documentation improvements.
 
