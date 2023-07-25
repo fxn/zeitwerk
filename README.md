@@ -1296,7 +1296,7 @@ If the argument corresponds to an [ignored file or directory](#ignoring-parts-of
 loader.cpath_expected_at("non_existing_file.rb") # => Zeitwerk::Error
 ```
 
-`Zeitwer::NameError` is raised if a constant path cannot be derived from it:
+`Zeitwerk::NameError` is raised if a constant path cannot be derived from it:
 
 ```ruby
 loader.cpath_expected_at("8.rb") # => Zeitwerk::NameError
