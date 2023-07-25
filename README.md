@@ -58,7 +58,7 @@
   - [Reopening third-party namespaces](#reopening-third-party-namespaces)
   - [Introspection](#introspection)
     - [`Zeitwerk::Loader#dirs`](#zeitwerkloaderdirs)
-    - [`Zeitwerk::Loader#expected_cpath_at`](#zeitwerkloaderexpected_cpath_at)
+    - [`Zeitwerk::Loader#cpath_expected_at`](#zeitwerkloadercpath_expected_at)
   - [Encodings](#encodings)
   - [Rules of thumb](#rules-of-thumb)
   - [Debuggers](#debuggers)
@@ -1266,26 +1266,26 @@ By default, ignored root directories are filtered out. If you want them included
 
 These collections are read-only. Please add to them with `Zeitwerk::Loader#push_dir`.
 
-<a id="markdown-zeitwerkloaderexpected_cpath_at" name="zeitwerkloaderexpected_cpath_at"></a>
-#### `Zeitwerk::Loader#expected_cpath_at`
+<a id="markdown-zeitwerkloadercpath_expected_at" name="zeitwerkloadercpath_expected_at"></a>
+#### `Zeitwerk::Loader#cpath_expected_at`
 
-Given a path as a string or `Pathname` object, `Zeitwerk::Loader#expected_cpath_at` returns a string with the corresponding expected constant path.
+Given a path as a string or `Pathname` object, `Zeitwerk::Loader#cpath_expected_at` returns a string with the corresponding expected constant path.
 
 Some examples, assuming that `app/models` is a root directory:
 
 ```ruby
-loader.expected_cpath_at("app/models")                  # => "Object"
-loader.expected_cpath_at("app/models/user.rb")          # => "User"
-loader.expected_cpath_at("app/models/hotel")            # => "Hotel"
-loader.expected_cpath_at("app/models/hotel/billing.rb") # => "Hotel::Billing"
+loader.cpath_expected_at("app/models")                  # => "Object"
+loader.cpath_expected_at("app/models/user.rb")          # => "User"
+loader.cpath_expected_at("app/models/hotel")            # => "Hotel"
+loader.cpath_expected_at("app/models/hotel/billing.rb") # => "Hotel::Billing"
 ```
 
 If `collapsed` is a collapsed directory:
 
 ```ruby
-loader.expected_cpath_at("a/b/collapsed/c") # => "A::B::C"
-loader.expected_cpath_at("a/b/collapsed")   # => "A::B", edge case
-loader.expected_cpath_at("a/b")             # => "A::B"
+loader.cpath_expected_at("a/b/collapsed/c") # => "A::B::C"
+loader.cpath_expected_at("a/b/collapsed")   # => "A::B", edge case
+loader.cpath_expected_at("a/b")             # => "A::B"
 ```
 
 If the argument corresponds to an [ignored file or directory](#ignoring-parts-of-the-project), the method returns `nil`. Same if the argument is not managed by the loader.
@@ -1293,13 +1293,13 @@ If the argument corresponds to an [ignored file or directory](#ignoring-parts-of
 `Zeitwerk::Error` is raised if the given path does not exist:
 
 ```ruby
-loader.expected_cpath_at("non_existing_file.rb") # => Zeitwerk::Error
+loader.cpath_expected_at("non_existing_file.rb") # => Zeitwerk::Error
 ```
 
 `Zeitwer::NameError` is raised if a constant path cannot be derived from it:
 
 ```ruby
-loader.expected_cpath_at("8.rb") # => Zeitwerk::NameError
+loader.cpath_expected_at("8.rb") # => Zeitwerk::NameError
 ```
 
 This method does not parse file contents and does not guarantee files define the returned constant path. It just says which is the _expected_ one.

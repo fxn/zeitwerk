@@ -2,21 +2,21 @@
 
 ## 2.6.9 (Unreleased)
 
-* Given a path as a string or `Pathname` object, `Zeitwerk::Loader#expected_cpath_at`
+* Given a path as a string or `Pathname` object, `Zeitwerk::Loader#cpath_expected_at`
   returns a string with the corresponding expected constant path.
 
   Some examples, assuming that `app/models` is a root directory:
 
   ```ruby
-  loader.expected_cpath_at("app/models")                  # => "Object"
-  loader.expected_cpath_at("app/models/user.rb")          # => "User"
-  loader.expected_cpath_at("app/models/hotel")            # => "Hotel"
-  loader.expected_cpath_at("app/models/hotel/billing.rb") # => "Hotel::Billing"
+  loader.cpath_expected_at("app/models")                  # => "Object"
+  loader.cpath_expected_at("app/models/user.rb")          # => "User"
+  loader.cpath_expected_at("app/models/hotel")            # => "Hotel"
+  loader.cpath_expected_at("app/models/hotel/billing.rb") # => "Hotel::Billing"
   ```
 
   This method returns `nil` for some input like ignored files, and may raise
   `Zeitwerk::Error` too. Please check its
-  [documentation](https://github.com/fxn/zeitwerk#zeitwerkloaderexpected_cpath_at) for
+  [documentation](https://github.com/fxn/zeitwerk#zeitwerkloadercpath_expected_at) for
   further details.
 
 * `Zeitwerk::Loader#load_file` raises a more informative error if given a hidden
