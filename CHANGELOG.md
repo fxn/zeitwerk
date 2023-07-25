@@ -15,9 +15,9 @@
   ```
 
   This method returns `nil` for some input like ignored files, and may raise
-  `Zeitwerk::Error` too. Please check its
-  [documentation](https://github.com/fxn/zeitwerk#zeitwerkloadercpath_expected_at) for
-  further details.
+  errors too. Please check its
+  [documentation](https://github.com/fxn/zeitwerk#zeitwerkloadercpath_expected_at)
+  for further details.
 
 * `Zeitwerk::Loader#load_file` raises with a more informative error if given a
   hidden file or directory.
