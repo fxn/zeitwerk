@@ -19,6 +19,15 @@
   [documentation](https://github.com/fxn/zeitwerk#zeitwerkloaderexpected_cpath_at) for
   further details.
 
+* `Zeitwerk::Loader#load_file` raises a more informative error if given a hidden
+  file or directory.
+
+* `Zeitwerk::Loader#eager_load_dir` does nothing if the argument is a hidden
+  file or directory. This is coherent with its existing logic for eager load
+  exclusions and ignored paths.
+
+* Documentation improvements.
+
 ## 2.6.8 (28 April 2023)
 
 * The new `Zeitwerk::Loader.for_gem_extension` gives you a loader configured
