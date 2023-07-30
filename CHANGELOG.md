@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2.6.10 (30 July 2023)
+
+* Improve validation of the values returned by the inflector's `camelize`.
+
 ## 2.6.9 (25 July 2023)
 
 * Given a path as a string or `Pathname` object, `Zeitwerk::Loader#cpath_expected_at`
