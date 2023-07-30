@@ -19,13 +19,15 @@ class TestExpectedCpathAtErrors < LoaderTest
     with_files(files) do
       loader.push_dir(".")
 
-      files.each do |file, _contents|
-        error = assert_raises Zeitwerk::NameError do
-          loader.cpath_expected_at(file)
-        end
-        abspath = File.expand_path(file)
-        assert_includes error.message, "cannot derive a constant name from #{abspath}"
+      error = assert_raises Zeitwerk::NameError do
+        loader.cpath_expected_at(files[0][0])
       end
+      assert_includes error.message, "wrong constant name Foo-bar"
+
+      error = assert_raises Zeitwerk::NameError do
+        loader.cpath_expected_at(files[1][0])
+      end
+      assert_includes error.message, "wrong constant name 1"
     end
   end
 
@@ -35,8 +37,7 @@ class TestExpectedCpathAtErrors < LoaderTest
       error = assert_raises Zeitwerk::NameError do
         loader.cpath_expected_at("x/foo-bar/y/z.rb")
       end
-      abspath = File.expand_path("x/foo-bar")
-      assert_includes error.message, "cannot derive a constant name from #{abspath}"
+      assert_includes error.message, "wrong constant name Foo-bar"
     end
   end
 end

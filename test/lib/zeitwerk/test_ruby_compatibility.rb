@@ -157,6 +157,15 @@ class TestRubyCompatibility < LoaderTest
     end
   end
 
+  # We delegate constant name validation to Module#const_defined?.
+  test "const_defined? raises NameError for invalid cnames" do
+    error = assert_raises ::NameError do
+      Module.new.const_defined?("Foo-Bar", false)
+    end
+
+    assert_includes error.message, "wrong constant name Foo-Bar"
+  end
+
   # Unloading removes autoloads by calling remove_const. It is convenient that
   # remove_const does not execute the autoload because it would be surprising,
   # and slower, that those unused files got loaded precisely while unloading.
