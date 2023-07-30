@@ -3,7 +3,7 @@
 require "pathname"
 require "test_helper"
 
-class TestExpectedCpathAtErrors < LoaderTest
+class TestCpathExpectedAtErrors < LoaderTest
   test "raises Zeitwerk::Error if the argument does not exist" do
     with_setup(dirs: ["."]) do
       error = assert_raises Zeitwerk::Error do
@@ -42,7 +42,7 @@ class TestExpectedCpathAtErrors < LoaderTest
   end
 end
 
-class TestExpectedCpathAtNil < LoaderTest
+class TestCpathExpectedAtNil < LoaderTest
   test "returns nil if the argument is not a directory or Ruby file" do
     files = [["tasks/database.rake", nil], ["CHANGELOG", nil]]
     with_setup(files) do
@@ -84,7 +84,7 @@ class TestExpectedCpathAtNil < LoaderTest
   end
 end
 
-class TestExpectedCpathAtString < LoaderTest
+class TestCpathExpectedAtString < LoaderTest
   module M
     def self.name
       "Overridden"
