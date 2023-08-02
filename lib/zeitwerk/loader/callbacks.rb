@@ -32,8 +32,9 @@ module Zeitwerk::Loader::Callbacks
   # @private
   # @sig (String) -> void
   def on_dir_autoloaded(dir)
-    # Module#autoload does not serialize concurrent requires, and we handle
-    # directories ourselves, so the callback needs to account for concurrency.
+    # Module#autoload does not serialize concurrent requires in CRuby < 3.2, and
+    # we handle directories ourselves without going through Kernel#require, so
+    # the callback needs to account for concurrency.
     #
     # Multi-threading would introduce a race condition here in which thread t1
     # autovivifies the module, and while autoloads for its children are being
