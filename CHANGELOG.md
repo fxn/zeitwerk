@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 2.6.11 (2 August 2023)
+
+* Let `on_load` callbacks for implicit namespaces autoload other implicit
+  namespaces.
+
 ## 2.6.10 (30 July 2023)
 
 * Improve validation of the values returned by the inflector's `camelize`.
