@@ -44,7 +44,7 @@ module Zeitwerk::Loader::Callbacks
     # That not only would reassign the constant (undesirable per se) but, worse,
     # the module object created by t2 wouldn't have any of the autoloads for its
     # children, since t1 would have correctly deleted its namespace_dirs entry.
-    mutex2.synchronize do
+    dirs_autoload_monitor.synchronize do
       if cref = autoloads.delete(dir)
         autovivified_module = cref[0].const_set(cref[1], Module.new)
         cpath = autovivified_module.name

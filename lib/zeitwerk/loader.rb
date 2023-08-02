@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "monitor"
 require "set"
 
 module Zeitwerk
@@ -91,9 +92,9 @@ module Zeitwerk
     attr_reader :mutex
     private :mutex
 
-    # @sig Mutex
-    attr_reader :mutex2
-    private :mutex2
+    # @sig Monitor
+    attr_reader :dirs_autoload_monitor
+    private :dirs_autoload_monitor
 
     def initialize
       super
@@ -103,10 +104,11 @@ module Zeitwerk
       @to_unload       = {}
       @namespace_dirs  = Hash.new { |h, cpath| h[cpath] = [] }
       @shadowed_files  = Set.new
-      @mutex           = Mutex.new
-      @mutex2          = Mutex.new
       @setup           = false
       @eager_loaded    = false
+
+      @mutex = Mutex.new
+      @dirs_autoload_monitor = Monitor.new
 
       Registry.register_loader(self)
     end

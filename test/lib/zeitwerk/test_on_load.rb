@@ -191,4 +191,15 @@ class TestOnLoad < LoaderTest
       assert loader.send(:on_load_callbacks).empty?
     end
   end
+
+  test "on_load is reentrant for implicit namespaces" do
+    files = [["m/x.rb", "M::X = true"], ["n/x.rb", "N::X = true"]]
+    with_setup(files) do
+      loaded = false
+      loader.on_load("M") { loaded = N }
+
+      assert M
+      assert loaded
+    end
+  end
 end
