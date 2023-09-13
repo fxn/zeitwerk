@@ -171,7 +171,7 @@ module Zeitwerk::Loader::EagerLoad
         next if honour_exclusions && eager_load_exclusions.member?(abspath)
 
         if ruby?(abspath)
-          if (cref = autoloads[abspath]) && !shadowed_file?(abspath)
+          if (cref = autoloads[abspath])
             cget(*cref)
           end
         else
