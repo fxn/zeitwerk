@@ -20,8 +20,16 @@ module Zeitwerk::Loader::Callbacks
     else
       msg = "expected file #{file} to define constant #{cpath}, but didn't"
       log(msg) if logger
+
+      # Ruby still keeps the autoload defined, but we remove it because the
+      # contract in Zeitwerk is more strict.
       crem(*cref)
+
+      # Since the expected constant was not defined, there is nothing to unload.
+      # However, if the exception is rescued and reloading is enabled, we still
+      # need to deleted the file from $LOADED_FEATURES.
       to_unload[cpath] = [file, cref] if reloading_enabled?
+
       raise Zeitwerk::NameError.new(msg, cref.last)
     end
   end
