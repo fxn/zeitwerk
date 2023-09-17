@@ -6,7 +6,7 @@ class TestCallbacks < LoaderTest
   module Namespace; end
 
   test "autoloading a file triggers on_file_autoloaded (Object)" do
-    def loader.on_file_autoloaded(file)
+    def loader.__on_file_autoloaded(file)
       if file == File.expand_path("x.rb")
         $on_file_autoloaded_called = true
       end
@@ -22,7 +22,7 @@ class TestCallbacks < LoaderTest
   end
 
   test "autoloading a file triggers on_file_autoloaded (Namespace)" do
-    def loader.on_file_autoloaded(file)
+    def loader.__on_file_autoloaded(file)
       if file == File.expand_path("x.rb")
         $on_file_autoloaded_called = true
       end
@@ -38,7 +38,7 @@ class TestCallbacks < LoaderTest
   end
 
   test "requiring an autoloadable file triggers on_file_autoloaded (Object)" do
-    def loader.on_file_autoloaded(file)
+    def loader.__on_file_autoloaded(file)
       if file == File.expand_path("y.rb")
         $on_file_autoloaded_called = true
       end
@@ -58,7 +58,7 @@ class TestCallbacks < LoaderTest
   end
 
   test "requiring an autoloadable file triggers on_file_autoloaded (Namespace)" do
-    def loader.on_file_autoloaded(file)
+    def loader.__on_file_autoloaded(file)
       if file == File.expand_path("y.rb")
         $on_file_autoloaded_called = true
       end

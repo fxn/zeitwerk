@@ -2,12 +2,12 @@
 
 module Zeitwerk::Loader::Callbacks
   include Zeitwerk::RealModName
+  extend Zeitwerk::Internal
 
   # Invoked from our decorated Kernel#require when a managed file is autoloaded.
   #
-  # @private
   # @sig (String) -> void
-  def on_file_autoloaded(file)
+  internal def on_file_autoloaded(file)
     cref  = autoloads.delete(file)
     cpath = cpath(*cref)
 

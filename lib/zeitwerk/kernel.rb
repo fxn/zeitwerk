@@ -28,7 +28,7 @@ module Kernel
     if loader = Zeitwerk::Registry.loader_for(path)
       if path.end_with?(".rb")
         required = zeitwerk_original_require(path)
-        loader.on_file_autoloaded(path) if required
+        loader.__on_file_autoloaded(path) if required
         required
       else
         loader.on_dir_autoloaded(path)
@@ -39,7 +39,7 @@ module Kernel
       if required
         abspath = $LOADED_FEATURES.last
         if loader = Zeitwerk::Registry.loader_for(abspath)
-          loader.on_file_autoloaded(abspath)
+          loader.__on_file_autoloaded(abspath)
         end
       end
       required
