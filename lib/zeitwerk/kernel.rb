@@ -31,7 +31,7 @@ module Kernel
         loader.__on_file_autoloaded(path) if required
         required
       else
-        loader.on_dir_autoloaded(path)
+        loader.__on_dir_autoloaded(path)
         true
       end
     else

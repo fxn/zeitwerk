@@ -37,9 +37,8 @@ module Zeitwerk::Loader::Callbacks
   # Invoked from our decorated Kernel#require when a managed directory is
   # autoloaded.
   #
-  # @private
   # @sig (String) -> void
-  def on_dir_autoloaded(dir)
+  internal def on_dir_autoloaded(dir)
     # Module#autoload does not serialize concurrent requires in CRuby < 3.2, and
     # we handle directories ourselves without going through Kernel#require, so
     # the callback needs to account for concurrency.

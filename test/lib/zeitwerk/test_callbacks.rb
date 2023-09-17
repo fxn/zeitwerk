@@ -78,7 +78,7 @@ class TestCallbacks < LoaderTest
   end
 
   test "autoloading a directory triggers on_dir_autoloaded (Object)" do
-    def loader.on_dir_autoloaded(dir)
+    def loader.__on_dir_autoloaded(dir)
       if dir == File.expand_path("m")
         $on_dir_autoloaded_called = true
       end
@@ -94,7 +94,7 @@ class TestCallbacks < LoaderTest
   end
 
   test "autoloading a directory triggers on_dir_autoloaded (Namespace)" do
-    def loader.on_dir_autoloaded(dir)
+    def loader.__on_dir_autoloaded(dir)
       if dir == File.expand_path("m")
         $on_dir_autoloaded_called = true
       end
