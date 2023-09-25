@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2.6.12 (25 September 2023)
+
+* Maintenance release with some internal polishing.
+
 ## 2.6.11 (2 August 2023)
 
 * Let `on_load` callbacks for implicit namespaces autoload other implicit
