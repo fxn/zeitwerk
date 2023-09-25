@@ -121,7 +121,7 @@ module Zeitwerk
         break if @setup
 
         actual_roots.each do |root_dir, root_namespace|
-          set_autoloads_in_dir(root_dir, root_namespace)
+          define_autoloads_in_dir(root_dir, root_namespace)
         end
 
         on_setup_callbacks.each(&:call)
@@ -407,14 +407,14 @@ module Zeitwerk
     end
 
     # @sig (String, Module) -> void
-    private def set_autoloads_in_dir(dir, parent)
+    private def define_autoloads_in_dir(dir, parent)
       ls(dir) do |basename, abspath|
         if ruby?(basename)
           basename.delete_suffix!(".rb")
           autoload_file(parent, cname_for(basename, abspath), abspath)
         else
           if collapse?(abspath)
-            set_autoloads_in_dir(abspath, parent)
+            define_autoloads_in_dir(abspath, parent)
           else
             autoload_subdir(parent, cname_for(basename, abspath), abspath)
           end
@@ -443,12 +443,12 @@ module Zeitwerk
       elsif !cdef?(parent, cname)
         # First time we find this namespace, set an autoload for it.
         namespace_dirs[cpath(parent, cname)] << subdir
-        set_autoload(parent, cname, subdir)
+        define_autoload(parent, cname, subdir)
       else
         # For whatever reason the constant that corresponds to this namespace has
         # already been defined, we have to recurse.
         log("the namespace #{cpath(parent, cname)} already exists, descending into #{subdir}") if logger
-        set_autoloads_in_dir(subdir, cget(parent, cname))
+        define_autoloads_in_dir(subdir, cget(parent, cname))
       end
     end
 
@@ -471,7 +471,7 @@ module Zeitwerk
         shadowed_files << file
         log("file #{file} is ignored because #{cpath(parent, cname)} is already defined") if logger
       else
-        set_autoload(parent, cname, file)
+        define_autoload(parent, cname, file)
       end
     end
 
@@ -485,12 +485,12 @@ module Zeitwerk
 
       log("earlier autoload for #{cpath(parent, cname)} discarded, it is actually an explicit namespace defined in #{file}") if logger
 
-      set_autoload(parent, cname, file)
+      define_autoload(parent, cname, file)
       register_explicit_namespace(cpath(parent, cname))
     end
 
     # @sig (Module, Symbol, String) -> void
-    private def set_autoload(parent, cname, abspath)
+    private def define_autoload(parent, cname, abspath)
       parent.autoload(cname, abspath)
 
       if logger

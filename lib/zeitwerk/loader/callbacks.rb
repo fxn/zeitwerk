@@ -81,7 +81,7 @@ module Zeitwerk::Loader::Callbacks
   def on_namespace_loaded(namespace)
     if dirs = namespace_dirs.delete(real_mod_name(namespace))
       dirs.each do |dir|
-        set_autoloads_in_dir(dir, namespace)
+        define_autoloads_in_dir(dir, namespace)
       end
     end
   end
