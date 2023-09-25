@@ -121,7 +121,7 @@ module Zeitwerk
         break if @setup
 
         actual_roots.each do |root_dir, root_namespace|
-          define_autoloads_in_dir(root_dir, root_namespace)
+          define_autoloads_for_dir(root_dir, root_namespace)
         end
 
         on_setup_callbacks.each(&:call)
@@ -407,14 +407,14 @@ module Zeitwerk
     end
 
     # @sig (String, Module) -> void
-    private def define_autoloads_in_dir(dir, parent)
+    private def define_autoloads_for_dir(dir, parent)
       ls(dir) do |basename, abspath|
         if ruby?(basename)
           basename.delete_suffix!(".rb")
           autoload_file(parent, cname_for(basename, abspath), abspath)
         else
           if collapse?(abspath)
-            define_autoloads_in_dir(abspath, parent)
+            define_autoloads_for_dir(abspath, parent)
           else
             autoload_subdir(parent, cname_for(basename, abspath), abspath)
           end
@@ -448,7 +448,7 @@ module Zeitwerk
         # For whatever reason the constant that corresponds to this namespace has
         # already been defined, we have to recurse.
         log("the namespace #{cpath(parent, cname)} already exists, descending into #{subdir}") if logger
-        define_autoloads_in_dir(subdir, cget(parent, cname))
+        define_autoloads_for_dir(subdir, cget(parent, cname))
       end
     end
 
