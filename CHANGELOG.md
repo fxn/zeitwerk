@@ -1,5 +1,31 @@
 # CHANGELOG
 
+## 2.6.13 (Unreleased)
+
+* There is a new experimental null inflector that simply returns its input
+  unchanged:
+
+  ```ruby
+  loader.inflector = Zeitwerk::NullInflector.new
+  ```
+
+  Projects using this inflector are expected to define their constants in files
+  and directories with names exactly matching them:
+
+  ```
+  User.rb       -> User
+  HTMLParser.rb -> HTMLParser
+  Admin/Role.rb -> Admin::Role
+  ```
+
+  Point is, you think less. Names that typically need custom configuration like
+  acronyms no longer require your attention. What you see is what you get,
+  simple.
+
+  Please see its
+  [documentation](https://github.com/fxn/zeitwerk#zeitwerknullinflector) for
+  further details.
+
 ## 2.6.12 (25 September 2023)
 
 * Maintenance release with some internal polishing.

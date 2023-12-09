@@ -40,6 +40,7 @@
   - [Inflection](#inflection)
     - [Zeitwerk::Inflector](#zeitwerkinflector)
     - [Zeitwerk::GemInflector](#zeitwerkgeminflector)
+    - [Zeitwerk::NullInflector](#zeitwerknullinflector)
     - [Custom inflector](#custom-inflector)
   - [Callbacks](#callbacks)
     - [The on_setup callback](#the-on_setup-callback)
@@ -773,6 +774,29 @@ Each loader instantiated with `Zeitwerk::Loader.for_gem` has an inflector of thi
 This inflector is like the basic one, except it expects `lib/my_gem/version.rb` to define `MyGem::VERSION`.
 
 The inflectors of different loaders are independent of each other. There are no global inflection rules or global configuration that can affect this inflector. It is deterministic.
+
+<a id="markdown-zeitwerknullinflector" name="zeitwerknullinflector"></a>
+#### Zeitwerk::NullInflector
+
+This is an experimental inflector that simply returns its input unchanged.
+
+```ruby
+loader.inflector = Zeitwerk::NullInflector.new
+```
+
+In a project using this inflector, the names of files and directories are equal to the constants they define:
+
+```
+User.rb       -> User
+HTMLParser.rb -> HTMLParser
+Admin/Role.rb -> Admin::Role
+```
+
+Point is, you think less. Names that typically need custom configuration like acronyms no longer require your attention. What you see is what you get, simple.
+
+This inflector is experimental since Ruby usually goes for snake case in files and directories. But hey, if you fancy giving it a whirl, go for it!
+
+The null inflector is not recommended for Rails applications as generators are not aware of it, and there's a likelihood of something breaking. However, if you're inclined to try it, please go ahead and see how far you can get with it.
 
 <a id="markdown-custom-inflector" name="custom-inflector"></a>
 #### Custom inflector
