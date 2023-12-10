@@ -796,7 +796,7 @@ Point is, you think less. Names that typically need custom configuration like ac
 
 This inflector is experimental since Ruby usually goes for snake case in files and directories. But hey, if you fancy giving it a whirl, go for it!
 
-The null inflector is not recommended for Rails applications as generators are not aware of it, and there's a likelihood of something breaking. However, if you're inclined to try it, please go ahead and see how far you can get with it.
+The null inflector cannot be used in Rails applications because the `main` autoloader also manages engines. However, you could subclass the default inflector and override `camelize` to return the basename untouched if it starts with an uppercase letter. Generators would not create the expected file names, but you could still experiment to see how far this approach takes you.
 
 <a id="markdown-custom-inflector" name="custom-inflector"></a>
 #### Custom inflector
