@@ -580,7 +580,7 @@ root_dir2/my_app/routes
 root_dir3/my_app/routes
 ```
 
-where `root_directory{1,2,3}` are root directories, eager loading `MyApp::Routes` will eager load the contents of the three corresponding directories.
+where `root_dir{1,2,3}` are root directories, eager loading `MyApp::Routes` will eager load the contents of the three corresponding directories.
 
 There might exist external source trees implementing part of the namespace. This happens routinely, because top-level constants are stored in the globally shared `Object`. It happens also when deliberately [reopening third-party namespaces](#reopening-third-party-namespaces). Such external code is not eager loaded, the implementation is carefully scoped to what the receiver manages to avoid side-effects elsewhere.
 
@@ -1030,7 +1030,7 @@ Zeitwerk::Loader.default_logger = method(:puts)
 
 If there is a logger configured, you'll see traces when autoloads are set, files loaded, and modules autovivified. While reloading, removed autoloads and unloaded objects are also traced.
 
-As a curiosity, if your project has namespaces you'll notice in the traces Zeitwerk sets autoloads for _directories_. That's a technique used to be able to descend into subdirectories on demand, avoiding that way unnecessary tree walks.
+As a curiosity, if your project has namespaces you'll notice in the traces Zeitwerk sets autoloads for _directories_. This allows descending into subdirectories on demand, thus avoiding unnecessary tree walks.
 
 <a id="markdown-loader-tag" name="loader-tag"></a>
 #### Loader tag
@@ -1056,7 +1056,7 @@ Zeitwerk@my_gem: constant MyGem::Foo loaded from ...
 <a id="markdown-ignoring-parts-of-the-project" name="ignoring-parts-of-the-project"></a>
 ### Ignoring parts of the project
 
-Zeitwerk ignores automatically any file or directory whose name starts with a dot, and any files that do not have extension ".rb".
+Zeitwerk ignores automatically any file or directory whose name starts with a dot, and any files that do not have the extension ".rb".
 
 However, sometimes it might still be convenient to tell Zeitwerk to completely ignore some particular Ruby file or directory. That is possible with `ignore`, which accepts an arbitrary number of strings or `Pathname` objects, and also an array of them.
 
@@ -1349,7 +1349,7 @@ The test suite passes on Windows with codepage `Windows-1252` if all the involve
 
 3. In that line, if two loaders manage files that translate to the same constant in the same namespace, the first one wins, the rest are ignored. Similar to what happens with `require` and `$LOAD_PATH`, only the first occurrence matters.
 
-4. Projects that reopen a namespace defined by some dependency have to ensure said namespace is loaded before setup. That is, the project has to make sure it reopens, rather than define. This is often accomplished just loading the dependency.
+4. Projects that reopen a namespace defined by some dependency have to ensure said namespace is loaded before setup. That is, the project has to make sure it reopens, rather than defines, the namespace. This is often accomplished by loading (e.g., `require`-ing) the dependency.
 
 5. Objects stored in reloadable constants should not be cached in places that are not reloaded. For example, non-reloadable classes should not subclass a reloadable class, or mixin a reloadable module. Otherwise, after reloading, those classes or module objects would become stale. Referring to constants in dynamic places like method calls or lambdas is fine.
 
