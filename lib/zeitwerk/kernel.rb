@@ -14,10 +14,6 @@ module Kernel
   # should not require anything. But if someone has legacy require calls around,
   # they will work as expected, and in a compatible way. This feature is by now
   # EXPERIMENTAL and UNDOCUMENTED.
-  #
-  # We cannot decorate with prepend + super because Kernel has already been
-  # included in Object, and changes in ancestors don't get propagated into
-  # already existing ancestor chains on Ruby < 3.0.
   alias_method :zeitwerk_original_require, :require
   class << self
     alias_method :zeitwerk_original_require, :require
