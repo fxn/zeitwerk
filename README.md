@@ -374,7 +374,7 @@ require "zeitwerk"
 loader = Zeitwerk::Loader.new
 loader.tag = File.basename(__FILE__, ".rb")
 loader.inflector = Zeitwerk::GemInflector.new(__FILE__)
-loader.push_dir(__dir__)
+loader.push_dir(File.dirname(__FILE__))
 ```
 
 If the main module references project constants at the top-level, Zeitwerk has to be ready to load them. Their definitions, in turn, may reference other project constants. And this is recursive. Therefore, it is important that the `setup` call happens above the main module definition:
