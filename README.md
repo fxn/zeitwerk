@@ -798,6 +798,8 @@ This inflector is experimental since Ruby usually goes for snake case in files a
 
 The null inflector cannot be used in Rails applications because the `main` autoloader also manages engines. However, you could subclass the default inflector and override `camelize` to return the basename untouched if it starts with an uppercase letter. Generators would not create the expected file names, but you could still experiment to see how far this approach takes you.
 
+In case-insensitive file systems, this inflector works as long as directory listings return the expected strings. Zeitwerk lists directories using Ruby APIs like `Dir.children` or `Dir.entries`.
+
 <a id="markdown-custom-inflector" name="custom-inflector"></a>
 #### Custom inflector
 
