@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 2.6.13 (Unreleased)
+## 2.6.13 (6 february 2024)
 
 * There is a new experimental null inflector that simply returns its input
   unchanged:
@@ -18,13 +18,11 @@
   Admin/Role.rb -> Admin::Role
   ```
 
-  Point is, you think less. Names that typically need custom configuration like
-  acronyms no longer require your attention. What you see is what you get,
-  simple.
-
   Please see its
   [documentation](https://github.com/fxn/zeitwerk#zeitwerknullinflector) for
   further details.
+
+* Documentation improvements.
 
 ## 2.6.12 (25 September 2023)
 
