@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "test_helper"
+require "fileutils"
 
 class TestForGem < LoaderTest
   MY_GEM = ["lib/my_gem.rb", <<~EOS]
@@ -243,6 +244,37 @@ class TestForGem < LoaderTest
       assert_includes err, "Zeitwerk defines the constant BAR after the directory"
       assert_includes err, File.expand_path("lib/foo")
       assert_includes err, "Zeitwerk::Loader.for_gem(warn_on_extra_files: false)"
+    end
+  end
+
+  # Emulates the project setup in https://github.com/fxn/zeitwerk/issues/282.
+  test "version inflection works with symlinked files" do
+    files = [
+      MY_GEM,
+      ["lib/my_gem/version.rb", "MyGem::VERSION = '1.2.3'"]
+    ]
+    with_files(files) do
+      FileUtils.mkdir_p("lib2/my_gem")
+      File.symlink(File.expand_path("lib/my_gem.rb"), "lib2/my_gem.rb")
+      File.symlink(File.expand_path("lib/my_gem/version.rb"), "lib2/my_gem/version.rb")
+      with_load_path("lib2") do
+        require "my_gem"
+        assert_equal "1.2.3", MyGem::VERSION
+      end
+    end
+  end
+
+  test "version inflection works with a symlinked lib" do
+    files = [
+      MY_GEM,
+      ["lib/my_gem/version.rb", "MyGem::VERSION = '1.2.3'"]
+    ]
+    with_files(files) do
+      File.symlink(File.expand_path("lib"), "lib2")
+      with_load_path("lib2") do
+        require "my_gem"
+        assert_equal "1.2.3", MyGem::VERSION
+      end
     end
   end
 end
