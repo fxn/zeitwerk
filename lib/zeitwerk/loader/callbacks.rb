@@ -18,7 +18,8 @@ module Zeitwerk::Loader::Callbacks
       to_unload[cpath] = [file, cref] if reloading_enabled?
       run_on_load_callbacks(cpath, cget(*cref), file) unless on_load_callbacks.empty?
     else
-      msg = "expected file #{file} to define constant #{cpath}, but didn't"
+      the = cref[0] == Object ? "the top-level" : "the"
+      msg = "expected file #{file} to define #{the} constant #{cpath}"
       log(msg) if logger
 
       # Ruby still keeps the autoload defined, but we remove it because the

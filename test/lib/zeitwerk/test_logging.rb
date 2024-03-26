@@ -136,7 +136,7 @@ class TestLogging < LoaderTest
   test "logs failed autoloads, provided the require call succeeded" do
     files = [["x.rb", ""]]
     with_files(files) do
-      assert_logged(/expected file #{File.expand_path("x.rb")} to define constant X, but didn't/) do
+      assert_logged(/expected file #{File.expand_path("x.rb")} to define the top-level constant X/) do
         loader.push_dir(".")
         loader.setup
         assert_raises(Zeitwerk::NameError) { X }
