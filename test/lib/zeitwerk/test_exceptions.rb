@@ -19,7 +19,7 @@ class TestExceptions < LoaderTest
     with_setup(files) do
       typo_rb = File.expand_path("typo.rb")
       error = assert_raises(Zeitwerk::NameError) { Typo }
-      assert_error_message "expected file #{typo_rb} to define the top-level constant Typo", error
+      assert_error_message "expected #{typo_rb} to define Typo in the top-level namespace", error
       assert_equal :Typo, error.name
     end
   end
@@ -29,7 +29,7 @@ class TestExceptions < LoaderTest
     with_setup(files) do
       typo_rb = File.expand_path("m/typo.rb")
       error = assert_raises(Zeitwerk::NameError) { M::Typo }
-      assert_error_message "expected file #{typo_rb} to define the constant M::Typo", error
+      assert_error_message "expected #{typo_rb} to define Typo in the namespace M", error
       assert_equal :Typo, error.name
     end
   end
@@ -39,7 +39,7 @@ class TestExceptions < LoaderTest
     with_setup(files) do
       x_rb = File.expand_path("x.rb")
       error = assert_raises(Zeitwerk::NameError) { loader.eager_load }
-      assert_error_message "expected file #{x_rb} to define the top-level constant X", error
+      assert_error_message "expected #{x_rb} to define X in the top-level namespace", error
       assert_equal :X, error.name
     end
   end
@@ -49,7 +49,7 @@ class TestExceptions < LoaderTest
     with_setup(files) do
       x_rb = File.expand_path("m/x.rb")
       error = assert_raises(Zeitwerk::NameError) { loader.eager_load }
-      assert_error_message "expected file #{x_rb} to define the constant M::X", error
+      assert_error_message "expected #{x_rb} to define X in the namespace M", error
       assert_equal :X, error.name
     end
   end
@@ -64,7 +64,7 @@ class TestExceptions < LoaderTest
     with_setup(files) do
       cli_x_rb = File.expand_path("cli/x.rb")
       error = assert_raises(Zeitwerk::NameError) { loader.eager_load }
-      assert_error_message "expected file #{cli_x_rb} to define the constant Cli::X", error
+      assert_error_message "expected #{cli_x_rb} to define X in the namespace Cli", error
       assert_equal :X, error.name
     end
   end
