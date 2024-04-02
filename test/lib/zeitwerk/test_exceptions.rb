@@ -34,6 +34,22 @@ class TestExceptions < LoaderTest
     end
   end
 
+  test "raises NameError if the expected constant is not defined (namespace, overridden name)" do
+    files = [["m.rb", <<~RUBY], ["m/typo.rb", "M::TyPo = 1"]]
+      module M
+        def self.name
+          "OVERRIDDEN"
+        end
+      end
+    RUBY
+    with_setup(files) do
+      typo_rb = File.expand_path("m/typo.rb")
+      error = assert_raises(Zeitwerk::NameError) { M::Typo }
+      assert_error_message "expected #{typo_rb} to define Typo in the M namespace", error
+      assert_equal :Typo, error.name
+    end
+  end
+
   test "eager loading raises NameError if files do not define the expected constants (top-level)" do
     files = [["x.rb", ""]]
     with_setup(files) do
