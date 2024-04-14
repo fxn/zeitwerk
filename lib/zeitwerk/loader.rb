@@ -230,53 +230,53 @@ module Zeitwerk
       setup
     end
 
-  # @sig (String | Pathname) -> String?
-  def cpath_expected_at(path)
-    abspath = File.expand_path(path)
+    # @sig (String | Pathname) -> String?
+    def cpath_expected_at(path)
+      abspath = File.expand_path(path)
 
-    raise Zeitwerk::Error.new("#{abspath} does not exist") unless File.exist?(abspath)
+      raise Zeitwerk::Error.new("#{abspath} does not exist") unless File.exist?(abspath)
 
-    return unless dir?(abspath) || ruby?(abspath)
-    return if ignored_path?(abspath)
+      return unless dir?(abspath) || ruby?(abspath)
+      return if ignored_path?(abspath)
 
-    paths = []
+      paths = []
 
-    if ruby?(abspath)
-      basename = File.basename(abspath, ".rb")
-      return if hidden?(basename)
+      if ruby?(abspath)
+        basename = File.basename(abspath, ".rb")
+        return if hidden?(basename)
 
-      paths << [basename, abspath]
-      walk_up_from = File.dirname(abspath)
-    else
-      walk_up_from = abspath
-    end
-
-    root_namespace = nil
-
-    walk_up(walk_up_from) do |dir|
-      break if root_namespace = roots[dir]
-      return if ignored_path?(dir)
-
-      basename = File.basename(dir)
-      return if hidden?(basename)
-
-      paths << [basename, abspath] unless collapse?(dir)
-    end
-
-    return unless root_namespace
-
-    if paths.empty?
-      real_mod_name(root_namespace)
-    else
-      cnames = paths.reverse_each.map { |b, a| cname_for(b, a) }
-
-      if root_namespace == Object
-        cnames.join("::")
+        paths << [basename, abspath]
+        walk_up_from = File.dirname(abspath)
       else
-        "#{real_mod_name(root_namespace)}::#{cnames.join("::")}"
+        walk_up_from = abspath
+      end
+
+      root_namespace = nil
+
+      walk_up(walk_up_from) do |dir|
+        break if root_namespace = roots[dir]
+        return if ignored_path?(dir)
+
+        basename = File.basename(dir)
+        return if hidden?(basename)
+
+        paths << [basename, abspath] unless collapse?(dir)
+      end
+
+      return unless root_namespace
+
+      if paths.empty?
+        real_mod_name(root_namespace)
+      else
+        cnames = paths.reverse_each.map { |b, a| cname_for(b, a) }
+
+        if root_namespace == Object
+          cnames.join("::")
+        else
+          "#{real_mod_name(root_namespace)}::#{cnames.join("::")}"
+        end
       end
     end
-  end
 
     # Says if the given constant path would be unloaded on reload. This
     # predicate returns `false` if reloading is disabled.
