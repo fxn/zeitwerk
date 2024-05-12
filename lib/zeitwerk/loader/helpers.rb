@@ -47,7 +47,9 @@ module Zeitwerk::Loader::Helpers
   private def has_at_least_one_ruby_file?(dir)
     to_visit = [dir]
 
-    while dir = to_visit.shift
+    until to_visit.empty?
+      dir = to_visit.shift
+
       ls(dir) do |_basename, abspath, ftype|
         if ftype == :file
           return true
