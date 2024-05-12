@@ -230,6 +230,40 @@ module Zeitwerk
       setup
     end
 
+    # Returns a hash that maps the absolute paths of the managed files and
+    # directories to their respective expected constant paths.
+    #
+    # @sig () -> Hash[String, String]
+    def all_expected_cpaths
+      result = {}
+
+      actual_roots.each do |root_dir, root_namespace|
+        queue = [[root_dir, real_mod_name(root_namespace)]]
+
+        until queue.empty?
+          dir, cpath = queue.shift
+          result[dir] = cpath
+
+          prefix = cpath == "Object" ? "" : cpath + "::"
+
+          ls(dir) do |basename, abspath|
+            if dir?(abspath)
+              if collapse?(abspath)
+                queue << [abspath, cpath]
+              else
+                queue << [abspath, prefix + inflector.camelize(basename, abspath)]
+              end
+            else
+              basename.delete_suffix!(".rb")
+              result[abspath] = prefix + inflector.camelize(basename, abspath)
+            end
+          end
+        end
+      end
+
+      result
+    end
+
     # @sig (String | Pathname) -> String?
     def cpath_expected_at(path)
       abspath = File.expand_path(path)
