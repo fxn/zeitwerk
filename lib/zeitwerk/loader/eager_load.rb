@@ -167,10 +167,10 @@ module Zeitwerk::Loader::EagerLoad
     while to_eager_load = queue.shift
       dir, namespace = to_eager_load
 
-      ls(dir) do |basename, abspath|
+      ls(dir) do |basename, abspath, ftype|
         next if honour_exclusions && eager_load_exclusions.member?(abspath)
 
-        if ruby?(abspath)
+        if ftype == :file
           if (cref = autoloads[abspath])
             cget(*cref)
           end
@@ -210,8 +210,8 @@ module Zeitwerk::Loader::EagerLoad
 
     suffix.split("::").each do |segment|
       while dir = dirs.shift
-        ls(dir) do |basename, abspath|
-          next unless dir?(abspath)
+        ls(dir) do |basename, abspath, ftype|
+          next unless ftype == :directory
 
           if collapse?(abspath)
             dirs << abspath

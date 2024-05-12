@@ -31,13 +31,15 @@ module Zeitwerk::Loader::Helpers
       if dir?(abspath)
         next if roots.key?(abspath)
         next if !has_at_least_one_ruby_file?(abspath)
+        ftype = :directory
       else
         next unless ruby?(abspath)
+        ftype = :file
       end
 
       # We freeze abspath because that saves allocations when passed later to
       # File methods. See #125.
-      yield basename, abspath.freeze
+      yield basename, abspath.freeze, ftype
     end
   end
 
@@ -46,11 +48,11 @@ module Zeitwerk::Loader::Helpers
     to_visit = [dir]
 
     while dir = to_visit.shift
-      ls(dir) do |_basename, abspath|
-        if dir?(abspath)
-          to_visit << abspath
-        else
+      ls(dir) do |_basename, abspath, ftype|
+        if ftype == :file
           return true
+        else
+          to_visit << abspath
         end
       end
     end

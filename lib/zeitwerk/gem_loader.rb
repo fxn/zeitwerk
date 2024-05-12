@@ -42,13 +42,12 @@ module Zeitwerk
     def warn_on_extra_files
       expected_namespace_dir = @root_file.delete_suffix(".rb")
 
-      ls(@root_dir) do |basename, abspath|
+      ls(@root_dir) do |basename, abspath, ftype|
         next if abspath == @root_file
         next if abspath == expected_namespace_dir
 
         basename_without_ext = basename.delete_suffix(".rb")
         cname = inflector.camelize(basename_without_ext, abspath).to_sym
-        ftype = dir?(abspath) ? "directory" : "file"
 
         warn(<<~EOS)
           WARNING: Zeitwerk defines the constant #{cname} after the #{ftype}

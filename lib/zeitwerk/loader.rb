@@ -246,16 +246,16 @@ module Zeitwerk
 
           prefix = cpath == "Object" ? "" : cpath + "::"
 
-          ls(dir) do |basename, abspath|
-            if dir?(abspath)
+          ls(dir) do |basename, abspath, ftype|
+            if ftype == :file
+              basename.delete_suffix!(".rb")
+              result[abspath] = prefix + inflector.camelize(basename, abspath)
+            else
               if collapse?(abspath)
                 queue << [abspath, cpath]
               else
                 queue << [abspath, prefix + inflector.camelize(basename, abspath)]
               end
-            else
-              basename.delete_suffix!(".rb")
-              result[abspath] = prefix + inflector.camelize(basename, abspath)
             end
           end
         end
@@ -442,8 +442,8 @@ module Zeitwerk
 
     # @sig (String, Module) -> void
     private def define_autoloads_for_dir(dir, parent)
-      ls(dir) do |basename, abspath|
-        if ruby?(basename)
+      ls(dir) do |basename, abspath, ftype|
+        if ftype == :file
           basename.delete_suffix!(".rb")
           autoload_file(parent, cname_for(basename, abspath), abspath)
         else
