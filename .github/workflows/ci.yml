@@ -22,6 +22,10 @@ jobs:
           - "3.2"
           - "3.3"
           - "head"
+        # GitHub is not able to set this combination up lately.
+        exclude:
+          - os: "macos-latest"
+            ruby-version: "2.5"
     runs-on: ${{ matrix.os }}
     steps:
       - uses: "actions/checkout@v4"
