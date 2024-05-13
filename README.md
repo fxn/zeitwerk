@@ -60,6 +60,7 @@
   - [Introspection](#introspection)
     - [`Zeitwerk::Loader#dirs`](#zeitwerkloaderdirs)
     - [`Zeitwerk::Loader#cpath_expected_at`](#zeitwerkloadercpath_expected_at)
+    - [`Zeitwerk::Loader#all_expected_cpaths`](#zeitwerkloaderall_expected_cpaths)
   - [Encodings](#encodings)
   - [Rules of thumb](#rules-of-thumb)
   - [Debuggers](#debuggers)
@@ -259,7 +260,7 @@ app/controllers/admin/users_controller.rb -> Admin::UsersController
 
 and does not have a file called `admin.rb`, Zeitwerk automatically creates an `Admin` module on your behalf the first time `Admin` is used.
 
-To trigger this behavior, the directory must contain non-ignored Ruby files with the `.rb` extension, either directly or recursively. Otherwise, the directory is ignored. This condition is reevaluated during reloads.
+To trigger this behavior, the directory must contain non-ignored Ruby files with the ".rb" extension, either directly or recursively. Otherwise, the directory is ignored. This condition is reevaluated during reloads.
 
 <a id="markdown-explicit-namespaces" name="explicit-namespaces"></a>
 ### Explicit namespaces
@@ -1329,6 +1330,53 @@ loader.cpath_expected_at("8.rb") # => Zeitwerk::NameError
 ```
 
 This method does not parse file contents and does not guarantee files define the returned constant path. It just says which is the _expected_ one.
+
+`Zeitwerk::Loader#cpath_expected_at` is designed to be used with individual paths. If you want to know all the expected constant paths in the project, please use `Zeitwerk::Loader#all_expected_cpaths`, documented next.
+
+<a id="markdown-zeitwerkloaderall_expected_cpaths" name="zeitwerkloaderall_expected_cpaths"></a>
+#### `Zeitwerk::Loader#all_expected_cpaths`
+
+The method `Zeitwerk::Loader#all_expected_cpaths` returns a hash that maps the absolute paths of the files and directories managed by the receiver to their corresponding expected constant paths.
+
+Ignored files or directories are not included in the result. Neither are directories that contain no non-ignored files with extension ".rb" (recursively).
+
+For example, if `lib` is the root directory of a gem with the following contents:
+
+```
+lib/my_gem.rb
+lib/my_gem/version.rb
+lib/my_gem/ignored.rb
+lib/my_gem/drivers/unix.rb
+lib/my_gem/drivers/windows.rb
+lib/my_gem/collapsed/foo.rb
+lib/tasks/my_gem.rake
+```
+
+`Zeitwerk::Loader#all_expected_cpaths` would return (maybe in a different order):
+
+```ruby
+{
+  "/.../lib"                           => "Object",
+  "/.../lib/my_gem.rb"                 => "MyGem",
+  "/.../lib/my_gem"                    => "MyGem",
+  "/.../lib/my_gem/version.rb"         => "MyGem::VERSION",
+  "/.../lib/my_gem/drivers"            => "MyGem::Drivers",
+  "/.../lib/my_gem/drivers/unix.rb"    => "MyGem::Drivers::Unix",
+  "/.../lib/my_gem/drivers/windows.rb" => "MyGem::Drivers::Windows",
+  "/.../lib/my_gem/collapsed"          => "MyGem"
+  "/.../lib/my_gem/collapsed/foo.rb"   => "MyGem::Foo"
+}
+```
+
+As the names suggest, the previous example assumes `lib/my_gem/ignored.rb` is ignored (so, not present in the returned hash), and `lib/my_gem/collapsed` is a collapsed directory (so the expected namespace at that level is still `MyGem`, this is an edge case).
+
+Directory paths are guaranteed to not have traling slashes.
+
+Note that `lib/tasks` is not present in the hash, because it contains no non-ignored file with extension ".rb" (it only contains one Rake file). The loader does not consider the `lib/tasks` directory to represent a Ruby namespace and therefore it does not end up in the hash.
+
+The order of the hash entries is undefined.
+
+This method does not parse file contents and does not guarantee files define the corresponding constant paths. It just says which are the _expected_ ones.
 
 <a id="markdown-encodings" name="encodings"></a>
 ### Encodings
