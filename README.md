@@ -1338,7 +1338,7 @@ This method does not parse file contents and does not guarantee files define the
 
 The method `Zeitwerk::Loader#all_expected_cpaths` returns a hash that maps the absolute paths of the files and directories managed by the receiver to their corresponding expected constant paths.
 
-Ignored files or directories are not included in the result. Directories that do not contain any files with the ".rb" extension (recursively) are also excluded. Additionally, if a directory contains files with the ".rb" extension but all of them are ignored, it is treated as if it contains no ".rb" files.
+Ignored files, hidden files, and files whose extension is not ".rb" are not included in the result. Same for directories, hidden or ignored directories are not included in the result. Additionally, directories that contain no files with extension ".rb" (recursively) are also excluded, since those are not considered to represent Ruby namespaces.
 
 For example, if `lib` is the root directory of a gem with the following contents:
 
