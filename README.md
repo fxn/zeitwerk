@@ -1338,7 +1338,7 @@ This method does not parse file contents and does not guarantee files define the
 
 The method `Zeitwerk::Loader#all_expected_cpaths` returns a hash that maps the absolute paths of the files and directories managed by the receiver to their corresponding expected constant paths.
 
-Ignored files or directories are not included in the result. Neither are directories that contain no non-ignored files with extension ".rb" (recursively).
+Ignored files or directories are not included in the result. Directories that do not contain any files with the ".rb" extension (recursively) are also excluded. Additionally, if a directory contains files with the ".rb" extension but all of them are ignored, it is treated as if it contains no ".rb" files.
 
 For example, if `lib` is the root directory of a gem with the following contents:
 
@@ -1370,9 +1370,9 @@ lib/tasks/my_gem.rake
 
 As the names suggest, the previous example assumes `lib/my_gem/ignored.rb` is ignored (so, not present in the returned hash), and `lib/my_gem/collapsed` is a collapsed directory (so the expected namespace at that level is still `MyGem`, this is an edge case).
 
-Directory paths are guaranteed to not have traling slashes.
+Directory paths are guaranteed to not have trailing slashes.
 
-Note that `lib/tasks` is not present in the hash, because it contains no non-ignored file with extension ".rb" (it only contains one Rake file). The loader does not consider the `lib/tasks` directory to represent a Ruby namespace and therefore it does not end up in the hash.
+Note that `lib/tasks` is not present in the hash because it contains no files with the ".rb" extension. The loader does not consider the `lib/tasks` directory to represent a Ruby namespace; therefore, it does not end up in the hash.
 
 The order of the hash entries is undefined.
 
