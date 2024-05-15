@@ -4,7 +4,7 @@
 
 * Implements `Zeitwerk::Loader#all_expected_cpaths`, which returns a hash that
   maps the absolute paths of the files and directories managed by the receiver
-  to their corresponding expected constant paths.
+  to their expected constant paths.
 
   Please, check its [documentation](https://github.com/fxn/zeitwerk?tab=readme-ov-file#zeitwerkloaderall_expected_cpaths) for further details.
 

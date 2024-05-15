@@ -1336,13 +1336,14 @@ This method does not parse file contents and does not guarantee files define the
 <a id="markdown-zeitwerkloaderall_expected_cpaths" name="zeitwerkloaderall_expected_cpaths"></a>
 #### `Zeitwerk::Loader#all_expected_cpaths`
 
-The method `Zeitwerk::Loader#all_expected_cpaths` returns a hash that maps the absolute paths of the files and directories managed by the receiver to their corresponding expected constant paths.
+The method `Zeitwerk::Loader#all_expected_cpaths` returns a hash that maps the absolute paths of the files and directories managed by the receiver to their expected constant paths.
 
 Ignored files, hidden files, and files whose extension is not ".rb" are not included in the result. Same for directories, hidden or ignored directories are not included in the result. Additionally, directories that contain no files with extension ".rb" (recursively) are also excluded, since those are not considered to represent Ruby namespaces.
 
 For example, if `lib` is the root directory of a gem with the following contents:
 
 ```
+lib/.DS_Store
 lib/my_gem.rb
 lib/my_gem/version.rb
 lib/my_gem/ignored.rb
@@ -1368,15 +1369,15 @@ lib/tasks/my_gem.rake
 }
 ```
 
-As the names suggest, the previous example assumes `lib/my_gem/ignored.rb` is ignored (so, not present in the returned hash), and `lib/my_gem/collapsed` is a collapsed directory (so the expected namespace at that level is still `MyGem`, this is an edge case).
+In the previous example we assume `lib/my_gem/ignored.rb` is ignored, and therefore it is not present in the returned hash. Also, `lib/my_gem/collapsed` is a collapsed directory, so the expected namespace at that level is still `MyGem` (this is an edge case).
 
-Directory paths are guaranteed to not have trailing slashes.
+The file `lib/.DS_Store` is hidden, hence excluded. The directory `lib/tasks` is also not present because it contains no files with extension ".rb".
 
-Note that `lib/tasks` is not present in the hash because it contains no files with the ".rb" extension. The loader does not consider the `lib/tasks` directory to represent a Ruby namespace; therefore, it does not end up in the hash.
+Directory paths do not have trailing slashes.
 
 The order of the hash entries is undefined.
 
-This method does not parse file contents and does not guarantee files define the corresponding constant paths. It just says which are the _expected_ ones.
+This method does not parse or execute file contents and does not guarantee files define the corresponding constant paths. It just says which are the _expected_ ones.
 
 <a id="markdown-encodings" name="encodings"></a>
 ### Encodings
