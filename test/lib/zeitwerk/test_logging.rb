@@ -191,6 +191,19 @@ class TestLogging < LoaderTest
     end
   end
 
+  test "logs files shadowed by already defined constants" do
+    on_teardown { remove_const :X }
+
+    ::X = 1
+    files = [["x.rb", "X = 1"]]
+    with_files(files) do
+      loader.push_dir(".")
+      assert_logged(%r(file .*?/x\.rb is ignored because X is already defined)) do
+        loader.setup
+      end
+    end
+  end
+
   test "logs when eager loading starts" do
     with_setup do
       assert_logged(/eager load start/) do
@@ -203,19 +216,6 @@ class TestLogging < LoaderTest
     with_setup do
       assert_logged(/eager load end/) do
         loader.eager_load
-      end
-    end
-  end
-
-  test "eager loading skips files that would map to already loaded constants" do
-    on_teardown { remove_const :X }
-
-    ::X = 1
-    files = [["x.rb", "X = 1"]]
-    with_files(files) do
-      loader.push_dir(".")
-      assert_logged(%r(file .*?/x\.rb is ignored because X is already defined)) do
-        loader.setup
       end
     end
   end
