@@ -204,6 +204,16 @@ class TestLogging < LoaderTest
     end
   end
 
+  test "logs directories being ignored because they have no Ruby files" do
+    files = [["tasks/foo.rake", ""]]
+    with_files(files) do
+      assert_logged(%r{directory .*?/tasks is ignored because it has no Ruby files}) do
+        loader.push_dir(".")
+        loader.setup
+      end
+    end
+  end
+
   test "logs when eager loading starts" do
     with_setup do
       assert_logged(/eager load start/) do

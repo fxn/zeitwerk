@@ -30,7 +30,12 @@ module Zeitwerk::Loader::Helpers
 
       if dir?(abspath)
         next if roots.key?(abspath)
-        next if !has_at_least_one_ruby_file?(abspath)
+
+        if !has_at_least_one_ruby_file?(abspath)
+          log("directory #{abspath} is ignored because it has no Ruby files") if logger
+          next
+        end
+
         ftype = :directory
       else
         next unless ruby?(abspath)
