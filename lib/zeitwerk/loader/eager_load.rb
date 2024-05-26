@@ -209,9 +209,7 @@ module Zeitwerk::Loader::EagerLoad
     next_dirs = []
 
     suffix.split("::").each do |segment|
-      until dirs.empty?
-        dir = dirs.shift
-
+      while (dir = dirs.shift)
         ls(dir) do |basename, abspath, ftype|
           next unless ftype == :directory
 
