@@ -43,18 +43,27 @@ module Zeitwerk::Loader::Helpers
     end
   end
 
+  # Looks for a Ruby file using breadth-first search. This type of search is
+  # important to list as less directories as possible and return fast in the
+  # common case in which there are Ruby files.
+  #
   # @sig (String) -> bool
   private def has_at_least_one_ruby_file?(dir)
     to_visit = [dir]
 
-    until to_visit.empty?
-      dir = to_visit.shift
+    while (dir = to_visit.shift)
+      children = Dir.children(dir)
 
-      ls(dir) do |_basename, abspath, ftype|
-        if ftype == :file
-          return true
+      children.each do |basename|
+        next if hidden?(basename)
+
+        abspath = File.join(dir, basename)
+        next if ignored_path?(abspath)
+
+        if dir?(abspath)
+          to_visit << abspath unless roots.key?(abspath)
         else
-          to_visit << abspath
+          return true if ruby?(abspath)
         end
       end
     end
