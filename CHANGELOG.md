@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2.6.15 (26 May 2024)
+
+* Internal improvements.
+
 ## 2.6.14 (14 May 2024)
 
 * Implements `Zeitwerk::Loader#all_expected_cpaths`, which returns a hash that
