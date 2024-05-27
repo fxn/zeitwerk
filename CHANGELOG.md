@@ -249,7 +249,7 @@ enforced with stricter formal visibility.
 
 ## 2.5.2 (27 December 2021)
 
-* When `Module#autoload` triggers the autovivification of an implicit namespace, `$LOADED_FEATURES` now gets the correspoding directory pushed. This is just a tweak to Zeitwerk's `Kernel#require` decoration. That way it acts more like the original, and cooperates better with other potential `Kernel#require` wrappers, like Bootsnap's.
+* When `Module#autoload` triggers the autovivification of an implicit namespace, `$LOADED_FEATURES` now gets the corresponding directory pushed. This is just a tweak to Zeitwerk's `Kernel#require` decoration. That way it acts more like the original, and cooperates better with other potential `Kernel#require` wrappers, like Bootsnap's.
 
 ## 2.5.1 (20 October 2021)
 
@@ -536,7 +536,7 @@ enforced with stricter formal visibility.
 
 ## 1.3.4 (14 March 2019)
 
-* Files shadowed by previous occurrences defining the same constant path were being correctly skipped when autoloading, but not when eager loading. This has been fixed. This mimicks what happens when there are two files in `$LOAD_PATH` with the same relative name, only the first one is loaded by `require`.
+* Files shadowed by previous occurrences defining the same constant path were being correctly skipped when autoloading, but not when eager loading. This has been fixed. This mimics what happens when there are two files in `$LOAD_PATH` with the same relative name, only the first one is loaded by `require`.
 
 ## 1.3.3 (12 March 2019)
 
