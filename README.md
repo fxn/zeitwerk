@@ -1065,7 +1065,7 @@ However, sometimes it might still be convenient to tell Zeitwerk to completely i
 
 You can ignore file names, directory names, and glob patterns. Glob patterns are expanded when they are added and again on each reload.
 
-There is an edge case related to nested root directories. Conceptually, root directories are independent source trees. If you ignore a parent of a nested root directory, the nested root directory is not affected. You need to ignore it explictly if you want it ignored too.
+There is an edge case related to nested root directories. Conceptually, root directories are independent source trees. If you ignore a parent of a nested root directory, the nested root directory is not affected. You need to ignore it explicitly if you want it ignored too.
 
 Let's see some use cases.
 
