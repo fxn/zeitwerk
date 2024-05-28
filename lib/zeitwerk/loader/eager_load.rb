@@ -61,8 +61,8 @@ module Zeitwerk::Loader::EagerLoad
     cnames.reverse_each do |cname|
       # Can happen if there are no Ruby files. This is not an error condition,
       # the directory is actually managed. Could have Ruby files later.
-      return unless cdef?(namespace, cname)
-      namespace = cget(namespace, cname)
+      return unless namespace.const_defined?(cname, false)
+      namespace = namespace.const_get(cname, false)
     end
 
     # A shortcircuiting test depends on the invocation of this method. Please
@@ -145,12 +145,12 @@ module Zeitwerk::Loader::EagerLoad
 
     namespace = root_namespace
     cnames.reverse_each do |cname|
-      namespace = cget(namespace, cname)
+      namespace = namespace.const_get(cname, false)
     end
 
     raise Zeitwerk::Error.new("#{abspath} is shadowed") if shadowed_file?(abspath)
 
-    cget(namespace, base_cname)
+    namespace.const_get(base_cname, false)
   end
 
   # The caller is responsible for making sure `namespace` is the namespace that
@@ -164,22 +164,20 @@ module Zeitwerk::Loader::EagerLoad
     log("eager load directory #{dir} start") if logger
 
     queue = [[dir, namespace]]
-    until queue.empty?
-      dir, namespace = queue.shift
-
+    while (dir, namespace = queue.shift)
       ls(dir) do |basename, abspath, ftype|
         next if honour_exclusions && eager_load_exclusions.member?(abspath)
 
         if ftype == :file
           if (cref = autoloads[abspath])
-            cget(*cref)
+            cref.get
           end
         else
           if collapse?(abspath)
             queue << [abspath, namespace]
           else
             cname = inflector.camelize(basename, abspath).to_sym
-            queue << [abspath, cget(namespace, cname)]
+            queue << [abspath, namespace.const_get(cname, false)]
           end
         end
       end

@@ -22,14 +22,13 @@ module Zeitwerk
     private_constant :MUTEX
 
     # Maps absolute paths for which an autoload has been set ---and not
-    # executed--- to their corresponding parent class or module and constant
-    # name.
+    # executed--- to their corresponding Zeitwerk::Cref object.
     #
-    #   "/Users/fxn/blog/app/models/user.rb"          => [Object, :User],
-    #   "/Users/fxn/blog/app/models/hotel/pricing.rb" => [Hotel, :Pricing]
+    #   "/Users/fxn/blog/app/models/user.rb"          => #<Zeitwerk::Cref:... @mod=Object, @cname=:User, ...>,
+    #   "/Users/fxn/blog/app/models/hotel/pricing.rb" => #<Zeitwerk::Cref:... @mod=Hotel, @cname=:Pricing, ...>,
     #   ...
     #
-    # @sig Hash[String, [Module, Symbol]]
+    # @sig Hash[String, Zeitwerk::Cref]
     attr_reader :autoloads
     internal :autoloads
 
@@ -45,17 +44,19 @@ module Zeitwerk
 
     # Stores metadata needed for unloading. Its entries look like this:
     #
-    #   "Admin::Role" => [".../admin/role.rb", [Admin, :Role]]
+    #   "Admin::Role" => [
+    #     ".../admin/role.rb",
+    #     #<Zeitwerk::Cref:... @mod=Admin, @cname=:Role, ...>
+    #   ]
     #
     # The cpath as key helps implementing unloadable_cpath? The file name is
     # stored in order to be able to delete it from $LOADED_FEATURES, and the
-    # pair [Module, Symbol] is used to remove_const the constant from the class
-    # or module object.
+    # cref is used to remove the constant from the parent class or module.
     #
     # If reloading is enabled, this hash is filled as constants are autoloaded
     # or eager loaded. Otherwise, the collection remains empty.
     #
-    # @sig Hash[String, [String, [Module, Symbol]]]
+    # @sig Hash[String, [String, Zeitwerk::Cref]]
     attr_reader :to_unload
     internal :to_unload
 
@@ -154,22 +155,22 @@ module Zeitwerk
         # is enough.
         unloaded_files = Set.new
 
-        autoloads.each do |abspath, (parent, cname)|
-          if parent.autoload?(cname)
-            unload_autoload(parent, cname)
+        autoloads.each do |abspath, cref|
+          if cref.autoload?
+            unload_autoload(cref)
           else
             # Could happen if loaded with require_relative. That is unsupported,
             # and the constant path would escape unloadable_cpath? This is just
             # defensive code to clean things up as much as we are able to.
-            unload_cref(parent, cname)
+            unload_cref(cref)
             unloaded_files.add(abspath) if ruby?(abspath)
           end
         end
 
-        to_unload.each do |cpath, (abspath, (parent, cname))|
+        to_unload.each do |cpath, (abspath, cref)|
           unless on_unload_callbacks.empty?
             begin
-              value = cget(parent, cname)
+              value = cref.get
             rescue ::NameError
               # Perhaps the user deleted the constant by hand, or perhaps an
               # autoload failed to define the expected constant but the user
@@ -179,7 +180,7 @@ module Zeitwerk
             end
           end
 
-          unload_cref(parent, cname)
+          unload_cref(cref)
           unloaded_files.add(abspath) if ruby?(abspath)
         end
 
@@ -240,8 +241,7 @@ module Zeitwerk
       actual_roots.each do |root_dir, root_namespace|
         queue = [[root_dir, real_mod_name(root_namespace)]]
 
-        until queue.empty?
-          dir, cpath = queue.shift
+        while (dir, cpath = queue.shift)
           result[dir] = cpath
 
           prefix = cpath == "Object" ? "" : cpath + "::"
@@ -445,21 +445,22 @@ module Zeitwerk
       ls(dir) do |basename, abspath, ftype|
         if ftype == :file
           basename.delete_suffix!(".rb")
-          autoload_file(parent, cname_for(basename, abspath), abspath)
+          cref = Cref.new(parent, cname_for(basename, abspath))
+          autoload_file(cref, abspath)
         else
           if collapse?(abspath)
             define_autoloads_for_dir(abspath, parent)
           else
-            autoload_subdir(parent, cname_for(basename, abspath), abspath)
+            cref = Cref.new(parent, cname_for(basename, abspath))
+            autoload_subdir(cref, abspath)
           end
         end
       end
     end
 
     # @sig (Module, Symbol, String) -> void
-    private def autoload_subdir(parent, cname, subdir)
-      if autoload_path = autoload_path_set_by_me_for?(parent, cname)
-        cpath = cpath(parent, cname)
+    private def autoload_subdir(cref, subdir)
+      if autoload_path = autoload_path_set_by_me_for?(cref)
         if ruby?(autoload_path)
           # Scanning visited a Ruby file first, and now a directory for the same
           # constant has been found. This means we are dealing with an explicit
@@ -468,88 +469,83 @@ module Zeitwerk
           # Registering is idempotent, and we have to keep the autoload pointing
           # to the file. This may run again if more directories are found later
           # on, no big deal.
-          register_explicit_namespace(cpath)
+          register_explicit_namespace(cref.path)
         end
         # If the existing autoload points to a file, it has to be preserved, if
         # not, it is fine as it is. In either case, we do not need to override.
         # Just remember the subdirectory conforms this namespace.
-        namespace_dirs[cpath] << subdir
-      elsif !cdef?(parent, cname)
+        namespace_dirs[cref.path] << subdir
+      elsif !cref.defined?
         # First time we find this namespace, set an autoload for it.
-        namespace_dirs[cpath(parent, cname)] << subdir
-        define_autoload(parent, cname, subdir)
+        namespace_dirs[cref.path] << subdir
+        define_autoload(cref, subdir)
       else
         # For whatever reason the constant that corresponds to this namespace has
         # already been defined, we have to recurse.
-        log("the namespace #{cpath(parent, cname)} already exists, descending into #{subdir}") if logger
-        define_autoloads_for_dir(subdir, cget(parent, cname))
+        log("the namespace #{cref.path} already exists, descending into #{subdir}") if logger
+        define_autoloads_for_dir(subdir, cref.get)
       end
     end
 
     # @sig (Module, Symbol, String) -> void
-    private def autoload_file(parent, cname, file)
-      if autoload_path = strict_autoload_path(parent, cname) || Registry.inception?(cpath(parent, cname))
+    private def autoload_file(cref, file)
+      if autoload_path = cref.autoload? || Registry.inception?(cref.path)
         # First autoload for a Ruby file wins, just ignore subsequent ones.
         if ruby?(autoload_path)
           shadowed_files << file
           log("file #{file} is ignored because #{autoload_path} has precedence") if logger
         else
-          promote_namespace_from_implicit_to_explicit(
-            dir:    autoload_path,
-            file:   file,
-            parent: parent,
-            cname:  cname
-          )
+          promote_namespace_from_implicit_to_explicit(dir: autoload_path, file: file, cref: cref)
         end
-      elsif cdef?(parent, cname)
+      elsif cref.defined?
         shadowed_files << file
-        log("file #{file} is ignored because #{cpath(parent, cname)} is already defined") if logger
+        log("file #{file} is ignored because #{cref.path} is already defined") if logger
       else
-        define_autoload(parent, cname, file)
+        define_autoload(cref, file)
       end
     end
 
     # `dir` is the directory that would have autovivified a namespace. `file` is
     # the file where we've found the namespace is explicitly defined.
     #
-    # @sig (dir: String, file: String, parent: Module, cname: Symbol) -> void
-    private def promote_namespace_from_implicit_to_explicit(dir:, file:, parent:, cname:)
+    # @sig (dir: String, file: String, cref: Zeitwerk::Cref) -> void
+    private def promote_namespace_from_implicit_to_explicit(dir:, file:, cref:)
       autoloads.delete(dir)
       Registry.unregister_autoload(dir)
 
-      log("earlier autoload for #{cpath(parent, cname)} discarded, it is actually an explicit namespace defined in #{file}") if logger
+      log("earlier autoload for #{cref.path} discarded, it is actually an explicit namespace defined in #{file}") if logger
 
-      define_autoload(parent, cname, file)
-      register_explicit_namespace(cpath(parent, cname))
+      define_autoload(cref, file)
+      register_explicit_namespace(cref.path)
     end
 
     # @sig (Module, Symbol, String) -> void
-    private def define_autoload(parent, cname, abspath)
-      parent.autoload(cname, abspath)
+    private def define_autoload(cref, abspath)
+      cref.autoload(abspath)
 
       if logger
         if ruby?(abspath)
-          log("autoload set for #{cpath(parent, cname)}, to be loaded from #{abspath}")
+          log("autoload set for #{cref.path}, to be loaded from #{abspath}")
         else
-          log("autoload set for #{cpath(parent, cname)}, to be autovivified from #{abspath}")
+          log("autoload set for #{cref.path}, to be autovivified from #{abspath}")
         end
       end
 
-      autoloads[abspath] = [parent, cname]
+      autoloads[abspath] = cref
       Registry.register_autoload(self, abspath)
 
       # See why in the documentation of Zeitwerk::Registry.inceptions.
-      unless parent.autoload?(cname)
-        Registry.register_inception(cpath(parent, cname), abspath, self)
+      unless cref.autoload?
+        Registry.register_inception(cref.path, abspath, self)
       end
     end
 
     # @sig (Module, Symbol) -> String?
-    private def autoload_path_set_by_me_for?(parent, cname)
-      if autoload_path = strict_autoload_path(parent, cname)
+    private def autoload_path_set_by_me_for?(cref)
+      if autoload_path = cref.autoload?
         autoload_path if autoloads.key?(autoload_path)
       else
-        Registry.inception?(cpath(parent, cname))
+        Registry.inception?(cref.path)
       end
     end
 
@@ -590,21 +586,21 @@ module Zeitwerk
     end
 
     # @sig (Module, Symbol) -> void
-    private def unload_autoload(parent, cname)
-      crem(parent, cname)
-      log("autoload for #{cpath(parent, cname)} removed") if logger
+    private def unload_autoload(cref)
+      cref.remove
+      log("autoload for #{cref.path} removed") if logger
     end
 
     # @sig (Module, Symbol) -> void
-    private def unload_cref(parent, cname)
+    private def unload_cref(cref)
       # Let's optimistically remove_const. The way we use it, this is going to
       # succeed always if all is good.
-      crem(parent, cname)
+      cref.remove
     rescue ::NameError
       # There are a few edge scenarios in which this may happen. If the constant
       # is gone, that is OK, anyway.
     else
-      log("#{cpath(parent, cname)} unloaded") if logger
+      log("#{cref.path} unloaded") if logger
     end
   end
 end

@@ -8,29 +8,28 @@ module Zeitwerk::Loader::Callbacks
   #
   # @sig (String) -> void
   internal def on_file_autoloaded(file)
-    cref  = autoloads.delete(file)
-    cpath = cpath(*cref)
+    cref = autoloads.delete(file)
 
     Zeitwerk::Registry.unregister_autoload(file)
 
-    if cdef?(*cref)
-      log("constant #{cpath} loaded from file #{file}") if logger
-      to_unload[cpath] = [file, cref] if reloading_enabled?
-      run_on_load_callbacks(cpath, cget(*cref), file) unless on_load_callbacks.empty?
+    if cref.defined?
+      log("constant #{cref.path} loaded from file #{file}") if logger
+      to_unload[cref.path] = [file, cref] if reloading_enabled?
+      run_on_load_callbacks(cref.path, cref.get, file) unless on_load_callbacks.empty?
     else
-      msg = "expected file #{file} to define constant #{cpath}, but didn't"
+      msg = "expected file #{file} to define constant #{cref.path}, but didn't"
       log(msg) if logger
 
       # Ruby still keeps the autoload defined, but we remove it because the
       # contract in Zeitwerk is more strict.
-      crem(*cref)
+      cref.remove
 
       # Since the expected constant was not defined, there is nothing to unload.
       # However, if the exception is rescued and reloading is enabled, we still
       # need to deleted the file from $LOADED_FEATURES.
-      to_unload[cpath] = [file, cref] if reloading_enabled?
+      to_unload[cref.path] = [file, cref] if reloading_enabled?
 
-      raise Zeitwerk::NameError.new(msg, cref.last)
+      raise Zeitwerk::NameError.new(msg, cref.cname)
     end
   end
 
@@ -53,8 +52,8 @@ module Zeitwerk::Loader::Callbacks
     # children, since t1 would have correctly deleted its namespace_dirs entry.
     dirs_autoload_monitor.synchronize do
       if cref = autoloads.delete(dir)
-        autovivified_module = cref[0].const_set(cref[1], Module.new)
-        cpath = autovivified_module.name
+        implicit_namespace = cref.set(Module.new)
+        cpath = implicit_namespace.name
         log("module #{cpath} autovivified from directory #{dir}") if logger
 
         to_unload[cpath] = [dir, cref] if reloading_enabled?
@@ -65,9 +64,9 @@ module Zeitwerk::Loader::Callbacks
         # these to be able to unregister later if eager loading.
         autoloaded_dirs << dir
 
-        on_namespace_loaded(autovivified_module)
+        on_namespace_loaded(implicit_namespace)
 
-        run_on_load_callbacks(cpath, autovivified_module, dir) unless on_load_callbacks.empty?
+        run_on_load_callbacks(cpath, implicit_namespace, dir) unless on_load_callbacks.empty?
       end
     end
   end

@@ -3,6 +3,7 @@
 module Zeitwerk
   require_relative "zeitwerk/real_mod_name"
   require_relative "zeitwerk/internal"
+  require_relative "zeitwerk/cref"
   require_relative "zeitwerk/loader"
   require_relative "zeitwerk/gem_loader"
   require_relative "zeitwerk/registry"
