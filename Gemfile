@@ -10,4 +10,3 @@ gem "minitest-focus"
 gem "minitest-proveit"
 gem "minitest-reporters"
 gem "warning"
-gem "ruby-lsp", require: false
