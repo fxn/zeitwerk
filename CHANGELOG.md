@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 2.6.16 (15 June 2024)
+
+* Logging prints a message when a directory that was not ignored is skipped
+  anyway because it contains no Ruby files.
+
+* Internal refactors.
+
 ## 2.6.15 (26 May 2024)
 
 * Internal improvements.
