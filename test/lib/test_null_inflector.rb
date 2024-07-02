@@ -4,7 +4,7 @@ require "test_helper"
 
 class TestNullInflector < Minitest::Test
   def camelize(str)
-    Zeitwerk::NullInflector.new.camelize(str, nil)
+    Zeitwerk::NullInflector.new.camelize(str)
   end
 
   test "does not change the basename" do

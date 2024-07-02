@@ -4,7 +4,7 @@ require "test_helper"
 
 class TestInflector < Minitest::Test
   def camelize(str)
-    Zeitwerk::Inflector.new.camelize(str, nil)
+    Zeitwerk::Inflector.new.camelize(str)
   end
 
   test "capitalizes the first letter" do

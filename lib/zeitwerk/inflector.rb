@@ -11,8 +11,8 @@ module Zeitwerk
     #
     # Takes into account hard-coded mappings configured with `inflect`.
     #
-    # @sig (String, String) -> String
-    def camelize(basename, _abspath)
+    # @sig (String, String?) -> String
+    def camelize(basename, _abspath = nil)
       overrides[basename] || basename.split('_').each(&:capitalize!).join
     end
 
