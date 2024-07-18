@@ -164,8 +164,8 @@ module Zeitwerk::Loader::EagerLoad
     log("eager load directory #{dir} start") if logger
 
     queue = [[dir, namespace]]
-    while (dir, namespace = queue.shift)
-      ls(dir) do |basename, abspath, ftype|
+    while (current_dir, namespace = queue.shift)
+      ls(current_dir) do |basename, abspath, ftype|
         next if honour_exclusions && eager_load_exclusions.member?(abspath)
 
         if ftype == :file
