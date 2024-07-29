@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2.6.17 (29 July 2024)
+
+* Fix log message when eager loading a directory ends.
+
 ## 2.6.16 (15 June 2024)
 
 * Logging prints a message when a directory that was not ignored is skipped
