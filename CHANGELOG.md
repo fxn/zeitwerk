@@ -29,7 +29,7 @@
 
   Please, check its [documentation](https://github.com/fxn/zeitwerk?tab=readme-ov-file#zeitwerkloaderall_expected_cpaths) for further details.
 
-## 2.6.13 (6 february 2024)
+## 2.6.13 (6 February 2024)
 
 * There is a new experimental null inflector that simply returns its input
   unchanged:
