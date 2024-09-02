@@ -110,9 +110,12 @@ module Zeitwerk
 
       # @private
       # @sig (String) -> String?
-      def inception?(cpath)
+      def inception?(cpath, registered_by_loader=nil)
         if pair = inceptions[cpath]
-          pair.first
+          abspath, loader = pair
+          if registered_by_loader.nil? || registered_by_loader.equal?(loader)
+            abspath
+          end
         end
       end
 

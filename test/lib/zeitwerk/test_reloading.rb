@@ -96,6 +96,34 @@ class TestReloading < LoaderTest
     end
   end
 
+  test 'reloading namespaces that are inceptions in other projects' do
+    on_teardown do
+      remove_const :MyGem
+      delete_loaded_feature "lib/my_gem.rb"
+    end
+
+    gem_files = [["lib/my_gem.rb", <<~EOS]]
+      Zeitwerk::Loader.for_gem.setup
+      module MyGem; end
+    EOS
+
+    app_files = [["app/my_gem/foo.rb", 'MyGem::Foo = true']]
+
+    with_files(gem_files + app_files) do
+      with_load_path("lib") do
+        require 'my_gem'
+
+        loader.push_dir("app")
+        loader.enable_reloading
+        loader.setup
+
+        assert MyGem::Foo
+        loader.reload
+        assert MyGem::Foo
+      end
+    end
+  end
+
   test "reloading raises if the flag is not set" do
     e = assert_raises(Zeitwerk::ReloadingDisabledError) do
       loader = Zeitwerk::Loader.new

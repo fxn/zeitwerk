@@ -545,7 +545,7 @@ module Zeitwerk
       if autoload_path = cref.autoload?
         autoload_path if autoloads.key?(autoload_path)
       else
-        Registry.inception?(cref.path)
+        Registry.inception?(cref.path, self)
       end
     end
 
