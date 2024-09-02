@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 2.6.18 (2 September 2024)
+
+* Fixes a bug in which projects reopening the main namespace of a gem dependency
+  managed by its own Zeitwerk loader could not reload the constants they added
+  to that external namespace.
+
 ## 2.6.17 (29 July 2024)
 
 * Fix log message when eager loading a directory ends.
