@@ -96,7 +96,7 @@ class TestReloading < LoaderTest
     end
   end
 
-  test 'reloading namespaces that are inceptions in other projects' do
+  test "reloading namespaces that are inceptions in other projects" do
     on_teardown do
       remove_const :MyGem
       delete_loaded_feature "lib/my_gem.rb"
@@ -107,11 +107,11 @@ class TestReloading < LoaderTest
       module MyGem; end
     EOS
 
-    app_files = [["app/my_gem/foo.rb", 'MyGem::Foo = true']]
+    app_files = [["app/my_gem/foo.rb", "MyGem::Foo = true"]]
 
     with_files(gem_files + app_files) do
       with_load_path("lib") do
-        require 'my_gem'
+        require "my_gem"
 
         loader.push_dir("app")
         loader.enable_reloading
