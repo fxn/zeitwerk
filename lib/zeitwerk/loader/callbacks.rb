@@ -73,7 +73,7 @@ module Zeitwerk::Loader::Callbacks
   end
 
   # Invoked when a class or module is created or reopened, either from the
-  # tracer or from module autovivification. If the namespace has matching
+  # const_added or from module autovivification. If the namespace has matching
   # subdirectories, we descend into them now.
   #
   # @private

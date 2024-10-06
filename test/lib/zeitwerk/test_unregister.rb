@@ -26,13 +26,13 @@ class TestUnregister < LoaderTest
     assert !registry.gem_loaders_by_root_file.values.include?(loader1)
     assert !registry.autoloads.values.include?(loader1)
     assert !registry.inceptions.values.any? {|_, l| l == loader1}
-    assert !Zeitwerk::ExplicitNamespace.send(:cpaths).values.include?(loader1)
+    assert !Zeitwerk::ExplicitNamespace.__registered?("dummy1")
 
     assert registry.loaders.include?(loader2)
     assert registry.gem_loaders_by_root_file.values.include?(loader2)
     assert registry.autoloads.values.include?(loader2)
     assert registry.inceptions.values.any? {|_, l| l == loader2}
-    assert Zeitwerk::ExplicitNamespace.send(:cpaths).values.include?(loader2)
+    assert Zeitwerk::ExplicitNamespace.__registered?("dummy2") == loader2
   end
 
   test 'with_loader yields and unregisters' do

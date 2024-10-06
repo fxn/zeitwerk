@@ -54,7 +54,6 @@
     - [Use case: The adapter pattern](#use-case-the-adapter-pattern)
     - [Use case: Test files mixed with implementation files](#use-case-test-files-mixed-with-implementation-files)
   - [Shadowed files](#shadowed-files)
-  - [Edge cases](#edge-cases)
   - [Beware of circular dependencies](#beware-of-circular-dependencies)
   - [Reopening third-party namespaces](#reopening-third-party-namespaces)
   - [Introspection](#introspection)
@@ -63,7 +62,6 @@
     - [`Zeitwerk::Loader#all_expected_cpaths`](#zeitwerkloaderall_expected_cpaths)
   - [Encodings](#encodings)
   - [Rules of thumb](#rules-of-thumb)
-  - [Debuggers](#debuggers)
 - [Pronunciation](#pronunciation)
 - [Supported Ruby versions](#supported-ruby-versions)
 - [Testing](#testing)
@@ -1178,36 +1176,6 @@ file #{file} is ignored because #{constant_path} is already defined
 
 Shadowing only applies to Ruby files, namespace definition can be spread over multiple directories. And you can also reopen third-party namespaces if done [orderly](#reopening-third-party-namespaces).
 
-<a id="markdown-edge-cases" name="edge-cases"></a>
-### Edge cases
-
-[Explicit namespaces](#explicit-namespaces) like `Trip` here:
-
-```ruby
-# trip.rb
-class Trip
-  include Geolocation
-end
-
-# trip/geolocation.rb
-module Trip::Geolocation
-  ...
-end
-```
-
-have to be defined with the `class`/`module` keywords, as in the example above.
-
-For technical reasons, raw constant assignment is not supported:
-
-```ruby
-# trip.rb
-Trip = Class { ...}        # NOT SUPPORTED
-Trip = Struct.new { ... }  # NOT SUPPORTED
-Trip = Data.define { ... } # NOT SUPPORTED
-```
-
-This only affects explicit namespaces, those idioms work well for any other ordinary class or module.
-
 <a id="markdown-beware-of-circular-dependencies" name="beware-of-circular-dependencies"></a>
 ### Beware of circular dependencies
 
@@ -1405,15 +1373,6 @@ The test suite passes on Windows with codepage `Windows-1252` if all the involve
 5. Objects stored in reloadable constants should not be cached in places that are not reloaded. For example, non-reloadable classes should not subclass a reloadable class, or mixin a reloadable module. Otherwise, after reloading, those classes or module objects would become stale. Referring to constants in dynamic places like method calls or lambdas is fine.
 
 6. In a given process, ideally, there should be at most one loader with reloading enabled. Technically, you can have more, but it may get tricky if one refers to constants managed by the other one. Do that only if you know what you are doing.
-
-<a id="markdown-debuggers" name="debuggers"></a>
-### Debuggers
-
-Zeitwerk and [debug.rb](https://github.com/ruby/debug) are fully compatible if CRuby is ≥ 3.1 (see [ruby/debug#558](https://github.com/ruby/debug/pull/558)).
-
-[Byebug](https://github.com/deivid-rodriguez/byebug) is compatible except for an edge case explained in [deivid-rodriguez/byebug#564](https://github.com/deivid-rodriguez/byebug/issues/564). Prior to CRuby 3.1, `debug.rb` has a similar edge incompatibility.
-
-[Break](https://github.com/gsamokovarov/break) is fully compatible.
 
 <a id="markdown-pronunciation" name="pronunciation"></a>
 ## Pronunciation

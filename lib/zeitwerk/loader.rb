@@ -469,7 +469,7 @@ module Zeitwerk
           # Registering is idempotent, and we have to keep the autoload pointing
           # to the file. This may run again if more directories are found later
           # on, no big deal.
-          register_explicit_namespace(cref.path)
+          register_explicit_namespace(cref)
         end
         # If the existing autoload points to a file, it has to be preserved, if
         # not, it is fine as it is. In either case, we do not need to override.
@@ -515,8 +515,10 @@ module Zeitwerk
 
       log("earlier autoload for #{cref.path} discarded, it is actually an explicit namespace defined in #{file}") if logger
 
+      # Order matters: When Module#const_added is triggered by the autoload, we
+      # don't want the namespace to be registered yet.
       define_autoload(cref, file)
-      register_explicit_namespace(cref.path)
+      register_explicit_namespace(cref)
     end
 
     # @sig (Module, Symbol, String) -> void
@@ -549,9 +551,9 @@ module Zeitwerk
       end
     end
 
-    # @sig (String) -> void
-    private def register_explicit_namespace(cpath)
-      ExplicitNamespace.__register(cpath, self)
+    # @sig (Zeitwerk::Cref) -> void
+    private def register_explicit_namespace(cref)
+      ExplicitNamespace.__register(cref.path, self)
     end
 
     # @sig (String) -> void

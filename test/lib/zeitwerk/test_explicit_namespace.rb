@@ -53,6 +53,18 @@ class TestExplicitNamespace < LoaderTest
     end
   end
 
+  test "explicit namespaces defined with an explicit constant assignment are loaded correctly" do
+    files = [
+      ["hotel.rb", "Hotel = Class.new; Hotel::X = 1"],
+      ["hotel/pricing.rb", "class Hotel::Pricing; end"]
+    ]
+    with_setup(files) do
+      assert_kind_of Class, Hotel
+      assert Hotel::X
+      assert Hotel::Pricing
+    end
+  end
+
   test "explicit namespaces are loaded correctly even if #name is overridden" do
     files = [
       ["hotel.rb", <<~RUBY],
@@ -135,108 +147,6 @@ class TestExplicitNamespace < LoaderTest
     with_setup(files) do
       assert_nil Zeitwerk::Registry.loader_for(File.expand_path("rd1/m"))
       assert_same loader, Zeitwerk::Registry.loader_for(File.expand_path("rd2/m.rb"))
-    end
-  end
-
-  # As of this writing, a tracer on the :class event does not seem to have any
-  # performance penalty in an ordinary code base. But I prefer to precisely
-  # control that we use a tracer only if needed in case this issue
-  #
-  #     https://bugs.ruby-lang.org/issues/14104
-  #
-  # goes forward.
-  def tracer
-    Zeitwerk::ExplicitNamespace.send(:tracer)
-  end
-
-  test "the tracer starts disabled" do
-    assert !tracer.enabled?
-  end
-
-  test "simple autoloading does not enable the tracer" do
-    files = [["x.rb", "X = true"]]
-    with_setup(files) do
-      assert !tracer.enabled?
-      assert X
-      assert !tracer.enabled?
-    end
-  end
-
-  test "autovivification does not enable the tracer, one directory" do
-    files = [["foo/bar.rb", "module Foo::Bar; end"]]
-    with_setup(files) do
-      assert !tracer.enabled?
-      assert Foo::Bar
-      assert !tracer.enabled?
-    end
-  end
-
-  test "autovivification does not enable the tracer, two directories" do
-    files = [
-      ["rd1/foo/bar.rb", "module Foo::Bar; end"],
-      ["rd2/foo/baz.rb", "module Foo::Baz; end"],
-    ]
-    with_setup(files) do
-      assert !tracer.enabled?
-      assert Foo::Bar
-      assert !tracer.enabled?
-    end
-  end
-
-  test "explicit namespaces enable the tracer until loaded" do
-    files = [
-      ["hotel.rb", "class Hotel; end"],
-      ["hotel/pricing.rb", "class Hotel::Pricing; end"]
-    ]
-    with_setup(files) do
-      assert tracer.enabled?
-      assert Hotel
-      assert !tracer.enabled?
-      assert Hotel::Pricing
-      assert !tracer.enabled?
-    end
-  end
-
-  test "the tracer is enabled until everything is loaded" do
-    files = [
-      ["a/m.rb", "module M; end"], ["a/m/n.rb", "M::N = true"],
-      ["b/x.rb", "module X; end"], ["b/x/y.rb", "X::Y = true"],
-    ]
-    with_files(files) do
-      new_loader(dirs: "a")
-      assert tracer.enabled?
-
-      new_loader(dirs: "b")
-      assert tracer.enabled?
-
-      assert M
-      assert tracer.enabled?
-
-      assert X
-      assert !tracer.enabled?
-    end
-  end
-
-  # This is a regression test.
-  test "the tracer handles singleton classes" do
-    files = [
-      ["hotel.rb", <<-EOS],
-        class Hotel
-          class << self
-            def x
-              1
-            end
-          end
-        end
-      EOS
-      ["hotel/pricing.rb", "class Hotel::Pricing; end"],
-      ["car.rb", "class Car; end"],
-      ["car/pricing.rb", "class Car::Pricing; end"],
-    ]
-    with_setup(files) do
-      assert tracer.enabled?
-      assert_equal 1, Hotel.x
-      assert tracer.enabled?
     end
   end
 

@@ -261,47 +261,6 @@ class TestRubyCompatibility < LoaderTest
     end
   end
 
-  # This is why we issue a namespace_dirs.delete call in the tracer block, to
-  # ignore events triggered by reopenings.
-  test "tracing :class calls you back on creation and on reopening" do
-    on_teardown do
-      @tracer.disable
-      remove_const :C, from: self.class
-      remove_const :M, from: self.class
-    end
-
-    traced = []
-    @tracer = TracePoint.trace(:class) do |tp|
-      traced << tp.self
-    end
-
-    2.times do
-      class C; end
-      module M; end
-    end
-
-    assert_equal [C, M, C, M], traced
-  end
-
-  # Computing hash codes is costly and we want the tracer to be as efficient as
-  # possible. The TP callback doesn't short-circuit anonymous classes/modules
-  # because Class.new/Module.new do not trigger the :class event. We leverage
-  # this property to save a nil? call.
-  #
-  # However, if that changes in future versions of Ruby, this test would tell us
-  # and we could revisit the callback implementation.
-  test "trace points on the :class events don't get called on Class.new and Module.new" do
-    on_teardown { @tracer.disable }
-
-    $tracer_for_anonymous_class_and_modules_called = false
-    @tracer = TracePoint.trace(:class) { $tracer_for_anonymous_class_and_modules_called = true }
-
-    Class.new
-    Module.new
-
-    assert !$tracer_for_anonymous_class_and_modules_called
-  end
-
   # If the user issues a require call with a Pathname object for a path that is
   # autoloadable, we are still able to intercept it because $LOADED_FEATURES
   # stores it as a string and loader_for is able to find its loader. During

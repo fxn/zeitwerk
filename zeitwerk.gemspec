@@ -25,5 +25,5 @@ Gem::Specification.new do |spec|
     "bug_tracker_uri" => "https://github.com/fxn/zeitwerk/issues"
   }
 
-  spec.required_ruby_version = ">= 2.5"
+  spec.required_ruby_version = ">= 3.2"
 end
