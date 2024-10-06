@@ -26,19 +26,9 @@ class Zeitwerk::Cref
     @path  = nil
   end
 
-  if Symbol.method_defined?(:name)
-    # Symbol#name was introduced in Ruby 3.0. It returns always the same
-    # frozen object, so we may save a few string allocations.
-    #
-    # @sig () -> String
-    def path
-      @path ||= Object.equal?(@mod) ? @cname.name : "#{real_mod_name(@mod)}::#{@cname.name}"
-    end
-  else
-    # @sig () -> String
-    def path
-      @path ||= Object.equal?(@mod) ? @cname.to_s : "#{real_mod_name(@mod)}::#{@cname}"
-    end
+  # @sig () -> String
+  def path
+    @path ||= Object.equal?(@mod) ? @cname.name : "#{real_mod_name(@mod)}::#{@cname.name}".freeze
   end
 
   # The autoload? predicate takes into account the ancestor chain of the
