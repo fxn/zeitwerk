@@ -31,33 +31,9 @@ class Zeitwerk::Cref
     @path ||= Object.equal?(@mod) ? @cname.name : "#{real_mod_name(@mod)}::#{@cname.name}".freeze
   end
 
-  # The autoload? predicate takes into account the ancestor chain of the
-  # receiver, like const_defined? and other methods in the constants API do.
-  #
-  # For example, given
-  #
-  #   class A
-  #     autoload :X, "x.rb"
-  #   end
-  #
-  #   class B < A
-  #   end
-  #
-  # B.autoload?(:X) returns "x.rb".
-  #
-  # We need a way to retrieve it ignoring ancestors.
-  #
   # @sig () -> String?
-  if method(:autoload?).arity == 1
-    # @sig () -> String?
-    def autoload?
-      @mod.autoload?(@cname) if self.defined?
-    end
-  else
-    # @sig () -> String?
-    def autoload?
-      @mod.autoload?(@cname, false)
-    end
+  def autoload?
+    @mod.autoload?(@cname, false)
   end
 
   # @sig (String) -> bool
