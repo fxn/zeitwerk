@@ -10,13 +10,7 @@ module Zeitwerk::RealModName
   # The name method can be overridden, hence the indirection in this method.
   #
   # @sig (Module) -> String?
-  if UnboundMethod.method_defined?(:bind_call)
-    def real_mod_name(mod)
-      UNBOUND_METHOD_MODULE_NAME.bind_call(mod)
-    end
-  else
-    def real_mod_name(mod)
-      UNBOUND_METHOD_MODULE_NAME.bind(mod).call
-    end
+  def real_mod_name(mod)
+    UNBOUND_METHOD_MODULE_NAME.bind_call(mod)
   end
 end
