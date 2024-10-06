@@ -57,9 +57,7 @@ module Zeitwerk::Loader::Helpers
     to_visit = [dir]
 
     while (dir = to_visit.shift)
-      children = Dir.children(dir)
-
-      children.each do |basename|
+      Dir.each_child(dir) do |basename|
         next if hidden?(basename)
 
         abspath = File.join(dir, basename)
