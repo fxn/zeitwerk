@@ -40,7 +40,7 @@ module Zeitwerk
 
       # This is an internal method only used by the test suite.
       #
-      # @sig (String) -> bool
+      # @sig (String) -> Zeitwerk::Loader?
       internal def registered?(cpath)
         @cpaths[cpath]
       end
