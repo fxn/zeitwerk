@@ -23,6 +23,10 @@
 
 * Requires Ruby 3.2 or later.
 
+* Gems that work with previous versions of Zeitwerk also work with this one. In
+  client projects, Bundler takes the Ruby requirement into account when
+  resolving gem version constraints.
+
 ## 2.6.18 (2 September 2024)
 
 * Fixes a bug in which projects reopening the main namespace of a gem dependency
