@@ -3,9 +3,9 @@
 ## 2.7.0 (Unreleased)
 
 * [Explicit namespaces](https://github.com/fxn/zeitwerk#explicit-namespaces) can
-  now be defined using constant assignments.
+  now also be defined using constant assignments.
 
-  Constant assignments like
+  While constant assignments like
 
   ```ruby
   # coordinates.rb
@@ -13,9 +13,9 @@
   Coordinates = Data.define(:x, :y)
   ```
 
-  worked for classes and modules, except if they were also namespaces. That is,
-  if they additionally had matching subdirectories. In such cases, their child
-  constants could not be autoloaded.
+  worked for most objects, they did not for classes and modules that were also
+  namespaces (i.e., those defined by a file and matching subdirectories). In
+  such cases, their child constants could not be autoloaded.
 
   This limitation has been removed.
 
