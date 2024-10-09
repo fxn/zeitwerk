@@ -1,5 +1,28 @@
 # CHANGELOG
 
+## 2.7.0 (Unreleased)
+
+* [Explicit namespaces](https://github.com/fxn/zeitwerk#explicit-namespaces) can
+  now be defined using constant assignments.
+
+  Constant assignments like
+
+  ```ruby
+  # coordinates.rb
+
+  Coordinates = Data.define(:x, :y)
+  ```
+
+  worked for classes and modules, except if they were also namespaces. That is,
+  if they additionally had matching subdirectories. In such cases, their child
+  constants could not be autoloaded.
+
+  This limitation has been removed.
+
+* `TracePoint` is no longer used.
+
+* Requires Ruby 3.2 or later.
+
 ## 2.6.18 (2 September 2024)
 
 * Fixes a bug in which projects reopening the main namespace of a gem dependency
