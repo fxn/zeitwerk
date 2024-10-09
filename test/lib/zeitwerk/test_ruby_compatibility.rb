@@ -69,28 +69,6 @@ class TestRubyCompatibility < LoaderTest
     end
   end
 
-  # Zeitwerk has to be called as soon as explicit namespaces are defined, to be
-  # able to configure autoloads for their children before the class or module
-  # body is interpreted. If explicit namespaces are found, Zeitwerk sets a trace
-  # point on the :class event with that purpose.
-  #
-  # This is key because the body of explicit namespaces could reference child
-  # constants at the top-level. Mixins are a common use case.
-  test "TracePoint emits :class events" do
-    on_teardown do
-      @tp.disable
-      remove_const :C, from: self.class
-    end
-
-    called = false
-
-    @tp = TracePoint.new(:class) { called = true }
-    @tp.enable
-
-    class C; end
-    assert called
-  end
-
   # We configure autoloads on directories to autovivify modules on demand, and
   # lazily descend to set autoloads for their children. This is more efficient,
   # specially for large code bases.
