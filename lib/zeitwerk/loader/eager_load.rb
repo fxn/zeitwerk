@@ -84,7 +84,7 @@ module Zeitwerk::Loader::EagerLoad
     return unless mod_name
 
     actual_roots.each do |root_dir, root_namespace|
-      if mod.equal?(Object)
+      if Object.equal?(mod)
         # A shortcircuiting test depends on the invocation of this method.
         # Please keep them in sync if refactored.
         actual_eager_load_dir(root_dir, root_namespace)
