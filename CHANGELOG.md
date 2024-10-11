@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 2.7.0 (Unreleased)
+## 2.7.0 (11 October 2024)
 
 * [Explicit namespaces](https://github.com/fxn/zeitwerk#explicit-namespaces) can
   now also be defined using constant assignments.
@@ -23,9 +23,13 @@
 
 * Requires Ruby 3.2 or later.
 
-* Gems that work with previous versions of Zeitwerk also work with this one. In
-  client projects, Bundler takes the Ruby requirement into account when
-  resolving gem version constraints.
+  Gems that work with previous versions of Zeitwerk also work with this one. If
+  they support Ruby versions older than 3.2 they can specify a relaxed version
+  constraint for Zeitwerk like "~> 2.6", for example.
+
+  In client projects, Bundler takes the Ruby requirement into account when
+  resolving dependencies, so `Gemfile.lock` will get one compatible with the
+  Ruby version being used.
 
 ## 2.6.18 (2 September 2024)
 
