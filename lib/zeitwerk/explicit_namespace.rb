@@ -9,9 +9,21 @@ module Zeitwerk
   # loading their constant before setup. This is documented.
   module ExplicitNamespace # :nodoc: all
     # Maps cnames or cpaths of explicit namespaces with their corresponding
-    # loader. They are symbols if the namespace lives in Object, or qualified
-    # paths as strings otherwise. Entries are added as the namespaces are found,
-    # and removed as they are autoloaded.
+    # loader. They are symbols for top-level ones, and strings for nested ones:
+    #
+    #   {
+    #     :Admin => #<Zeitwerk::Loader:...>,
+    #     "Hotel::Pricing" => #<Zeitwerk::Loader:...>
+    #   }
+    #
+    # There are two types of keys to make loader_for as fast as possible, since
+    # it is invoked by our const_added for all autoloads and constant actually
+    # added. Globally. With this trick, for top-level constants we do not need
+    # to call Symbol#name and perform a string lookup. Instead, we can directly
+    # perform a fast symbol lookup.
+    #
+    # Entries are added as the namespaces are found, and removed as they are
+    # autoloaded.
     #
     # @sig Hash[(Symbol | String) => Zeitwerk::Loader]
     @loaders = {}
@@ -32,7 +44,7 @@ module Zeitwerk
         end
       end
 
-      # @sig (String) -> Zeitwerk::Loader?
+      # @sig (Module, Symbol) -> Zeitwerk::Loader?
       internal def loader_for(mod, cname)
         if Object.equal?(mod)
           @loaders.delete(cname)
