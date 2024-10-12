@@ -13,6 +13,9 @@
 class Zeitwerk::Cref
   include Zeitwerk::RealModName
 
+  # @sig Module
+  attr_reader :mod
+
   # @sig Symbol
   attr_reader :cname
 

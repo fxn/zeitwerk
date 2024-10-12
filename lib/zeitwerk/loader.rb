@@ -553,7 +553,7 @@ module Zeitwerk
 
     # @sig (Zeitwerk::Cref) -> void
     private def register_explicit_namespace(cref)
-      ExplicitNamespace.__register(cref.path, self)
+      ExplicitNamespace.__register(cref, self)
     end
 
     # @sig (String) -> void
