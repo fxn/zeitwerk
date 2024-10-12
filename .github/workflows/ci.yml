@@ -24,6 +24,8 @@ jobs:
         with:
           ruby-version: ${{ matrix.ruby-version }}
           bundler-cache: true
+          # This CI job does not compile extensions so no need to install a toolchain (which takes 1+ min)
+          windows-toolchain: none
       - name: "Enable global frozen string literals for head"
         if: matrix.ruby-version == 'head'
         run: "echo RUBYOPT=--enable-frozen-string-literal >> $GITHUB_ENV"
