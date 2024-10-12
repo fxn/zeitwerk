@@ -1382,9 +1382,9 @@ The test suite passes on Windows with codepage `Windows-1252` if all the involve
 <a id="markdown-supported-ruby-versions" name="supported-ruby-versions"></a>
 ## Supported Ruby versions
 
-Zeitwerk works with CRuby 2.5 and above.
+Starting with version 2.7, Zeitwerk requires Ruby 3.2 or newer.
 
-On TruffleRuby all is good except for thread-safety. Right now, in TruffleRuby `Module#autoload` does not block threads accessing a constant that is being autoloaded. CRuby prevents such access to avoid concurrent threads from seeing partial evaluations of the corresponding file. Zeitwerk inherits autoloading thread-safety from this property. This is not an issue if your project gets eager loaded, or if you lazy load in single-threaded environments. (See https://github.com/oracle/truffleruby/issues/2431.)
+As of this writing, Zeitwerk 2.7 does not work with TruffleRuby due to https://github.com/oracle/truffleruby/issues/3683. Nowadays, TruffleRuby users need a `< 2.7` version contraint for the `zeitwerk` gem. Older versions of Zeitwerk run well, except autoloading is not thread-safe. See https://github.com/oracle/truffleruby/issues/2431. If your program is multi-threaded, you need to eager load before threads are created.
 
 JRuby 9.3.0.0 is almost there. As of this writing, the test suite of Zeitwerk passes on JRuby except for three tests. (See https://github.com/jruby/jruby/issues/6781.)
 
