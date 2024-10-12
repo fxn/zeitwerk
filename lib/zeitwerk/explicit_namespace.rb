@@ -27,7 +27,7 @@ module Zeitwerk
         @cpaths[cpath] = loader
       end
 
-      # @sig (String) -> Zeitwerk::Loader?
+      # @sig (Module, Symbol) -> Zeitwerk::Loader?
       internal def loader_for(mod, cname)
         cpath = Object.equal?(mod) ? cname.name : "#{real_mod_name(mod)}::#{cname}"
         @cpaths.delete(cpath)
