@@ -1,8 +1,17 @@
 # frozen_string_literal: true
 
 module Zeitwerk
-  # Centralizes the logic needed to descend into matching subdirectories right
-  # after the constant for an explicit namespace has been defined.
+  # This module is essentially a registry for explicit namespaces.
+  #
+  # When a loader determines that a certain file should define an explicit
+  # namespace, it registers it here, associating its cref with itself.
+  #
+  # If the namespace is autoloaded, our const_added callback retrieves its
+  # loader by calling loader_for. That way, the loader is able to scan the
+  # subdirectories that conform the namespace and set autoloads for their
+  # expected constants just in time.
+  #
+  # Once autoloaded, the namespace is unregistered.
   #
   # The implementation assumes an explicit namespace is managed by one loader.
   # Loaders that reopen namespaces owned by other projects are responsible for
