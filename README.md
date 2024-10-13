@@ -281,6 +281,8 @@ class Hotel < ApplicationRecord
 end
 ```
 
+When autoloaded, Zeitwerk verifies the expected constant (`Hotel` in the example) stores a class or module object. If it doesn't, `Zeitwerk::Error` is raised.
+
 An explicit namespace must be managed by one single loader. Loaders that reopen namespaces owned by other projects are responsible for loading their constants before setup.
 
 <a id="markdown-collapsing-directories" name="collapsing-directories"></a>

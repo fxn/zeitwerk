@@ -166,4 +166,17 @@ class TestExplicitNamespace < LoaderTest
       assert M::X
     end
   end
+
+  test "if the expected constant does not define a class or module object, we raise a controlled error" do
+    on_teardown { remove_const :Hotel }
+
+    files = [
+      ["hotel.rb", "Hotel = 1"],
+      ["hotel/pricing.rb", "class Hotel::Pricing; end"]
+    ]
+    with_setup(files) do
+      error = assert_raises(Zeitwerk::Error) { Hotel }
+      assert_equal "Hotel is expected to be a namespace, should be a class or module (got Integer)", error.message
+    end
+  end
 end
