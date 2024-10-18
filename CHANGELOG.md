@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 2.7.1 (19 October 2024)
+
+* Micro-optimization in a hot path.
+
+* Raises `Zeitwerk::Error` if an autoloaded constant expected to represent a
+  namespace does not store a class or module object.
+
+* Adds `truffleruby-head` to CI, except for autoloading thread-safety
+  (see why in https://github.com/oracle/truffleruby/issues/2431).
+
 ## 2.7.0 (11 October 2024)
 
 * [Explicit namespaces](https://github.com/fxn/zeitwerk#explicit-namespaces) can
