@@ -1386,7 +1386,10 @@ The test suite passes on Windows with codepage `Windows-1252` if all the involve
 
 Starting with version 2.7, Zeitwerk requires Ruby 3.2 or newer.
 
-As of this writing, Zeitwerk 2.7 does not work with TruffleRuby due to https://github.com/oracle/truffleruby/issues/3683. Nowadays, TruffleRuby users need a `< 2.7` version contraint for the `zeitwerk` gem. Older versions of Zeitwerk run well, except autoloading is not thread-safe. See https://github.com/oracle/truffleruby/issues/2431. If your program is multi-threaded, you need to eager load before threads are created.
+Zeitwerk 2.7 requires TruffleRuby 24.1.2+ due to https://github.com/oracle/truffleruby/issues/3683.
+Alternatively, TruffleRuby users can use a `< 2.7` version constraint for the `zeitwerk` gem.
+As of this writing, [autoloading is not fully thread-safe yet on TruffleRuby](https://github.com/oracle/truffleruby/issues/2431).
+If your program is multi-threaded, you need to eager load before threads are created.
 
 JRuby 9.3.0.0 is almost there. As of this writing, the test suite of Zeitwerk passes on JRuby except for three tests. (See https://github.com/jruby/jruby/issues/6781.)
 

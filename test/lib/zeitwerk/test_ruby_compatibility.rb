@@ -265,6 +265,8 @@ class TestRubyCompatibility < LoaderTest
   # This allows Zeitwerk to be thread-safe on regular file autoloads. Module
   # autovivification is custom, has its own test.
   test "autoloads and constant references are synchronized" do
+    skip 'https://github.com/oracle/truffleruby/issues/2431' if RUBY_ENGINE == 'truffleruby'
+
     $ensure_M_is_autoloaded_by_the_thread = Queue.new
 
     files = [["m.rb", <<-EOS]]
