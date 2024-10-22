@@ -1,0 +1,23 @@
+name: "Keep an eye on TruffleRuby HEAD"
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "10 10 * * *"
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - "ubuntu-latest"
+          - "macos-latest"
+        ruby-version:
+          - "truffleruby-head"
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: "actions/checkout@v4"
+      - uses: "ruby/setup-ruby@v1"
+        with:
+          ruby-version: ${{ matrix.ruby-version }}
+          bundler-cache: true
+      - run: "bundle exec rake"
