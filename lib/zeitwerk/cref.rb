@@ -3,7 +3,7 @@
 # This private class encapsulates pairs (mod, cname).
 #
 # Objects represent the constant cname in the class or module object mod, and
-# have API to manage them that encapsulates the constants API. Examples:
+# have API to manage them. Examples:
 #
 #   cref.path
 #   cref.set(value)
