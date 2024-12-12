@@ -647,6 +647,16 @@ Both strings and `Pathname` objects are supported as arguments. The method raise
 If you want to eager load a directory, `Zeitwerk::Loader#eager_load_dir` is more efficient than invoking `Zeitwerk::Loader#load_file` on its files.
 
 <a id="markdown-reloading" name="reloading"></a>
+
+#### Optimize performance by manually defining inceptions
+
+In order to avoid the costly `autoload?` call on all the autoloaded definitions you can manually define a list of namespaces to be included as inceptions.
+Use this as your own risk, note that after manually setting `manual_incepted_namespaces`, if you add a Gem which needs the inception you will need to include it in this list manually in order to have it working.
+
+```ruby
+loader.manual_incepted_namespaces = ['ActionCable']
+```
+
 ### Reloading
 
 <a id="markdown-configuration-and-usage" name="configuration-and-usage"></a>

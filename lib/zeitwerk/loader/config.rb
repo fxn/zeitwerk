@@ -13,6 +13,9 @@ module Zeitwerk::Loader::Config
   # @sig #call | #debug | nil
   attr_accessor :logger
 
+  # @sig nil
+  attr_accessor :manual_incepted_namespaces
+
   # Absolute paths of the root directories, mapped to their respective root namespaces:
   #
   #   "/Users/fxn/blog/app/channels" => Object,
@@ -84,20 +87,21 @@ module Zeitwerk::Loader::Config
   private :on_unload_callbacks
 
   def initialize
-    @inflector              = Zeitwerk::Inflector.new
-    @logger                 = self.class.default_logger
-    @tag                    = SecureRandom.hex(3)
-    @initialized_at         = Time.now
-    @roots                  = {}
-    @ignored_glob_patterns  = Set.new
-    @ignored_paths          = Set.new
-    @collapse_glob_patterns = Set.new
-    @collapse_dirs          = Set.new
-    @eager_load_exclusions  = Set.new
-    @reloading_enabled      = false
-    @on_setup_callbacks     = []
-    @on_load_callbacks      = {}
-    @on_unload_callbacks    = {}
+    @inflector                  = Zeitwerk::Inflector.new
+    @logger                     = self.class.default_logger
+    @manual_incepted_namespaces = []
+    @tag                        = SecureRandom.hex(3)
+    @initialized_at             = Time.now
+    @roots                      = {}
+    @ignored_glob_patterns      = Set.new
+    @ignored_paths              = Set.new
+    @collapse_glob_patterns     = Set.new
+    @collapse_dirs              = Set.new
+    @eager_load_exclusions      = Set.new
+    @reloading_enabled          = false
+    @on_setup_callbacks         = []
+    @on_load_callbacks          = {}
+    @on_unload_callbacks        = {}
   end
 
   # Pushes `path` to the list of root directories.
