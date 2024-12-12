@@ -537,7 +537,10 @@ module Zeitwerk
       Registry.register_autoload(self, abspath)
 
       # See why in the documentation of Zeitwerk::Registry.inceptions.
-      unless cref.autoload?
+      # FIXME: This has a performance penalization for few edge cases that need it.
+      # In our project they are just 3. It would be great to be able to configure this 
+      # per project or just disable it, so everybody can have the most performant experience.
+      unless ['ActionCable', 'ActionCable::Engine', 'FQL'].include?(cref.path)
         Registry.register_inception(cref.path, abspath, self)
       end
     end
