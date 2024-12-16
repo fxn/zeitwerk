@@ -539,15 +539,15 @@ module Zeitwerk
       # If manual incepted namespaces are present we skip the default behavior
       # and we will only incept the manually defined namespaces for improved
       # performance
-      if manual_incepted_namespaces.any?
-        if manual_incepted_namespaces.include?(cref.cname.name)
-          Registry.register_inception(cref.path, abspath, self)
-        end
-      else
+      if manual_incepted_namespaces.empty?
         # This operation can impact performance in big codebases since it will
         # be evaluated for every single auoloaded constant.
         # See why in the documentation of Zeitwerk::Registry.inceptions.
         unless cref.autoload?
+          Registry.register_inception(cref.path, abspath, self)
+        end
+      else
+        if manual_incepted_namespaces.include?(cref.cname.name)
           Registry.register_inception(cref.path, abspath, self)
         end
       end

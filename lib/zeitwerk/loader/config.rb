@@ -13,7 +13,7 @@ module Zeitwerk::Loader::Config
   # @sig #call | #debug | nil
   attr_accessor :logger
 
-  # @sig nil
+  # @sig Set[String]
   attr_accessor :manual_incepted_namespaces
 
   # Absolute paths of the root directories, mapped to their respective root namespaces:
@@ -89,7 +89,7 @@ module Zeitwerk::Loader::Config
   def initialize
     @inflector                  = Zeitwerk::Inflector.new
     @logger                     = self.class.default_logger
-    @manual_incepted_namespaces = []
+    @manual_incepted_namespaces = Set.new
     @tag                        = SecureRandom.hex(3)
     @initialized_at             = Time.now
     @roots                      = {}
