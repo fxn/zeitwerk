@@ -10,6 +10,8 @@
 #   cref.get
 #
 # The constant may or may not exist in mod.
+#
+# These objects are hashable.
 class Zeitwerk::Cref
   include Zeitwerk::RealModName
 
@@ -33,6 +35,18 @@ class Zeitwerk::Cref
   def path
     @path ||= Object.equal?(@mod) ? @cname.name : "#{real_mod_name(@mod)}::#{@cname.name}".freeze
   end
+  alias to_s path
+
+  # @sig () -> Integer
+  def hash
+    path.hash
+  end
+
+  # @sig (Object) -> bool
+  def eql?(other)
+    other.is_a?(self.class) && path == other.path
+  end
+  alias == eql?
 
   # @sig () -> String?
   def autoload?

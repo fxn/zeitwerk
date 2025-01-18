@@ -8,7 +8,7 @@ class TestCref < LoaderTest
   end
 
   def new_cref(mod = klass, cname = :Foo)
-    Zeitwerk::Cref.new(mod, :Foo)
+    Zeitwerk::Cref.new(mod, cname)
   end
 
   test "#cname" do
@@ -21,6 +21,35 @@ class TestCref < LoaderTest
 
   test "#path for another namespace" do
     assert_equal "#{self.class}::Foo", new_cref.path
+  end
+
+  test "#to_s is #path" do
+    assert_equal Zeitwerk::Cref.instance_method(:to_s), Zeitwerk::Cref.instance_method(:path)
+  end
+
+  test "#eql? is true for the same object" do
+    cref = new_cref
+    assert cref.eql?(cref)
+  end
+
+  test "#eql? is true for different objects with the same path" do
+    cref1 = new_cref
+    cref2 = new_cref
+    assert cref1.eql?(cref2)
+    assert cref2.eql?(cref1)
+  end
+
+  test "#eql? is true for different objects with different paths" do
+    assert !new_cref.eql?(new_cref(klass, :Bar))
+    assert !new_cref(String, :Foo).eql?(new_cref)
+  end
+
+  test "#eql? is false for objects of different classes" do
+    assert !new_cref.eql?(Object.new)
+  end
+
+  test "#== is #eql?" do
+    assert_equal Zeitwerk::Cref.instance_method(:==), Zeitwerk::Cref.instance_method(:eql?)
   end
 
   test "#autoload?" do
@@ -80,5 +109,14 @@ class TestCref < LoaderTest
 
   test "#remove with unknown cname" do
     assert_raises(NameError) { new_cref.remove }
+  end
+
+  test "crefs are hashable" do
+    cref = new_cref
+    h = { cref => true }
+
+    assert h[cref]
+    assert h[new_cref]
+    assert !h[new_cref(klass, :Bar)]
   end
 end
