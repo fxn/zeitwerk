@@ -32,6 +32,7 @@ require_relative "support/delete_loaded_feature"
 require_relative "support/loader_test"
 require_relative "support/remove_const"
 require_relative "support/on_teardown"
+require_relative "support/overridden_module"
 
 require "zeitwerk"
 
@@ -40,6 +41,7 @@ Minitest::Test.class_eval do
   include DeleteLoadedFeature
   include RemoveConst
   include OnTeardown
+  include OverriddenModule
 
   prove_it!
 end

@@ -23,6 +23,26 @@ class TestCref < LoaderTest
     assert_equal "#{self.class}::Foo", new_cref.path
   end
 
+  test "#path for another namespace that overrides #name" do
+    on_teardown do
+      remove_const :M
+      remove_const :C
+    end
+
+    ::M = new_overridden_module
+    cref = new_cref(M)
+    assert_equal "M::Foo", cref.path
+
+    ::C = new_overridden_class
+    cref = new_cref(C)
+    assert_equal "C::Foo", cref.path
+  end
+
+  test "#path is memoized" do
+    cref = new_cref
+    assert_equal cref.path.object_id, cref.path.object_id
+  end
+
   test "#to_s is #path" do
     assert_equal Zeitwerk::Cref.instance_method(:to_s), Zeitwerk::Cref.instance_method(:path)
   end
@@ -118,5 +138,20 @@ class TestCref < LoaderTest
     assert h[cref]
     assert h[new_cref]
     assert !h[new_cref(klass, :Bar)]
+  end
+
+  test "crefs are hashable even if #hash is overridden in mod" do
+    on_teardown do
+      remove_const :M
+      remove_const :C
+    end
+
+    ::M = new_overridden_module
+    cref = new_cref(::M)
+    assert_equal [cref], { cref => 1 }.keys
+
+    ::C = new_overridden_class
+    cref = new_cref(::C)
+    assert_equal [cref], { cref => 1 }.keys
   end
 end

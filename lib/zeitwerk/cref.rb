@@ -14,6 +14,7 @@
 # These objects are hashable.
 class Zeitwerk::Cref
   include Zeitwerk::RealModName
+  include Zeitwerk::RealModHash
 
   # @sig Module
   attr_reader :mod
@@ -39,12 +40,12 @@ class Zeitwerk::Cref
 
   # @sig () -> Integer
   def hash
-    path.hash
+    real_mod_hash(@mod) ^ @cname.hash
   end
 
   # @sig (Object) -> bool
   def eql?(other)
-    other.is_a?(self.class) && path == other.path
+    other.is_a?(self.class) && @mod.equal?(other.mod) && @cname.equal?(other.cname)
   end
   alias == eql?
 
@@ -54,8 +55,8 @@ class Zeitwerk::Cref
   end
 
   # @sig (String) -> bool
-  def autoload(abspath)
-    @mod.autoload(@cname, abspath)
+  def autoload(autoload_path)
+    @mod.autoload(@cname, autoload_path)
   end
 
   # @sig () -> bool
