@@ -151,7 +151,7 @@ module Zeitwerk
         # is enough.
         unloaded_files = Set.new
 
-        autoloads.each do |autoload_path, cref|
+        autoloads.each do |abspath, cref|
           if cref.autoload?
             unload_autoload(cref)
           else
@@ -159,11 +159,11 @@ module Zeitwerk
             # and the constant path would escape unloadable_cpath? This is just
             # defensive code to clean things up as much as we are able to.
             unload_cref(cref)
-            unloaded_files.add(autoload_path) if ruby?(autoload_path)
+            unloaded_files.add(abspath) if ruby?(abspath)
           end
         end
 
-        to_unload.each do |cref, loaded_feature|
+        to_unload.each do |cref, abspath|
           unless on_unload_callbacks.empty?
             begin
               value = cref.get
@@ -172,12 +172,12 @@ module Zeitwerk
               # autoload failed to define the expected constant but the user
               # rescued the exception.
             else
-              run_on_unload_callbacks(cref.path, value, loaded_feature)
+              run_on_unload_callbacks(cref.path, value, abspath)
             end
           end
 
           unload_cref(cref)
-          unloaded_files.add(loaded_feature) if ruby?(loaded_feature)
+          unloaded_files.add(abspath) if ruby?(abspath)
         end
 
         unless unloaded_files.empty?
@@ -518,23 +518,23 @@ module Zeitwerk
     end
 
     # @sig (Module, Symbol, String) -> void
-    private def define_autoload(cref, autoload_path)
-      cref.autoload(autoload_path)
+    private def define_autoload(cref, abspath)
+      cref.autoload(abspath)
 
       if logger
-        if ruby?(autoload_path)
-          log("autoload set for #{cref}, to be loaded from #{autoload_path}")
+        if ruby?(abspath)
+          log("autoload set for #{cref}, to be loaded from #{abspath}")
         else
-          log("autoload set for #{cref}, to be autovivified from #{autoload_path}")
+          log("autoload set for #{cref}, to be autovivified from #{abspath}")
         end
       end
 
-      autoloads[autoload_path] = cref
-      Registry.register_autoload(self, autoload_path)
+      autoloads[abspath] = cref
+      Registry.register_autoload(self, abspath)
 
       # See why in the documentation of Zeitwerk::Registry.inceptions.
       unless cref.autoload?
-        Registry.register_inception(cref, autoload_path, self)
+        Registry.register_inception(cref, abspath, self)
       end
     end
 

@@ -18,9 +18,6 @@ You should always pick the most specific option:
 * `dir`: Absolute path of a directory.
 * `abspath`: Absolute path of a file or directory.
 
-In some places we use `autoload_path` because it is even more concise. Zeitwerk
-only sets autoloads using absolute paths.
-
 Note that Zeitwerk does not deal with file or directory objects, only with paths. For brevity, we exploit this fact to adopt the convention `file`&`dir` instead of `filename`&`dirname` or somesuch.
 
 ## Paths
