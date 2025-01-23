@@ -2,7 +2,6 @@
 
 module Zeitwerk
   require_relative "zeitwerk/real_mod_name"
-  require_relative "zeitwerk/real_mod_hash"
   require_relative "zeitwerk/internal"
   require_relative "zeitwerk/cref"
   require_relative "zeitwerk/loader"
