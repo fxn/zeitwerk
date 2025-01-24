@@ -103,13 +103,13 @@ module Zeitwerk
       end
 
       # @private
-      # @sig (String, String, Zeitwerk::Loader) -> void
+      # @sig (Zeitwerk::Cref, String, Zeitwerk::Loader) -> void
       def register_inception(cref, abspath, loader)
         inceptions[cref.path] = [abspath, loader]
       end
 
       # @private
-      # @sig (String) -> String?
+      # @sig (Zeitwerk::Cref, Zeitwerk::Loader?) -> String?
       def inception?(cref, registered_by_loader=nil)
         if pair = inceptions[cref.path]
           abspath, loader = pair

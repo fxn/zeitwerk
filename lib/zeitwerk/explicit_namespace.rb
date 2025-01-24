@@ -44,7 +44,7 @@ module Zeitwerk
       # Registers `cref` as being the constant path of an explicit namespace
       # managed by `loader`.
       #
-      # @sig (String, Zeitwerk::Loader) -> void
+      # @sig (Zeitwerk::Cref, Zeitwerk::Loader) -> void
       internal def register(cref, loader)
         if Object.equal?(cref.mod)
           @loaders[cref.cname] = loader
@@ -69,7 +69,7 @@ module Zeitwerk
 
       # This is an internal method only used by the test suite.
       #
-      # @sig (String) -> Zeitwerk::Loader?
+      # @sig (Symbol | String) -> Zeitwerk::Loader?
       internal def registered?(cname_or_cpath)
         @loaders[cname_or_cpath]
       end
