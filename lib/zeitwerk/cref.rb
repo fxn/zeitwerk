@@ -33,6 +33,7 @@ class Zeitwerk::Cref
   def path
     @path ||= Object.equal?(@mod) ? @cname.name : "#{real_mod_name(@mod)}::#{@cname.name}".freeze
   end
+  alias to_s path
 
   # @sig () -> String?
   def autoload?

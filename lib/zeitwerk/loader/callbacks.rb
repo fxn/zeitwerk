@@ -14,11 +14,11 @@ module Zeitwerk::Loader::Callbacks
     Zeitwerk::Registry.unregister_autoload(file)
 
     if cref.defined?
-      log("constant #{cref.path} loaded from file #{file}") if logger
+      log("constant #{cref} loaded from file #{file}") if logger
       to_unload[cref.path] = [file, cref] if reloading_enabled?
       run_on_load_callbacks(cref.path, cref.get, file) unless on_load_callbacks.empty?
     else
-      msg = "expected file #{file} to define constant #{cref.path}, but didn't"
+      msg = "expected file #{file} to define constant #{cref}, but didn't"
       log(msg) if logger
 
       # Ruby still keeps the autoload defined, but we remove it because the

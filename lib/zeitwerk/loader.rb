@@ -482,7 +482,7 @@ module Zeitwerk
       else
         # For whatever reason the constant that corresponds to this namespace has
         # already been defined, we have to recurse.
-        log("the namespace #{cref.path} already exists, descending into #{subdir}") if logger
+        log("the namespace #{cref} already exists, descending into #{subdir}") if logger
         define_autoloads_for_dir(subdir, cref.get)
       end
     end
@@ -499,7 +499,7 @@ module Zeitwerk
         end
       elsif cref.defined?
         shadowed_files << file
-        log("file #{file} is ignored because #{cref.path} is already defined") if logger
+        log("file #{file} is ignored because #{cref} is already defined") if logger
       else
         define_autoload(cref, file)
       end
@@ -513,7 +513,7 @@ module Zeitwerk
       autoloads.delete(dir)
       Registry.unregister_autoload(dir)
 
-      log("earlier autoload for #{cref.path} discarded, it is actually an explicit namespace defined in #{file}") if logger
+      log("earlier autoload for #{cref} discarded, it is actually an explicit namespace defined in #{file}") if logger
 
       # Order matters: When Module#const_added is triggered by the autoload, we
       # don't want the namespace to be registered yet.
@@ -527,9 +527,9 @@ module Zeitwerk
 
       if logger
         if ruby?(abspath)
-          log("autoload set for #{cref.path}, to be loaded from #{abspath}")
+          log("autoload set for #{cref}, to be loaded from #{abspath}")
         else
-          log("autoload set for #{cref.path}, to be autovivified from #{abspath}")
+          log("autoload set for #{cref}, to be autovivified from #{abspath}")
         end
       end
 
@@ -590,7 +590,7 @@ module Zeitwerk
     # @sig (Module, Symbol) -> void
     private def unload_autoload(cref)
       cref.remove
-      log("autoload for #{cref.path} removed") if logger
+      log("autoload for #{cref} removed") if logger
     end
 
     # @sig (Module, Symbol) -> void
@@ -602,7 +602,7 @@ module Zeitwerk
       # There are a few edge scenarios in which this may happen. If the constant
       # is gone, that is OK, anyway.
     else
-      log("#{cref.path} unloaded") if logger
+      log("#{cref} unloaded") if logger
     end
   end
 end

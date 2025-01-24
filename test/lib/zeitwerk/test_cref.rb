@@ -23,6 +23,10 @@ class TestCref < LoaderTest
     assert_equal "#{self.class}::Foo", new_cref.path
   end
 
+  test "#to_s is #path" do
+    assert_equal Zeitwerk::Cref.instance_method(:to_s), Zeitwerk::Cref.instance_method(:path)
+  end
+
   test "#autoload?" do
     on_teardown { remove_const :Foo, from: klass }
 
