@@ -5,20 +5,22 @@ require "test_helper"
 class TestUnregister < LoaderTest
   test "unregister removes the loader from internal state" do
     loader1 = Zeitwerk::Loader.new
+    cref1 = Zeitwerk::Cref.new(Object, :"dummy1")
     registry = Zeitwerk::Registry
     registry.register_loader(loader1)
     registry.gem_loaders_by_root_file["dummy1"] = loader1
     registry.register_autoload(loader1, "dummy1")
-    registry.register_inception("dummy1", "dummy1", loader1)
-    Zeitwerk::ExplicitNamespace.__register(Zeitwerk::Cref.new(Object, :"dummy"), loader1)
+    registry.register_inception(cref1, "dummy1", loader1)
+    Zeitwerk::ExplicitNamespace.__register(cref1, loader1)
 
     loader2 = Zeitwerk::Loader.new
+    cref2 = Zeitwerk::Cref.new(Object, :"dummy2")
     registry = Zeitwerk::Registry
     registry.register_loader(loader2)
     registry.gem_loaders_by_root_file["dummy2"] = loader2
     registry.register_autoload(loader2, "dummy2")
-    registry.register_inception("dummy2", "dummy2", loader2)
-    Zeitwerk::ExplicitNamespace.__register(Zeitwerk::Cref.new(Object, :"dummy2"), loader2)
+    registry.register_inception(cref2, "dummy2", loader2)
+    Zeitwerk::ExplicitNamespace.__register(cref2, loader2)
 
     loader1.unregister
 

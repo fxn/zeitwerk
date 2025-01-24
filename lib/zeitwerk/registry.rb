@@ -104,14 +104,14 @@ module Zeitwerk
 
       # @private
       # @sig (String, String, Zeitwerk::Loader) -> void
-      def register_inception(cpath, abspath, loader)
-        inceptions[cpath] = [abspath, loader]
+      def register_inception(cref, abspath, loader)
+        inceptions[cref.path] = [abspath, loader]
       end
 
       # @private
       # @sig (String) -> String?
-      def inception?(cpath, registered_by_loader=nil)
-        if pair = inceptions[cpath]
+      def inception?(cref, registered_by_loader=nil)
+        if pair = inceptions[cref.path]
           abspath, loader = pair
           if registered_by_loader.nil? || registered_by_loader.equal?(loader)
             abspath

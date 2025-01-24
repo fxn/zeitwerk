@@ -489,7 +489,7 @@ module Zeitwerk
 
     # @sig (Module, Symbol, String) -> void
     private def autoload_file(cref, file)
-      if autoload_path = cref.autoload? || Registry.inception?(cref.path)
+      if autoload_path = cref.autoload? || Registry.inception?(cref)
         # First autoload for a Ruby file wins, just ignore subsequent ones.
         if ruby?(autoload_path)
           shadowed_files << file
@@ -538,7 +538,7 @@ module Zeitwerk
 
       # See why in the documentation of Zeitwerk::Registry.inceptions.
       unless cref.autoload?
-        Registry.register_inception(cref.path, abspath, self)
+        Registry.register_inception(cref, abspath, self)
       end
     end
 
@@ -547,7 +547,7 @@ module Zeitwerk
       if autoload_path = cref.autoload?
         autoload_path if autoloads.key?(autoload_path)
       else
-        Registry.inception?(cref.path, self)
+        Registry.inception?(cref, self)
       end
     end
 
