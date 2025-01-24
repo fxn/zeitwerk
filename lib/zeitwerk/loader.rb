@@ -44,15 +44,19 @@ module Zeitwerk
 
     # Stores metadata needed for unloading. Its entries look like this:
     #
-    #   #<Zeitwerk::Cref:... @mod=Admin, @cname=:Role, ...> => ".../admin/role.rb"
+    #   "Admin::Role" => [
+    #     ".../admin/role.rb",
+    #     #<Zeitwerk::Cref:... @mod=Admin, @cname=:Role, ...>
+    #   ]
     #
-    # The cref is used to remove the constant from its class or module, and the
-    # file name is used to remove the file from $LOADED_FEATURES.
+    # The cpath as key helps implementing unloadable_cpath? The file name is
+    # stored in order to be able to delete it from $LOADED_FEATURES, and the
+    # cref is used to remove the constant from the parent class or module.
     #
     # If reloading is enabled, this hash is filled as constants are autoloaded
     # or eager loaded. Otherwise, the collection remains empty.
     #
-    # @sig Hash[Zeitwerk::Cref, String]
+    # @sig Hash[String, [String, Zeitwerk::Cref]]
     attr_reader :to_unload
     internal :to_unload
 
@@ -163,7 +167,7 @@ module Zeitwerk
           end
         end
 
-        to_unload.each do |cref, abspath|
+        to_unload.each do |cpath, (abspath, cref)|
           unless on_unload_callbacks.empty?
             begin
               value = cref.get
@@ -172,7 +176,7 @@ module Zeitwerk
               # autoload failed to define the expected constant but the user
               # rescued the exception.
             else
-              run_on_unload_callbacks(cref.path, value, abspath)
+              run_on_unload_callbacks(cpath, value, abspath)
             end
           end
 
@@ -313,7 +317,7 @@ module Zeitwerk
     #
     # @sig (String) -> bool
     def unloadable_cpath?(cpath)
-      unloadable_cpaths.include?(cpath)
+      to_unload.key?(cpath)
     end
 
     # Returns an array with the constant paths that would be unloaded on reload.
@@ -321,7 +325,7 @@ module Zeitwerk
     #
     # @sig () -> Array[String]
     def unloadable_cpaths
-      to_unload.keys.map(&:path).freeze
+      to_unload.keys.freeze
     end
 
     # This is a dangerous method.
@@ -478,14 +482,14 @@ module Zeitwerk
       else
         # For whatever reason the constant that corresponds to this namespace has
         # already been defined, we have to recurse.
-        log("the namespace #{cref} already exists, descending into #{subdir}") if logger
+        log("the namespace #{cref.path} already exists, descending into #{subdir}") if logger
         define_autoloads_for_dir(subdir, cref.get)
       end
     end
 
     # @sig (Module, Symbol, String) -> void
     private def autoload_file(cref, file)
-      if autoload_path = cref.autoload? || Registry.inception?(cref)
+      if autoload_path = cref.autoload? || Registry.inception?(cref.path)
         # First autoload for a Ruby file wins, just ignore subsequent ones.
         if ruby?(autoload_path)
           shadowed_files << file
@@ -495,7 +499,7 @@ module Zeitwerk
         end
       elsif cref.defined?
         shadowed_files << file
-        log("file #{file} is ignored because #{cref} is already defined") if logger
+        log("file #{file} is ignored because #{cref.path} is already defined") if logger
       else
         define_autoload(cref, file)
       end
@@ -509,7 +513,7 @@ module Zeitwerk
       autoloads.delete(dir)
       Registry.unregister_autoload(dir)
 
-      log("earlier autoload for #{cref} discarded, it is actually an explicit namespace defined in #{file}") if logger
+      log("earlier autoload for #{cref.path} discarded, it is actually an explicit namespace defined in #{file}") if logger
 
       # Order matters: When Module#const_added is triggered by the autoload, we
       # don't want the namespace to be registered yet.
@@ -523,9 +527,9 @@ module Zeitwerk
 
       if logger
         if ruby?(abspath)
-          log("autoload set for #{cref}, to be loaded from #{abspath}")
+          log("autoload set for #{cref.path}, to be loaded from #{abspath}")
         else
-          log("autoload set for #{cref}, to be autovivified from #{abspath}")
+          log("autoload set for #{cref.path}, to be autovivified from #{abspath}")
         end
       end
 
@@ -534,7 +538,7 @@ module Zeitwerk
 
       # See why in the documentation of Zeitwerk::Registry.inceptions.
       unless cref.autoload?
-        Registry.register_inception(cref, abspath, self)
+        Registry.register_inception(cref.path, abspath, self)
       end
     end
 
@@ -543,7 +547,7 @@ module Zeitwerk
       if autoload_path = cref.autoload?
         autoload_path if autoloads.key?(autoload_path)
       else
-        Registry.inception?(cref, self)
+        Registry.inception?(cref.path, self)
       end
     end
 
@@ -586,7 +590,7 @@ module Zeitwerk
     # @sig (Module, Symbol) -> void
     private def unload_autoload(cref)
       cref.remove
-      log("autoload for #{cref} removed") if logger
+      log("autoload for #{cref.path} removed") if logger
     end
 
     # @sig (Module, Symbol) -> void
@@ -598,7 +602,7 @@ module Zeitwerk
       # There are a few edge scenarios in which this may happen. If the constant
       # is gone, that is OK, anyway.
     else
-      log("#{cref} unloaded") if logger
+      log("#{cref.path} unloaded") if logger
     end
   end
 end

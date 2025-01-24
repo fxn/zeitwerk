@@ -61,7 +61,7 @@ module Zeitwerk
       #   end
       #
       # @private
-      # @sig Hash[Zeitwerk::Cref, String, Zeitwerk::Loader]]
+      # @sig Hash[String, [String, Zeitwerk::Loader]]
       attr_reader :inceptions
 
       # Registers a loader.
@@ -103,15 +103,15 @@ module Zeitwerk
       end
 
       # @private
-      # @sig (Zeitwerk::Cref, String, Zeitwerk::Loader) -> void
-      def register_inception(cref, abspath, loader)
-        inceptions[cref] = [abspath, loader]
+      # @sig (String, String, Zeitwerk::Loader) -> void
+      def register_inception(cpath, abspath, loader)
+        inceptions[cpath] = [abspath, loader]
       end
 
       # @private
       # @sig (String) -> String?
-      def inception?(cref, registered_by_loader=nil)
-        if pair = inceptions[cref]
+      def inception?(cpath, registered_by_loader=nil)
+        if pair = inceptions[cpath]
           abspath, loader = pair
           if registered_by_loader.nil? || registered_by_loader.equal?(loader)
             abspath
@@ -128,8 +128,8 @@ module Zeitwerk
       # @private
       # @sig (Zeitwerk::Loader) -> void
       def on_unload(loader)
-        autoloads.delete_if { |_, object| object == loader }
-        inceptions.delete_if { |_, (_, object)| object == loader }
+        autoloads.delete_if { |_path, object| object == loader }
+        inceptions.delete_if { |_cpath, (_path, object)| object == loader }
       end
     end
 

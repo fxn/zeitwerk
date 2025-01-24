@@ -14,11 +14,11 @@ module Zeitwerk::Loader::Callbacks
     Zeitwerk::Registry.unregister_autoload(file)
 
     if cref.defined?
-      log("constant #{cref} loaded from file #{file}") if logger
-      to_unload[cref] = file if reloading_enabled?
+      log("constant #{cref.path} loaded from file #{file}") if logger
+      to_unload[cref.path] = [file, cref] if reloading_enabled?
       run_on_load_callbacks(cref.path, cref.get, file) unless on_load_callbacks.empty?
     else
-      msg = "expected file #{file} to define constant #{cref}, but didn't"
+      msg = "expected file #{file} to define constant #{cref.path}, but didn't"
       log(msg) if logger
 
       # Ruby still keeps the autoload defined, but we remove it because the
@@ -28,7 +28,7 @@ module Zeitwerk::Loader::Callbacks
       # Since the expected constant was not defined, there is nothing to unload.
       # However, if the exception is rescued and reloading is enabled, we still
       # need to deleted the file from $LOADED_FEATURES.
-      to_unload[cref] = file if reloading_enabled?
+      to_unload[cref.path] = [file, cref] if reloading_enabled?
 
       raise Zeitwerk::NameError.new(msg, cref.cname)
     end
@@ -57,7 +57,7 @@ module Zeitwerk::Loader::Callbacks
         cpath = implicit_namespace.name
         log("module #{cpath} autovivified from directory #{dir}") if logger
 
-        to_unload[cref] = dir if reloading_enabled?
+        to_unload[cpath] = [dir, cref] if reloading_enabled?
 
         # We don't unregister `dir` in the registry because concurrent threads
         # wouldn't find a loader associated to it in Kernel#require and would
