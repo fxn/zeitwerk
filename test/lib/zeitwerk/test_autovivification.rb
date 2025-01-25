@@ -63,7 +63,7 @@ class TestAutovivification < LoaderTest
       ["rd2/admin/y.rb", "Admin::Y = true"]
     ]
     with_setup(files) do
-      assert !Zeitwerk::ExplicitNamespace.__registered?(:Admin)
+      assert !Zeitwerk::Registry::ExplicitNamespaces.__registered?(:Admin)
     end
   end
 

@@ -206,7 +206,7 @@ module Zeitwerk
         shadowed_files.clear
 
         Registry.on_unload(self)
-        ExplicitNamespace.__unregister_loader(self)
+        Registry::ExplicitNamespaces.__unregister_loader(self)
 
         @setup        = false
         @eager_loaded = false
@@ -334,7 +334,7 @@ module Zeitwerk
     # @sig () -> void
     def unregister
       Registry.unregister_loader(self)
-      ExplicitNamespace.__unregister_loader(self)
+      Registry::ExplicitNamespaces.__unregister_loader(self)
     end
 
     # The return value of this predicate is only meaningful if the loader has
@@ -553,7 +553,7 @@ module Zeitwerk
 
     # @sig (Zeitwerk::Cref) -> void
     private def register_explicit_namespace(cref)
-      ExplicitNamespace.__register(cref, self)
+      Registry::ExplicitNamespaces.__register(cref, self)
     end
 
     # @sig (String) -> void

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-module Zeitwerk
-  # This module is essentially a registry for explicit namespaces.
+module Zeitwerk::Registry
+  # This module is a registry for explicit namespaces.
   #
   # When a loader determines that a certain file should define an explicit
   # namespace, it registers it here, associating its cref with itself.
@@ -16,7 +16,7 @@ module Zeitwerk
   # The implementation assumes an explicit namespace is managed by one loader.
   # Loaders that reopen namespaces owned by other projects are responsible for
   # loading their constant before setup. This is documented.
-  module ExplicitNamespace # :nodoc: all
+  module ExplicitNamespaces # :nodoc: all
     # Maps cnames or cpaths of explicit namespaces with their corresponding
     # loader. They are symbols for top-level ones, and strings for nested ones:
     #
@@ -38,8 +38,8 @@ module Zeitwerk
     @loaders = {}
 
     class << self
-      include RealModName
-      extend Internal
+      include Zeitwerk::RealModName
+      extend Zeitwerk::Internal
 
       # Registers `cref` as being the constant path of an explicit namespace
       # managed by `loader`.
@@ -82,7 +82,7 @@ module Zeitwerk
       end
 
       module Synchronized
-        extend Internal
+        extend Zeitwerk::Internal
 
         MUTEX = Mutex.new
 
@@ -109,5 +109,10 @@ module Zeitwerk
 
       prepend Synchronized unless RUBY_ENGINE == "ruby"
     end
+
+    # This module is used by `Module#const_added`, which is a hot path. This
+    # ad-hoc constant is meant to be used there. The regular constant path is
+    # fine in the rest of the gem.
+    ::ZEITWERK_REGISTRY_EXPLICIT_NAMESPACES = self
   end
 end

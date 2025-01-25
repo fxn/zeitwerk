@@ -131,14 +131,14 @@ class TestUnload < LoaderTest
     ]
     with_files(files) do
       la = new_loader(dirs: "a")
-      assert Zeitwerk::ExplicitNamespace.__registered?(:M) == la
+      assert Zeitwerk::Registry::ExplicitNamespaces.__registered?(:M) == la
 
       lb = new_loader(dirs: "b")
-      assert Zeitwerk::ExplicitNamespace.__registered?(:X) == lb
+      assert Zeitwerk::Registry::ExplicitNamespaces.__registered?(:X) == lb
 
       la.unload
-      assert_nil Zeitwerk::ExplicitNamespace.__registered?(:M)
-      assert Zeitwerk::ExplicitNamespace.__registered?(:X) == lb
+      assert_nil Zeitwerk::Registry::ExplicitNamespaces.__registered?(:M)
+      assert Zeitwerk::Registry::ExplicitNamespaces.__registered?(:X) == lb
     end
   end
 
