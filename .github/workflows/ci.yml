@@ -16,11 +16,14 @@ jobs:
         ruby-version:
           - "3.2"
           - "3.3"
-          - "truffleruby-head"
+          - "truffleruby"
           - "head"
+          - "truffleruby-head"
         exclude:
-          - { os: "windows-latest", ruby-version: "truffleruby-head" }
-
+          - os: windows-latest
+            ruby-version: truffleruby
+          - os: windows-latest
+            ruby-version: truffleruby-head
     runs-on: ${{ matrix.os }}
     steps:
       - uses: "actions/checkout@v4"
