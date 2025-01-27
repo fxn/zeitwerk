@@ -14,7 +14,6 @@ jobs:
           - "windows-latest"
         ruby-version:
           - "head"
-          - "truffleruby-head"
     runs-on: ${{ matrix.os }}
     steps:
       - uses: "actions/checkout@v4"
