@@ -10,7 +10,7 @@ module Zeitwerk::ConstAdded
         raise Zeitwerk::Error, "#{cref} is expected to be a namespace, should be a class or module (got #{namespace.class})"
       end
 
-      loader.on_namespace_loaded(namespace)
+      loader.__on_namespace_loaded(namespace)
     end
     super
   end

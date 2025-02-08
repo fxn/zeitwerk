@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Zeitwerk::Loader::Callbacks
+module Zeitwerk::Loader::Callbacks # :nodoc: all
   include Zeitwerk::RealModName
   extend Zeitwerk::Internal
 
@@ -76,9 +76,8 @@ module Zeitwerk::Loader::Callbacks
   # const_added or from module autovivification. If the namespace has matching
   # subdirectories, we descend into them now.
   #
-  # @private
   # @sig (Module) -> void
-  def on_namespace_loaded(namespace)
+  internal def on_namespace_loaded(namespace)
     if dirs = namespace_dirs.delete(real_mod_name(namespace))
       dirs.each do |dir|
         define_autoloads_for_dir(dir, namespace)
