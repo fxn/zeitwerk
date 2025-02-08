@@ -2,8 +2,6 @@ module Zeitwerk::Registry
   # Loaders know their own inceptions, but there is a use case in which we need
   # to know if a given cpath is an inception globally. This is what this
   # registry is for.
-  #
-  # @private
   module Inceptions # :nodoc: all
     # @sig Hash[String, String]
     @inceptions = {}
@@ -28,6 +26,30 @@ module Zeitwerk::Registry
       def clear # for tests
         @inceptions.clear
       end
+
+      module Synchronized
+        extend Zeitwerk::Internal
+
+        MUTEX = Mutex.new
+
+        def register(...)
+          MUTEX.synchronize { super }
+        end
+
+        def registered?(...)
+          MUTEX.synchronize { super }
+        end
+
+        def unregister(...)
+          MUTEX.synchronize { super }
+        end
+
+        def clear
+          MUTEX.synchronize { super }
+        end
+      end
+
+      prepend Synchronized unless RUBY_ENGINE == "ruby"
     end
   end
 end
