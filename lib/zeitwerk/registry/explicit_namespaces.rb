@@ -109,10 +109,5 @@ module Zeitwerk::Registry
 
       prepend Synchronized unless RUBY_ENGINE == "ruby"
     end
-
-    # This module is used by `Module#const_added`, which is a hot path. This
-    # ad-hoc constant is meant to be used there. The regular constant path is
-    # fine in the rest of the gem.
-    ::ZEITWERK_REGISTRY_EXPLICIT_NAMESPACES = self
   end
 end

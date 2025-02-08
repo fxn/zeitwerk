@@ -2,7 +2,7 @@
 
 module Zeitwerk::ConstAdded
   def const_added(cname)
-    if loader = ZEITWERK_REGISTRY_EXPLICIT_NAMESPACES.__loader_for(self, cname)
+    if loader = Zeitwerk::Registry::ExplicitNamespaces.__loader_for(self, cname)
       namespace = const_get(cname, false)
 
       unless namespace.is_a?(Module)
