@@ -10,7 +10,6 @@ class TestUnregister < LoaderTest
     registry.register_loader(loader1)
     registry.gem_loaders_by_root_file["dummy1"] = loader1
     registry.register_autoload(loader1, "dummy1")
-    registry.register_inception(cref1, "dummy1", loader1)
     Zeitwerk::Registry::ExplicitNamespaces.__register(cref1, loader1)
 
     loader2 = Zeitwerk::Loader.new
@@ -19,7 +18,6 @@ class TestUnregister < LoaderTest
     registry.register_loader(loader2)
     registry.gem_loaders_by_root_file["dummy2"] = loader2
     registry.register_autoload(loader2, "dummy2")
-    registry.register_inception(cref2, "dummy2", loader2)
     Zeitwerk::Registry::ExplicitNamespaces.__register(cref2, loader2)
 
     loader1.unregister
@@ -27,13 +25,11 @@ class TestUnregister < LoaderTest
     assert !registry.loaders.include?(loader1)
     assert !registry.gem_loaders_by_root_file.values.include?(loader1)
     assert !registry.autoloads.values.include?(loader1)
-    assert !registry.inceptions.values.any? {|_, l| l == loader1}
     assert !Zeitwerk::Registry::ExplicitNamespaces.__registered?(:"dummy1")
 
     assert registry.loaders.include?(loader2)
     assert registry.gem_loaders_by_root_file.values.include?(loader2)
     assert registry.autoloads.values.include?(loader2)
-    assert registry.inceptions.values.any? {|_, l| l == loader2}
     assert Zeitwerk::Registry::ExplicitNamespaces.__registered?(:"dummy2") == loader2
   end
 

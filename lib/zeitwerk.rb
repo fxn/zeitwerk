@@ -7,7 +7,6 @@ module Zeitwerk
   require_relative "zeitwerk/loader"
   require_relative "zeitwerk/gem_loader"
   require_relative "zeitwerk/registry"
-  require_relative "zeitwerk/registry/explicit_namespaces"
   require_relative "zeitwerk/inflector"
   require_relative "zeitwerk/gem_inflector"
   require_relative "zeitwerk/null_inflector"

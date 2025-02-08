@@ -32,6 +32,29 @@ module Zeitwerk
     attr_reader :autoloads
     internal :autoloads
 
+    # When the path passed to Module#autoload is in the stack of features being
+    # loaded at the moment, Ruby passes. For example, Module#autoload? returns
+    # `nil` even if the autoload has not been attempted. See
+    #
+    #     https://bugs.ruby-lang.org/issues/21035
+    #
+    # We call these "inceptions".
+    #
+    # A common case is the entry point of gems managed by Zeitwerk. Their main
+    # file is normally required and, while doing so, the loader sets an autoload
+    # on the gem namespace. That autoload hits this edge case.
+    #
+    # There is some logic that neeeds to know if an autoload for a given
+    # constant already exists. We check Module#autoload? first, and fallback to
+    # the inceptions just in case.
+    #
+    # This hash table keeps track of pairs (cpath, autoload_path), and the
+    # module Zeitwerk::Registry::Inceptions acts as a global registry.
+    #
+    # @sig Hash[String, String]
+    attr_reader :inceptions
+    internal :inceptions
+
     # We keep track of autoloaded directories to remove them from the registry
     # at the end of eager loading.
     #
@@ -101,6 +124,7 @@ module Zeitwerk
       super
 
       @autoloads       = {}
+      @inceptions      = {}
       @autoloaded_dirs = []
       @to_unload       = {}
       @namespace_dirs  = Hash.new { |h, cpath| h[cpath] = [] }
@@ -205,8 +229,10 @@ module Zeitwerk
         namespace_dirs.clear
         shadowed_files.clear
 
+        unregister_inceptions
+        unregister_explicit_namespaces
+
         Registry.on_unload(self)
-        Registry::ExplicitNamespaces.__unregister_loader(self)
 
         @setup        = false
         @eager_loaded = false
@@ -333,8 +359,9 @@ module Zeitwerk
     # @experimental
     # @sig () -> void
     def unregister
+      unregister_inceptions
+      unregister_explicit_namespaces
       Registry.unregister_loader(self)
-      Registry::ExplicitNamespaces.__unregister_loader(self)
     end
 
     # The return value of this predicate is only meaningful if the loader has
@@ -489,7 +516,7 @@ module Zeitwerk
 
     # @sig (Module, Symbol, String) -> void
     private def autoload_file(cref, file)
-      if autoload_path = cref.autoload? || Registry.inception?(cref)
+      if autoload_path = cref.autoload? || Registry::Inceptions.registered?(cref.path)
         # First autoload for a Ruby file wins, just ignore subsequent ones.
         if ruby?(autoload_path)
           shadowed_files << file
@@ -536,10 +563,7 @@ module Zeitwerk
       autoloads[abspath] = cref
       Registry.register_autoload(self, abspath)
 
-      # See why in the documentation of Zeitwerk::Registry.inceptions.
-      unless cref.autoload?
-        Registry.register_inception(cref, abspath, self)
-      end
+      register_inception(cref, abspath) unless cref.autoload?
     end
 
     # @sig (Module, Symbol) -> String?
@@ -547,13 +571,32 @@ module Zeitwerk
       if autoload_path = cref.autoload?
         autoload_path if autoloads.key?(autoload_path)
       else
-        Registry.inception?(cref, self)
+        inceptions[cref.path]
       end
     end
 
     # @sig (Zeitwerk::Cref) -> void
     private def register_explicit_namespace(cref)
       Registry::ExplicitNamespaces.__register(cref, self)
+    end
+
+    # @sig () -> void
+    private def unregister_explicit_namespaces
+      Registry::ExplicitNamespaces.__unregister_loader(self)
+    end
+
+    # @sig (Zeitwerk::Cref, String) -> void
+    private def register_inception(cref, abspath)
+      inceptions[cref.path] = abspath
+      Registry::Inceptions.register(cref.path, abspath)
+    end
+
+    # @sig () -> void
+    private def unregister_inceptions
+      inceptions.each_key do |cpath|
+        Registry::Inceptions.unregister(cpath)
+      end
+      inceptions.clear
     end
 
     # @sig (String) -> void
