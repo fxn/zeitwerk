@@ -63,7 +63,8 @@ class TestAutovivification < LoaderTest
       ["rd2/admin/y.rb", "Admin::Y = true"]
     ]
     with_setup(files) do
-      assert !Zeitwerk::Registry::ExplicitNamespaces.__registered?(:Admin)
+      cref = Zeitwerk::Cref.new(Object, :Admin)
+      assert !Zeitwerk::Registry::ExplicitNamespaces.__registered?(cref)
     end
   end
 

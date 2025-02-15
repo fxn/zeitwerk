@@ -48,10 +48,11 @@ module Zeitwerk
     # constant already exists. We check Module#autoload? first, and fallback to
     # the inceptions just in case.
     #
-    # This hash table keeps track of pairs (cpath, autoload_path), and the
-    # module Zeitwerk::Registry::Inceptions acts as a global registry.
+    # This map keeps track of pairs (cref, autoload_path) found by the loader.
+    # The module Zeitwerk::Registry::Inceptions, on the other hand, acts as a
+    # global registry for them.
     #
-    # @sig Hash[String, String]
+    # @sig Zeitwerk::Cref::Map[String]
     attr_reader :inceptions
     internal :inceptions
 
@@ -65,39 +66,22 @@ module Zeitwerk
     attr_reader :autoloaded_dirs
     internal :autoloaded_dirs
 
-    # Stores metadata needed for unloading. Its entries look like this:
+    # If reloading is enabled, this collection maps autoload paths to their
+    # autoloaded crefs.
     #
-    #   "Admin::Role" => [
-    #     ".../admin/role.rb",
-    #     #<Zeitwerk::Cref:... @mod=Admin, @cname=:Role, ...>
-    #   ]
+    # On unload, the autoload paths are passed to callbacks, files deleted from
+    # $LOADED_FEATURES, and the crefs are deleted.
     #
-    # The cpath as key helps implementing unloadable_cpath? The file name is
-    # stored in order to be able to delete it from $LOADED_FEATURES, and the
-    # cref is used to remove the constant from the parent class or module.
-    #
-    # If reloading is enabled, this hash is filled as constants are autoloaded
-    # or eager loaded. Otherwise, the collection remains empty.
-    #
-    # @sig Hash[String, [String, Zeitwerk::Cref]]
+    # @sig Hash[String, Zeitwerk::Cref]
     attr_reader :to_unload
     internal :to_unload
 
-    # Maps namespace constant paths to their respective directories.
+    # Maps namespace crefs to the directories that conform the namespace.
     #
-    # For example, given this mapping:
+    # When these crefs get defined we know their children are spread over those
+    # directories. We'll visit them to set up the corresponding autoloads.
     #
-    #   "Admin" => [
-    #     "/Users/fxn/blog/app/controllers/admin",
-    #     "/Users/fxn/blog/app/models/admin",
-    #     ...
-    #   ]
-    #
-    # when `Admin` gets defined we know that it plays the role of a namespace
-    # and that its children are spread over those directories. We'll visit them
-    # to set up the corresponding autoloads.
-    #
-    # @sig Hash[String, Array[String]]
+    # @sig Zeitwerk::Cref::Map[String]
     attr_reader :namespace_dirs
     internal :namespace_dirs
 
@@ -124,10 +108,10 @@ module Zeitwerk
       super
 
       @autoloads       = {}
-      @inceptions      = {}
+      @inceptions      = Zeitwerk::Cref::Map.new
       @autoloaded_dirs = []
       @to_unload       = {}
-      @namespace_dirs  = Hash.new { |h, cpath| h[cpath] = [] }
+      @namespace_dirs  = Zeitwerk::Cref::Map.new
       @shadowed_files  = Set.new
       @setup           = false
       @eager_loaded    = false
@@ -191,7 +175,7 @@ module Zeitwerk
           end
         end
 
-        to_unload.each do |cpath, (abspath, cref)|
+        to_unload.each do |abspath, cref|
           unless on_unload_callbacks.empty?
             begin
               value = cref.get
@@ -200,7 +184,7 @@ module Zeitwerk
               # autoload failed to define the expected constant but the user
               # rescued the exception.
             else
-              run_on_unload_callbacks(cpath, value, abspath)
+              run_on_unload_callbacks(cref, value, abspath)
             end
           end
 
@@ -343,7 +327,7 @@ module Zeitwerk
     #
     # @sig (String) -> bool
     def unloadable_cpath?(cpath)
-      to_unload.key?(cpath)
+      unloadable_cpaths.include?(cpath)
     end
 
     # Returns an array with the constant paths that would be unloaded on reload.
@@ -351,7 +335,7 @@ module Zeitwerk
     #
     # @sig () -> Array[String]
     def unloadable_cpaths
-      to_unload.keys.freeze
+      to_unload.values.map(&:path)
     end
 
     # This is a dangerous method.
@@ -501,10 +485,10 @@ module Zeitwerk
         # If the existing autoload points to a file, it has to be preserved, if
         # not, it is fine as it is. In either case, we do not need to override.
         # Just remember the subdirectory conforms this namespace.
-        namespace_dirs[cref.path] << subdir
+        (namespace_dirs[cref] ||= []) << subdir
       elsif !cref.defined?
         # First time we find this namespace, set an autoload for it.
-        namespace_dirs[cref.path] << subdir
+        (namespace_dirs[cref] ||= []) << subdir
         define_autoload(cref, subdir)
       else
         # For whatever reason the constant that corresponds to this namespace has
@@ -516,7 +500,7 @@ module Zeitwerk
 
     # @sig (Module, Symbol, String) -> void
     private def autoload_file(cref, file)
-      if autoload_path = cref.autoload? || Registry::Inceptions.registered?(cref.path)
+      if autoload_path = cref.autoload? || Registry::Inceptions.registered?(cref)
         # First autoload for a Ruby file wins, just ignore subsequent ones.
         if ruby?(autoload_path)
           shadowed_files << file
@@ -571,7 +555,7 @@ module Zeitwerk
       if autoload_path = cref.autoload?
         autoload_path if autoloads.key?(autoload_path)
       else
-        inceptions[cref.path]
+        inceptions[cref]
       end
     end
 
@@ -587,14 +571,14 @@ module Zeitwerk
 
     # @sig (Zeitwerk::Cref, String) -> void
     private def register_inception(cref, abspath)
-      inceptions[cref.path] = abspath
-      Registry::Inceptions.register(cref.path, abspath)
+      inceptions[cref] = abspath
+      Registry::Inceptions.register(cref, abspath)
     end
 
     # @sig () -> void
     private def unregister_inceptions
-      inceptions.each_key do |cpath|
-        Registry::Inceptions.unregister(cpath)
+      inceptions.each_key do |cref|
+        Registry::Inceptions.unregister(cref)
       end
       inceptions.clear
     end
@@ -624,10 +608,10 @@ module Zeitwerk
     end
 
     # @sig (String, Object, String) -> void
-    private def run_on_unload_callbacks(cpath, value, abspath)
+    private def run_on_unload_callbacks(cref, value, abspath)
       # Order matters. If present, run the most specific one.
-      on_unload_callbacks[cpath]&.each { |c| c.call(value, abspath) }
-      on_unload_callbacks[:ANY]&.each { |c| c.call(cpath, value, abspath) }
+      on_unload_callbacks[cref.path]&.each { |c| c.call(value, abspath) }
+      on_unload_callbacks[:ANY]&.each { |c| c.call(cref.path, value, abspath) }
     end
 
     # @sig (Module, Symbol) -> void

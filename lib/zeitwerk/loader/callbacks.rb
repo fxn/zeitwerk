@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 module Zeitwerk::Loader::Callbacks # :nodoc: all
-  include Zeitwerk::RealModName
   extend Zeitwerk::Internal
 
   # Invoked from our decorated Kernel#require when a managed file is autoloaded.
@@ -15,7 +14,7 @@ module Zeitwerk::Loader::Callbacks # :nodoc: all
 
     if cref.defined?
       log("constant #{cref} loaded from file #{file}") if logger
-      to_unload[cref.path] = [file, cref] if reloading_enabled?
+      to_unload[file] = cref if reloading_enabled?
       run_on_load_callbacks(cref.path, cref.get, file) unless on_load_callbacks.empty?
     else
       msg = "expected file #{file} to define constant #{cref}, but didn't"
@@ -28,7 +27,7 @@ module Zeitwerk::Loader::Callbacks # :nodoc: all
       # Since the expected constant was not defined, there is nothing to unload.
       # However, if the exception is rescued and reloading is enabled, we still
       # need to deleted the file from $LOADED_FEATURES.
-      to_unload[cref.path] = [file, cref] if reloading_enabled?
+      to_unload[file] = cref if reloading_enabled?
 
       raise Zeitwerk::NameError.new(msg, cref.cname)
     end
@@ -57,7 +56,7 @@ module Zeitwerk::Loader::Callbacks # :nodoc: all
         cpath = implicit_namespace.name
         log("module #{cpath} autovivified from directory #{dir}") if logger
 
-        to_unload[cpath] = [dir, cref] if reloading_enabled?
+        to_unload[dir] = cref if reloading_enabled?
 
         # We don't unregister `dir` in the registry because concurrent threads
         # wouldn't find a loader associated to it in Kernel#require and would
@@ -65,20 +64,20 @@ module Zeitwerk::Loader::Callbacks # :nodoc: all
         # these to be able to unregister later if eager loading.
         autoloaded_dirs << dir
 
-        on_namespace_loaded(implicit_namespace)
+        on_namespace_loaded(cref, implicit_namespace)
 
         run_on_load_callbacks(cpath, implicit_namespace, dir) unless on_load_callbacks.empty?
       end
     end
   end
 
-  # Invoked when a class or module is created or reopened, either from the
-  # const_added or from module autovivification. If the namespace has matching
-  # subdirectories, we descend into them now.
+  # Invoked when a namespace is created, either from const_added or from module
+  # autovivification. If the namespace has matching subdirectories, we descend
+  # into them now.
   #
-  # @sig (Module) -> void
-  internal def on_namespace_loaded(namespace)
-    if dirs = namespace_dirs.delete(real_mod_name(namespace))
+  # @sig (Zeitwerk::Cref, Module) -> void
+  internal def on_namespace_loaded(cref, namespace)
+    if dirs = namespace_dirs.delete(cref)
       dirs.each do |dir|
         define_autoloads_for_dir(dir, namespace)
       end

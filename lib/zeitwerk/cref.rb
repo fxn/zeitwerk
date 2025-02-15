@@ -11,6 +11,8 @@
 #
 # The constant may or may not exist in mod.
 class Zeitwerk::Cref
+  require_relative "cref/map"
+
   include Zeitwerk::RealModName
 
   # @sig Module
