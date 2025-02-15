@@ -1,5 +1,34 @@
 # frozen_string_literal: true
 
+# This class emulates a hash table whose keys are of type Zeitwerk::Cref.
+#
+# It is a synchronized hash of hashes. The first one, stored in `@map`, is keyed
+# on class and module object IDs. Then, each one of them stores a hash table
+# keyed on constant names, where we finally store the values.
+#
+# For example, if we store values 0, 1, and 2 for the crefs that would
+# correspond to `M::X`, `M::Y`, and `N::Z`, the map will look like this:
+#
+#   { M => { X: 0, :Y => 1 }, N => { Z: 2 } }
+#
+# Why not use simple hash tables of type Hash[Module, Symbol]? Because class and
+# module objects are not guaranteed to be hashable, the `hash` method may have
+# been overridden:
+#
+#   https://github.com/fxn/zeitwerk/issues/188
+#
+# Another option would be to make crefs hashable. I tried with hash code
+#
+#  real_mod_hash(mod) ^ cname.hash
+#
+# and the matching eql?, but that was about 1.8x slower than a hash keyed by
+# class and module names.
+#
+# The gem used hashes keyed by class and module names, but that felt like an
+# unnecessary dependency on said names, our natural objects are the crefs.
+#
+# On the other hand, an unsynchronized hash based on constant paths is 1.6x
+# slower than this map.
 class Zeitwerk::Cref::Map # :nodoc: all
   def initialize
     @map = {}

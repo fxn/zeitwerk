@@ -88,9 +88,9 @@ module Zeitwerk
     # A shadowed file is a file managed by this loader that is ignored when
     # setting autoloads because its matching constant is already taken.
     #
-    # This private set is populated as we descend. For example, if the loader
-    # has only scanned the top-level, `shadowed_files` does not have shadowed
-    # files that may exist deep in the project tree yet.
+    # This private set is populated lazily, as we descend. For example, if the
+    # loader has only scanned the top-level, `shadowed_files` does not have the
+    # shadowed files that may exist deep in the project tree.
     #
     # @sig Set[String]
     attr_reader :shadowed_files
@@ -325,6 +325,9 @@ module Zeitwerk
     # Says if the given constant path would be unloaded on reload. This
     # predicate returns `false` if reloading is disabled.
     #
+    # This is an undocumented method that I wrote to help transition from the
+    # classic autoloader in Rails. Its usage was removed from Rails in 7.0.
+    #
     # @sig (String) -> bool
     def unloadable_cpath?(cpath)
       unloadable_cpaths.include?(cpath)
@@ -332,6 +335,9 @@ module Zeitwerk
 
     # Returns an array with the constant paths that would be unloaded on reload.
     # This predicate returns an empty array if reloading is disabled.
+    #
+    # This is an undocumented method that I wrote to help transition from the
+    # classic autoloader in Rails. Its usage was removed from Rails in 7.0.
     #
     # @sig () -> Array[String]
     def unloadable_cpaths
