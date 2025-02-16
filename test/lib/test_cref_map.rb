@@ -112,4 +112,33 @@ class TestCrefMap < Minitest::Test
     @map.clear
     assert @map.empty?
   end
+
+  # See https://github.com/fxn/zeitwerk/issues/188.
+  test "the map is robust to hash overrides" do
+    # This module is not hashable because the `hash` method has been overridden
+    # to mean something else. In particular, it has even a different arity.
+    m = Module.new do
+      def self.hash(_) = nil
+    end
+
+    assert_raises(ArgumentError, 'wrong number of arguments (given 0, expected 1)') do
+      { m => 0 }
+    end
+
+    n = Module.new do
+      def self.hash(_) = nil
+    end
+
+    # This map is designed to be able to use class and module objects as keys
+    # even if they are not technically hashable.
+    map = Zeitwerk::Cref::Map.new
+    cref_m = Zeitwerk::Cref.new(m, :X)
+    cref_n = Zeitwerk::Cref.new(n, :X)
+
+    map[cref_m] = 0
+    map[cref_n] = 1
+
+    assert_equal 0, map[cref_m]
+    assert_equal 1, map[cref_n]
+  end
 end
