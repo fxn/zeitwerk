@@ -613,7 +613,7 @@ module Zeitwerk
       end
     end
 
-    # @sig (String, Object, String) -> void
+    # @sig (String, top, String) -> void
     private def run_on_unload_callbacks(cref, value, abspath)
       # Order matters. If present, run the most specific one.
       on_unload_callbacks[cref.path]&.each { |c| c.call(value, abspath) }

@@ -71,15 +71,15 @@ module Zeitwerk::Loader::Config
 
   # User-oriented callbacks to be fired when a constant is loaded.
   #
-  # @sig Hash[String, Array[{ (Object, String) -> void }]]
-  #      Hash[Symbol, Array[{ (String, Object, String) -> void }]]
+  # @sig Hash[String, Array[{ (top, String) -> void }]]
+  #      Hash[Symbol, Array[{ (String, top, String) -> void }]]
   attr_reader :on_load_callbacks
   private :on_load_callbacks
 
   # User-oriented callbacks to be fired before constants are removed.
   #
-  # @sig Hash[String, Array[{ (Object, String) -> void }]]
-  #      Hash[Symbol, Array[{ (String, Object, String) -> void }]]
+  # @sig Hash[String, Array[{ (top, String) -> void }]]
+  #      Hash[Symbol, Array[{ (String, top, String) -> void }]]
   attr_reader :on_unload_callbacks
   private :on_unload_callbacks
 
@@ -247,8 +247,8 @@ module Zeitwerk::Loader::Config
   #   end
   #
   # @raise [TypeError]
-  # @sig (String) { (Object, String) -> void } -> void
-  #      (:ANY) { (String, Object, String) -> void } -> void
+  # @sig (String) { (top, String) -> void } -> void
+  #      (:ANY) { (String, top, String) -> void } -> void
   def on_load(cpath = :ANY, &block)
     raise TypeError, "on_load only accepts strings" unless cpath.is_a?(String) || cpath == :ANY
 
@@ -272,8 +272,8 @@ module Zeitwerk::Loader::Config
   #   end
   #
   # @raise [TypeError]
-  # @sig (String) { (Object) -> void } -> void
-  #      (:ANY) { (String, Object) -> void } -> void
+  # @sig (String) { (top) -> void } -> void
+  #      (:ANY) { (String, top) -> void } -> void
   def on_unload(cpath = :ANY, &block)
     raise TypeError, "on_unload only accepts strings" unless cpath.is_a?(String) || cpath == :ANY
 

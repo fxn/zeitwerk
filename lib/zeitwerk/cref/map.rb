@@ -43,7 +43,7 @@ class Zeitwerk::Cref::Map # :nodoc: all
     @mutex = Mutex.new
   end
 
-  # @sig (Zeitwerk::Cref, Object) -> Object
+  # @sig (Zeitwerk::Cref, V) -> V
   def []=(cref, value)
     @mutex.synchronize do
       cnames = (@map[cref.mod] ||= {})
@@ -51,14 +51,14 @@ class Zeitwerk::Cref::Map # :nodoc: all
     end
   end
 
-  # @sig (Zeitwerk::Cref) -> Object?
+  # @sig (Zeitwerk::Cref) -> top?
   def [](cref)
     @mutex.synchronize do
       @map[cref.mod]&.[](cref.cname)
     end
   end
 
-  # @sig (Zeitwerk::Cref) -> Object?
+  # @sig (Zeitwerk::Cref) -> top?
   def delete(cref)
     delete_mod_cname(cref.mod, cref.cname)
   end
@@ -66,7 +66,7 @@ class Zeitwerk::Cref::Map # :nodoc: all
   # Ad-hoc for loader_for, called from const_added. That is a hot path, I prefer
   # to not create a cref in every call, since that is global.
   #
-  # @sig (Module, Symbol) -> Object?
+  # @sig (Module, Symbol) -> top?
   def delete_mod_cname(mod, cname)
     @mutex.synchronize do
       if cnames = @map[mod]
@@ -77,7 +77,7 @@ class Zeitwerk::Cref::Map # :nodoc: all
     end
   end
 
-  # @sig (Object) -> void
+  # @sig (top) -> void
   def delete_by_value(value)
     @mutex.synchronize do
       @map.delete_if do |mod, cnames|

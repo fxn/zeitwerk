@@ -86,7 +86,7 @@ module Zeitwerk::Loader::Callbacks # :nodoc: all
 
   private
 
-  # @sig (String, Object) -> void
+  # @sig (String, top, String) -> void
   def run_on_load_callbacks(cpath, value, abspath)
     # Order matters. If present, run the most specific one.
     callbacks = reloading_enabled? ? on_load_callbacks[cpath] : on_load_callbacks.delete(cpath)

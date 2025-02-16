@@ -52,13 +52,13 @@ class Zeitwerk::Cref
     @mod.const_defined?(@cname, false)
   end
 
-  # @sig (Object) -> Object
+  # @sig (top) -> top
   def set(value)
     @mod.const_set(@cname, value)
   end
 
   # @raise [NameError]
-  # @sig () -> Object
+  # @sig () -> top
   def get
     @mod.const_get(@cname, false)
   end
