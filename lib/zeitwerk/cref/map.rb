@@ -58,6 +58,14 @@ class Zeitwerk::Cref::Map # :nodoc: all
     end
   end
 
+  # @sig (Zeitwerk::Cref, V) -> V
+  def get_or_set(cref, value)
+    @mutex.synchronize do
+      cnames = (@map[cref.mod] ||= {})
+      cnames.fetch(cref.cname) { cnames[cref.cname] = value }
+    end
+  end
+
   # @sig (Zeitwerk::Cref) -> top?
   def delete(cref)
     delete_mod_cname(cref.mod, cref.cname)

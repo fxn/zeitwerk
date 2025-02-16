@@ -39,6 +39,17 @@ class TestCrefMap < Minitest::Test
     assert_nil @map[@cref_mx]
   end
 
+  test "get_or_set returns the value if the key exists" do
+    @map[@cref_mx] = "mx"
+
+    assert_equal "mx", @map.get_or_set(@cref_mx, "not-mx")
+  end
+
+  test "get_or_set sets the value if the key does not exist" do
+    assert_same false, @map.get_or_set(@cref_mx, false)
+    assert_same false, @map[@cref_mx]
+  end
+
   test "delete removes and returns an existing value" do
     initialize_map
 
