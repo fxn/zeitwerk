@@ -89,7 +89,7 @@ class Zeitwerk::Cref::Map # :nodoc: all
 
   # Order of yielded crefs is undefined.
   #
-  # @sig () { () -> Zeitwerk::Cref } -> void
+  # @sig () { (Zeitwerk::Cref) -> void } -> void
   def each_key
     @mutex.synchronize do
       @map.each do |mod, cnames|
