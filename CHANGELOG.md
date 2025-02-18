@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 2.7.2 (18 February 2025)
+
+* Internal improvements and micro-optimizations.
+
+* Add stable TruffleRuby to CI.
+
 ## 2.7.1 (19 October 2024)
 
 * Micro-optimization in a hot path.
