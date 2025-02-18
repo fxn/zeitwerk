@@ -67,27 +67,45 @@ class TestUnload < LoaderTest
   end
 
   test "unload clears internal caches" do
+    $loader = nil
     files = [
+      ["my_gem.rb", <<-EOS],
+        $loader = Zeitwerk::Loader.new
+        $loader.push_dir(__dir__)
+        $loader.push_dir("rd1")
+        $loader.push_dir("rd2")
+
+        $loader.enable_reloading
+        $loader.setup
+
+        module MyGem; end
+      EOS
       ["rd1/user.rb", "class User; end"],
       ["rd1/api/v1/users_controller.rb", "class Api::V1::UsersController; end"],
       ["rd1/admin/root.rb", "class Admin::Root; end"],
       ["rd2/user.rb", "class User; end"]
     ]
-    with_setup(files) do
+    with_files(files) do
+      with_load_path(".") do
+        require "my_gem"
+      end
+
       assert User
       assert Api::V1::UsersController
 
-      assert !loader.__autoloads.empty?
-      assert !loader.__autoloaded_dirs.empty?
-      assert !loader.__to_unload.empty?
-      assert !loader.__namespace_dirs.empty?
+      assert !$loader.__autoloads.empty?
+      assert !$loader.__autoloaded_dirs.empty?
+      assert !$loader.__to_unload.empty?
+      assert !$loader.__namespace_dirs.empty?
+      assert !$loader.__inceptions.empty?
 
-      loader.unload
+      $loader.unload
 
-      assert loader.__autoloads.empty?
-      assert loader.__autoloaded_dirs.empty?
-      assert loader.__to_unload.empty?
-      assert loader.__namespace_dirs.empty?
+      assert $loader.__autoloads.empty?
+      assert $loader.__autoloaded_dirs.empty?
+      assert $loader.__to_unload.empty?
+      assert $loader.__namespace_dirs.empty?
+      assert $loader.__inceptions.empty?
     end
   end
 
@@ -157,6 +175,46 @@ class TestUnload < LoaderTest
       assert !loader.__shadowed_files.empty? # precondition
       loader.unload
       assert loader.__shadowed_files.empty?
+    end
+  end
+
+  test "unload clears associated inceptions" do
+    files = []
+
+    files << ["gem1/my_gem1.rb", <<~EOS]
+      $loader1 = Zeitwerk::Loader.new
+      $loader1.push_dir(__dir__)
+      $loader1.enable_reloading
+      $loader1.setup
+      module MyGem1; end
+    EOS
+
+    files << ["gem2/my_gem2.rb", <<~EOS]
+      $loader2 = Zeitwerk::Loader.new
+      $loader2.push_dir(__dir__)
+      $loader2.setup
+      module MyGem2; end
+    EOS
+
+    with_files(files) do
+      with_load_path(".") do
+        require "gem1/my_gem1"
+        require "gem2/my_gem2"
+      end
+
+      assert MyGem1
+      assert MyGem2
+
+      cref1 = Zeitwerk::Cref.new(Object, :MyGem1)
+      cref2 = Zeitwerk::Cref.new(Object, :MyGem2)
+
+      assert Zeitwerk::Registry::Inceptions.registered?(cref1)
+      assert Zeitwerk::Registry::Inceptions.registered?(cref2)
+
+      $loader1.unload
+
+      assert !Zeitwerk::Registry::Inceptions.registered?(cref1)
+      assert Zeitwerk::Registry::Inceptions.registered?(cref2)
     end
   end
 
