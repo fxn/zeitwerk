@@ -58,11 +58,11 @@ class Zeitwerk::Cref::Map # :nodoc: all
     end
   end
 
-  # @sig (Zeitwerk::Cref, V) -> V
-  def get_or_set(cref, value)
+  # @sig (Zeitwerk::Cref, { () -> V }) -> V
+  def get_or_set(cref, &block)
     @mutex.synchronize do
       cnames = (@map[cref.mod] ||= {})
-      cnames.fetch(cref.cname) { cnames[cref.cname] = value }
+      cnames.fetch(cref.cname) { cnames[cref.cname] = block.call }
     end
   end
 

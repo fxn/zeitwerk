@@ -491,10 +491,10 @@ module Zeitwerk
         # If the existing autoload points to a file, it has to be preserved, if
         # not, it is fine as it is. In either case, we do not need to override.
         # Just remember the subdirectory conforms this namespace.
-        namespace_dirs.get_or_set(cref, []) << subdir
+        namespace_dirs.get_or_set(cref) { [] } << subdir
       elsif !cref.defined?
         # First time we find this namespace, set an autoload for it.
-        namespace_dirs.get_or_set(cref, []) << subdir
+        namespace_dirs.get_or_set(cref) { [] } << subdir
         define_autoload(cref, subdir)
       else
         # For whatever reason the constant that corresponds to this namespace has
