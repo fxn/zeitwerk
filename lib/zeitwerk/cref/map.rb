@@ -1,11 +1,18 @@
 # frozen_string_literal: true
 
+# Description of the structure
+# ----------------------------
+#
 # This class emulates a hash table whose keys are of type Zeitwerk::Cref.
 #
-# It is a synchronized 2-level hash. The keys of the top one, stored in `@map`,
-# are class and module objects, but their hash code is forced to be their object
-# IDs (see why below). Then, each one of them stores a hash table keyed on
-# constant names as symbols. We finally store the values in those.
+# It is a synchronized 2-level hash.
+#
+# The keys of the top one, stored in `@map`, are class and module objects, but
+# their hash code is forced to be their object IDs because class and module
+# objects may not be hashable (https://github.com/fxn/zeitwerk/issues/188).
+#
+# Then, each one of them stores a hash table with their constants and values.
+# Constants are stored as symbols.
 #
 # For example, if we store values 0, 1, and 2 for the crefs that would
 # correspond to `M::X`, `M::Y`, and `N::Z`, the map will look like this:
@@ -14,28 +21,53 @@
 #
 # This structure is internal, so only the needed interface is implemented.
 #
-# Why not use tables that map pairs [Module, Symbol] to their values? Because
-# class and module objects are not guaranteed to be hashable, the `hash` method
-# may have been overridden:
+# Alternative approaches
+# -----------------------
 #
-#   https://github.com/fxn/zeitwerk/issues/188
+# 1. We could also use a 1-level hash whose keys are constant paths. In the
+#    example above it would be:
 #
-# We can also use a 1-level hash whose keys are the corresponding class and
-# module names. In the example above it would be:
+#      { "M::X" => 0, "M::Y" => 1, "N::Z" => 2 }
 #
-#   { "M::X" => 0, "M::Y" => 1, "N::Z" => 2 }
+#    The gem used this approach for several years.
 #
-# The gem used this approach for several years.
+#  2. Write a custom `hash`/`eql?` in Zeitwerk::Cref. Hash code would be
 #
-# Another option would be to make crefs hashable. I tried with hash code
+#       real_mod_hash(@mod) ^ @cname.hash
 #
-#   real_mod_hash(mod) ^ cname.hash
+#     where `real_mod_hash(@mod)` would actually be a call to the real `hash`
+#     method in Module. Like what we do for module names to bypass overrides.
 #
-# and the matching eql?, but that was about 1.8x slower.
+#  3. Similar to 2, but use
 #
-# Finally, I came with this solution which is 1.6x faster than the previous one
-# based on class and module names, even being synchronized. Also, client code
-# feels natural, since crefs are central objects in Zeitwerk's implementation.
+#       @mod.object_id ^ @cname.object_id
+#
+#     as hash code instead.
+#
+# Benchamrks
+# ----------
+#
+# Writing:
+#
+#   map - baseline
+#   (3) - 1.74x  slower
+#   (2) - 2.91x  slower
+#   (1) - 3.87x  slower
+#
+# Reading:
+#
+#   map - baseline
+#   (3) - 1.99x  slower
+#   (2) - 2.80x  slower
+#   (1) - 3.48x  slower
+#
+# Extra ball
+# ----------
+#
+# In addition to that, the map is synchronized and provides `delete_mod_cname`,
+# which is ad-hoc for the hot path in `const_added`, we do not need to create
+# unnecessary cref objects for constants we do not manage (but we do not know in
+# advance there).
 class Zeitwerk::Cref::Map # :nodoc: all
   def initialize
     @map = {}
