@@ -53,8 +53,7 @@ module Zeitwerk::Loader::Callbacks # :nodoc: all
     dirs_autoload_monitor.synchronize do
       if cref = autoloads.delete(dir)
         implicit_namespace = cref.set(Module.new)
-        cpath = implicit_namespace.name
-        log("module #{cpath} autovivified from directory #{dir}") if logger
+        log("module #{cref} autovivified from directory #{dir}") if logger
 
         to_unload[dir] = cref if reloading_enabled?
 
@@ -66,7 +65,7 @@ module Zeitwerk::Loader::Callbacks # :nodoc: all
 
         on_namespace_loaded(cref, implicit_namespace)
 
-        run_on_load_callbacks(cpath, implicit_namespace, dir) unless on_load_callbacks.empty?
+        run_on_load_callbacks(cref.path, implicit_namespace, dir) unless on_load_callbacks.empty?
       end
     end
   end
