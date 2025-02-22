@@ -5,13 +5,14 @@ module Zeitwerk
     require_relative "registry/autoloads"
     require_relative "registry/explicit_namespaces"
     require_relative "registry/inceptions"
+    require_relative "registry/loaders"
 
     class << self
       # Keeps track of all loaders. Useful to broadcast messages and to prevent
       # them from being garbage collected.
       #
       # @private
-      # @sig Array[Zeitwerk::Loader]
+      # @sig Zeitwerk::Registry::Loaders
       attr_reader :loaders
 
       # Registers gem loaders to let `for_gem` be idempotent in case of reload.
@@ -37,20 +38,10 @@ module Zeitwerk
       # @sig Zeitwerk::Registry::Inceptions
       attr_reader :inceptions
 
-      # Registers a loader.
-      #
-      # @private
-      # @sig (Zeitwerk::Loader) -> void
-      def register_loader(loader)
-        loaders << loader
-      end
-
       # @private
       # @sig (Zeitwerk::Loader) -> void
       def unregister_loader(loader)
-        loaders.delete(loader)
         gem_loaders_by_root_file.delete_if { |_, l| l == loader }
-        autoloads.unregister_loader(loader)
       end
 
       # This method returns always a loader, the same instance for the same root
@@ -61,15 +52,9 @@ module Zeitwerk
       def loader_for_gem(root_file, namespace:, warn_on_extra_files:)
         gem_loaders_by_root_file[root_file] ||= GemLoader.__new(root_file, namespace: namespace, warn_on_extra_files: warn_on_extra_files)
       end
-
-      # @private
-      # @sig (Zeitwerk::Loader) -> void
-      def on_unload(loader)
-        autoloads.delete_if { |_path, object| object == loader }
-      end
     end
 
-    @loaders                  = []
+    @loaders                  = Loaders.new
     @gem_loaders_by_root_file = {}
     @autoloads                = Autoloads.new
     @explicit_namespaces      = ExplicitNamespaces.new

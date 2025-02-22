@@ -7,7 +7,7 @@ class TestUnregister < LoaderTest
     loader1 = Zeitwerk::Loader.new
     cref1 = Zeitwerk::Cref.new(Object, :"dummy1")
     registry = Zeitwerk::Registry
-    registry.register_loader(loader1)
+    registry.loaders.register(loader1)
     registry.gem_loaders_by_root_file["dummy1"] = loader1
     registry.autoloads.register("dummy1", loader1)
     registry.explicit_namespaces.register(cref1, loader1)
@@ -15,19 +15,19 @@ class TestUnregister < LoaderTest
     loader2 = Zeitwerk::Loader.new
     cref2 = Zeitwerk::Cref.new(Object, :"dummy2")
     registry = Zeitwerk::Registry
-    registry.register_loader(loader2)
+    registry.loaders.register(loader2)
     registry.gem_loaders_by_root_file["dummy2"] = loader2
     registry.autoloads.register("dummy2", loader2)
     registry.explicit_namespaces.register(cref2, loader2)
 
     loader1.unregister
 
-    assert !registry.loaders.include?(loader1)
+    assert !registry.loaders.registered?(loader1)
     assert !registry.gem_loaders_by_root_file.values.include?(loader1)
     assert !registry.autoloads.registered?("dummy1")
     assert !registry.explicit_namespaces.registered?(cref1)
 
-    assert registry.loaders.include?(loader2)
+    assert registry.loaders.registered?(loader2)
     assert registry.gem_loaders_by_root_file.values.include?(loader2)
     assert registry.autoloads.registered?("dummy2")
     assert registry.explicit_namespaces.registered?(cref2) == loader2

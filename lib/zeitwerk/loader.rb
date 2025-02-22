@@ -119,7 +119,7 @@ module Zeitwerk
       @mutex = Mutex.new
       @dirs_autoload_monitor = Monitor.new
 
-      Registry.register_loader(self)
+      Registry.loaders.register(self)
     end
 
     # Sets autoloads in the root namespaces.
@@ -351,6 +351,8 @@ module Zeitwerk
     def unregister
       unregister_inceptions
       unregister_explicit_namespaces
+      Registry.loaders.unregister(self)
+      Registry.autoloads.unregister_loader(self)
       Registry.unregister_loader(self)
     end
 
@@ -453,7 +455,11 @@ module Zeitwerk
       #
       # @sig () -> Array[String]
       def all_dirs
-        Registry.loaders.flat_map(&:dirs).freeze
+        dirs = []
+        Registry.loaders.each do |loader|
+          dirs.concat(loader.dirs)
+        end
+        dirs.freeze
       end
     end
 
