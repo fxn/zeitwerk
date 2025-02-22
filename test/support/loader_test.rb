@@ -42,7 +42,7 @@ class LoaderTest < Minitest::Test
   end
 
   def reset_explicit_namespace
-    Zeitwerk::Registry::ExplicitNamespaces.__clear
+    Zeitwerk::Registry.explicit_namespaces.clear
   end
 
   def teardown

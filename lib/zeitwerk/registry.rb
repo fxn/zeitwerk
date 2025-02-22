@@ -28,6 +28,10 @@ module Zeitwerk
       # @sig Hash[String, Zeitwerk::Loader]
       attr_reader :autoloads
 
+      # @private
+      # @sig Zeitwerk::Registry::ExplicitNamespaces
+      attr_reader :explicit_namespaces
+
       # Registers a loader.
       #
       # @private
@@ -81,5 +85,6 @@ module Zeitwerk
     @loaders                  = []
     @gem_loaders_by_root_file = {}
     @autoloads                = {}
+    @explicit_namespaces      = ExplicitNamespaces.new
   end
 end

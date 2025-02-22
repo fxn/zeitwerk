@@ -150,15 +150,15 @@ class TestUnload < LoaderTest
     with_files(files) do
       la = new_loader(dirs: "a")
       crefM = Zeitwerk::Cref.new(Object, :M)
-      assert Zeitwerk::Registry::ExplicitNamespaces.__registered?(crefM) == la
+      assert Zeitwerk::Registry.explicit_namespaces.registered?(crefM) == la
 
       lb = new_loader(dirs: "b")
       crefX = Zeitwerk::Cref.new(Object, :X)
-      assert Zeitwerk::Registry::ExplicitNamespaces.__registered?(crefX) == lb
+      assert Zeitwerk::Registry.explicit_namespaces.registered?(crefX) == lb
 
       la.unload
-      assert_nil Zeitwerk::Registry::ExplicitNamespaces.__registered?(crefM)
-      assert Zeitwerk::Registry::ExplicitNamespaces.__registered?(crefX) == lb
+      assert_nil Zeitwerk::Registry.explicit_namespaces.registered?(crefM)
+      assert Zeitwerk::Registry.explicit_namespaces.registered?(crefX) == lb
     end
   end
 

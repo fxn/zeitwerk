@@ -64,7 +64,7 @@ class TestAutovivification < LoaderTest
     ]
     with_setup(files) do
       cref = Zeitwerk::Cref.new(Object, :Admin)
-      assert !Zeitwerk::Registry::ExplicitNamespaces.__registered?(cref)
+      assert !Zeitwerk::Registry.explicit_namespaces.registered?(cref)
     end
   end
 

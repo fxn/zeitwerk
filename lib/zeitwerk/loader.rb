@@ -567,12 +567,12 @@ module Zeitwerk
 
     # @sig (Zeitwerk::Cref) -> void
     private def register_explicit_namespace(cref)
-      Registry::ExplicitNamespaces.__register(cref, self)
+      Registry.explicit_namespaces.register(cref, self)
     end
 
     # @sig () -> void
     private def unregister_explicit_namespaces
-      Registry::ExplicitNamespaces.__unregister_loader(self)
+      Registry.explicit_namespaces.unregister_loader(self)
     end
 
     # @sig (Zeitwerk::Cref, String) -> void
