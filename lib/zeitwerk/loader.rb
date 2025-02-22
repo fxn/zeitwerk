@@ -216,7 +216,7 @@ module Zeitwerk
         unregister_inceptions
         unregister_explicit_namespaces
 
-        Registry.on_unload(self)
+        Registry.autoloads.unregister_loader(self)
 
         @setup        = false
         @eager_loaded = false
@@ -528,7 +528,7 @@ module Zeitwerk
     # @sig (dir: String, file: String, cref: Zeitwerk::Cref) -> void
     private def promote_namespace_from_implicit_to_explicit(dir:, file:, cref:)
       autoloads.delete(dir)
-      Registry.unregister_autoload(dir)
+      Registry.autoloads.unregister(dir)
 
       log("earlier autoload for #{cref} discarded, it is actually an explicit namespace defined in #{file}") if logger
 
@@ -551,7 +551,7 @@ module Zeitwerk
       end
 
       autoloads[abspath] = cref
-      Registry.register_autoload(self, abspath)
+      Registry.autoloads.register(abspath, self)
 
       register_inception(cref, abspath) unless cref.autoload?
     end

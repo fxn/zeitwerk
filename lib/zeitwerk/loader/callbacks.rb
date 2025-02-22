@@ -10,7 +10,7 @@ module Zeitwerk::Loader::Callbacks # :nodoc: all
   internal def on_file_autoloaded(file)
     cref = autoloads.delete(file)
 
-    Zeitwerk::Registry.unregister_autoload(file)
+    Zeitwerk::Registry.autoloads.unregister(file)
 
     if cref.defined?
       log("constant #{cref} loaded from file #{file}") if logger

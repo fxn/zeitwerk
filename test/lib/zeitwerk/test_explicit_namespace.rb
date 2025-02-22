@@ -145,8 +145,8 @@ class TestExplicitNamespace < LoaderTest
       ["rd2/m.rb", "module M; end"]
     ]
     with_setup(files) do
-      assert_nil Zeitwerk::Registry.loader_for(File.expand_path("rd1/m"))
-      assert_same loader, Zeitwerk::Registry.loader_for(File.expand_path("rd2/m.rb"))
+      assert_nil Zeitwerk::Registry.autoloads.registered?(File.expand_path("rd1/m"))
+      assert_same loader, Zeitwerk::Registry.autoloads.registered?(File.expand_path("rd2/m.rb"))
     end
   end
 

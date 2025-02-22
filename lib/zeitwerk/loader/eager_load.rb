@@ -18,7 +18,7 @@ module Zeitwerk::Loader::EagerLoad
       end
 
       autoloaded_dirs.each do |autoloaded_dir|
-        Zeitwerk::Registry.unregister_autoload(autoloaded_dir)
+        Zeitwerk::Registry.autoloads.unregister(autoloaded_dir)
       end
       autoloaded_dirs.clear
 

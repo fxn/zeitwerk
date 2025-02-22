@@ -2,6 +2,7 @@
 
 module Zeitwerk
   module Registry # :nodoc: all
+    require_relative "registry/autoloads"
     require_relative "registry/explicit_namespaces"
     require_relative "registry/inceptions"
 
@@ -25,7 +26,7 @@ module Zeitwerk
       # invoke callbacks and autovivify modules.
       #
       # @private
-      # @sig Hash[String, Zeitwerk::Loader]
+      # @sig Zeitwerk::Registry::Autoloads
       attr_reader :autoloads
 
       # @private
@@ -49,7 +50,7 @@ module Zeitwerk
       def unregister_loader(loader)
         loaders.delete(loader)
         gem_loaders_by_root_file.delete_if { |_, l| l == loader }
-        autoloads.delete_if { |_, l| l == loader }
+        autoloads.unregister_loader(loader)
       end
 
       # This method returns always a loader, the same instance for the same root
@@ -62,24 +63,6 @@ module Zeitwerk
       end
 
       # @private
-      # @sig (Zeitwerk::Loader, String) -> String
-      def register_autoload(loader, abspath)
-        autoloads[abspath] = loader
-      end
-
-      # @private
-      # @sig (String) -> void
-      def unregister_autoload(abspath)
-        autoloads.delete(abspath)
-      end
-
-      # @private
-      # @sig (String) -> Zeitwerk::Loader?
-      def loader_for(path)
-        autoloads[path]
-      end
-
-      # @private
       # @sig (Zeitwerk::Loader) -> void
       def on_unload(loader)
         autoloads.delete_if { |_path, object| object == loader }
@@ -88,7 +71,7 @@ module Zeitwerk
 
     @loaders                  = []
     @gem_loaders_by_root_file = {}
-    @autoloads                = {}
+    @autoloads                = Autoloads.new
     @explicit_namespaces      = ExplicitNamespaces.new
     @inceptions               = Inceptions.new
   end

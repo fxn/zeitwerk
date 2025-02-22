@@ -21,7 +21,7 @@ module Kernel
 
   # @sig (String) -> true | false
   def require(path)
-    if loader = Zeitwerk::Registry.loader_for(path)
+    if loader = Zeitwerk::Registry.autoloads.registered?(path)
       if path.end_with?(".rb")
         required = zeitwerk_original_require(path)
         loader.__on_file_autoloaded(path) if required
@@ -34,7 +34,7 @@ module Kernel
       required = zeitwerk_original_require(path)
       if required
         abspath = $LOADED_FEATURES.last
-        if loader = Zeitwerk::Registry.loader_for(abspath)
+        if loader = Zeitwerk::Registry.autoloads.registered?(abspath)
           loader.__on_file_autoloaded(abspath)
         end
       end
