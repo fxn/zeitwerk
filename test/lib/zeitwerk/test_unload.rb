@@ -208,13 +208,13 @@ class TestUnload < LoaderTest
       cref1 = Zeitwerk::Cref.new(Object, :MyGem1)
       cref2 = Zeitwerk::Cref.new(Object, :MyGem2)
 
-      assert Zeitwerk::Registry::Inceptions.registered?(cref1)
-      assert Zeitwerk::Registry::Inceptions.registered?(cref2)
+      assert Zeitwerk::Registry.inceptions.registered?(cref1)
+      assert Zeitwerk::Registry.inceptions.registered?(cref2)
 
       $loader1.unload
 
-      assert !Zeitwerk::Registry::Inceptions.registered?(cref1)
-      assert Zeitwerk::Registry::Inceptions.registered?(cref2)
+      assert !Zeitwerk::Registry.inceptions.registered?(cref1)
+      assert Zeitwerk::Registry.inceptions.registered?(cref2)
     end
   end
 

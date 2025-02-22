@@ -32,6 +32,10 @@ module Zeitwerk
       # @sig Zeitwerk::Registry::ExplicitNamespaces
       attr_reader :explicit_namespaces
 
+      # @private
+      # @sig Zeitwerk::Registry::Inceptions
+      attr_reader :inceptions
+
       # Registers a loader.
       #
       # @private
@@ -86,5 +90,6 @@ module Zeitwerk
     @gem_loaders_by_root_file = {}
     @autoloads                = {}
     @explicit_namespaces      = ExplicitNamespaces.new
+    @inceptions               = Inceptions.new
   end
 end

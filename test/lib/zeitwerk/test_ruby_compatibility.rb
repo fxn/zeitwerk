@@ -193,7 +193,7 @@ class TestRubyCompatibility < LoaderTest
   end
 
   # This edge case justifies the need for the inceptions collection in the
-  # registry. See Zeitwerk::Registry::Inceptions.
+  # registry.
   test "an autoload on yourself is ignored" do
     files = [["foo.rb", <<-EOS]]
       Object.autoload(:Foo, __FILE__)

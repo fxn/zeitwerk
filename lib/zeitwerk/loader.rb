@@ -49,7 +49,7 @@ module Zeitwerk
     # the inceptions just in case.
     #
     # This map keeps track of pairs (cref, autoload_path) found by the loader.
-    # The module Zeitwerk::Registry::Inceptions, on the other hand, acts as a
+    # The object Zeitwerk::Registry.inceptions, on the other hand, acts as a
     # global registry for them.
     #
     # @sig Zeitwerk::Cref::Map[String]
@@ -506,7 +506,7 @@ module Zeitwerk
 
     # @sig (Module, Symbol, String) -> void
     private def autoload_file(cref, file)
-      if autoload_path = cref.autoload? || Registry::Inceptions.registered?(cref)
+      if autoload_path = cref.autoload? || Registry.inceptions.registered?(cref)
         # First autoload for a Ruby file wins, just ignore subsequent ones.
         if ruby?(autoload_path)
           shadowed_files << file
@@ -578,13 +578,13 @@ module Zeitwerk
     # @sig (Zeitwerk::Cref, String) -> void
     private def register_inception(cref, abspath)
       inceptions[cref] = abspath
-      Registry::Inceptions.register(cref, abspath)
+      Registry.inceptions.register(cref, abspath)
     end
 
     # @sig () -> void
     private def unregister_inceptions
       inceptions.each_key do |cref|
-        Registry::Inceptions.unregister(cref)
+        Registry.inceptions.unregister(cref)
       end
       inceptions.clear
     end
