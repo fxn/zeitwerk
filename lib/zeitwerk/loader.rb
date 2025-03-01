@@ -481,7 +481,7 @@ module Zeitwerk
       end
     end
 
-    # @sig (Module, Symbol, String) -> void
+    # @sig (Zeitwerk::Cref, String) -> void
     private def autoload_subdir(cref, subdir)
       if autoload_path = autoload_path_set_by_me_for?(cref)
         if ruby?(autoload_path)
@@ -510,7 +510,7 @@ module Zeitwerk
       end
     end
 
-    # @sig (Module, Symbol, String) -> void
+    # @sig (Zeitwerk::Cref, String) -> void
     private def autoload_file(cref, file)
       if autoload_path = cref.autoload? || Registry.inceptions.registered?(cref)
         # First autoload for a Ruby file wins, just ignore subsequent ones.
@@ -544,7 +544,7 @@ module Zeitwerk
       register_explicit_namespace(cref)
     end
 
-    # @sig (Module, Symbol, String) -> void
+    # @sig (Zeitwerk::Cref, String) -> void
     private def define_autoload(cref, abspath)
       cref.autoload(abspath)
 
@@ -562,7 +562,7 @@ module Zeitwerk
       register_inception(cref, abspath) unless cref.autoload?
     end
 
-    # @sig (Module, Symbol) -> String?
+    # @sig (Zeitwerk::Cref) -> String?
     private def autoload_path_set_by_me_for?(cref)
       if autoload_path = cref.autoload?
         autoload_path if autoloads.key?(autoload_path)
@@ -626,7 +626,7 @@ module Zeitwerk
       on_unload_callbacks[:ANY]&.each { |c| c.call(cref.path, value, abspath) }
     end
 
-    # @sig (Module, Symbol) -> void
+    # @sig (Zeitwerk::Cref) -> void
     private def unload_autoload(cref)
       cref.remove
       log("autoload for #{cref} removed") if logger
