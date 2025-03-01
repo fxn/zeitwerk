@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Zeitwerk::ConstAdded # :nodoc:
-  # @sig (Symbol) -> void
+  #: (Symbol) -> void
   def const_added(cname)
     if loader = Zeitwerk::Registry.explicit_namespaces.loader_for(self, cname)
       namespace = const_get(cname, false)

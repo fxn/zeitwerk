@@ -3,7 +3,7 @@
 module Zeitwerk::Loader::Helpers
   # --- Logging -----------------------------------------------------------------------------------
 
-  # @sig (String) -> void
+  #: (#to_s) -> void
   private def log(message)
     method_name = logger.respond_to?(:debug) ? :debug : :call
     logger.send(method_name, "Zeitwerk@#{tag}: #{message}")
@@ -11,7 +11,7 @@ module Zeitwerk::Loader::Helpers
 
   # --- Files and directories ---------------------------------------------------------------------
 
-  # @sig (String) { (String, String) -> void } -> void
+  #: (String) { (String, String, Symbol) -> void } -> void
   private def ls(dir)
     children = Dir.children(dir)
 
@@ -52,7 +52,7 @@ module Zeitwerk::Loader::Helpers
   # important to list as less directories as possible and return fast in the
   # common case in which there are Ruby files.
   #
-  # @sig (String) -> bool
+  #: (String) -> bool
   private def has_at_least_one_ruby_file?(dir)
     to_visit = [dir]
 
@@ -74,22 +74,22 @@ module Zeitwerk::Loader::Helpers
     false
   end
 
-  # @sig (String) -> bool
+  #: (String) -> bool
   private def ruby?(path)
     path.end_with?(".rb")
   end
 
-  # @sig (String) -> bool
+  #: (String) -> bool
   private def dir?(path)
     File.directory?(path)
   end
 
-  # @sig (String) -> bool
+  #: (String) -> bool
   private def hidden?(basename)
     basename.start_with?(".")
   end
 
-  # @sig (String) { (String) -> void } -> void
+  #: (String) { (String) -> void } -> void
   private def walk_up(abspath)
     loop do
       yield abspath
@@ -100,11 +100,11 @@ module Zeitwerk::Loader::Helpers
 
   # --- Inflection --------------------------------------------------------------------------------
 
-  CNAME_VALIDATOR = Module.new
+  CNAME_VALIDATOR = Module.new #: Module
   private_constant :CNAME_VALIDATOR
 
   # @raise [Zeitwerk::NameError]
-  # @sig (String, String) -> Symbol
+  #: (String, String) -> Symbol
   private def cname_for(basename, abspath)
     cname = inflector.camelize(basename, abspath)
 

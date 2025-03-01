@@ -18,7 +18,7 @@ module Zeitwerk
     include Config
     include EagerLoad
 
-    MUTEX = Mutex.new
+    MUTEX = Mutex.new #: Mutex
     private_constant :MUTEX
 
     # Maps absolute paths for which an autoload has been set ---and not
@@ -28,7 +28,7 @@ module Zeitwerk
     #   "/Users/fxn/blog/app/models/hotel/pricing.rb" => #<Zeitwerk::Cref:... @mod=Hotel, @cname=:Pricing, ...>,
     #   ...
     #
-    # @sig Hash[String, Zeitwerk::Cref]
+    #: Hash[String, Zeitwerk::Cref]
     attr_reader :autoloads
     internal :autoloads
 
@@ -52,7 +52,7 @@ module Zeitwerk
     # The object Zeitwerk::Registry.inceptions, on the other hand, acts as a
     # global registry for them.
     #
-    # @sig Zeitwerk::Cref::Map[String]
+    #: Zeitwerk::Cref::Map[String]
     attr_reader :inceptions
     internal :inceptions
 
@@ -62,7 +62,7 @@ module Zeitwerk
     # Files are removed as they are autoloaded, but directories need to wait due
     # to concurrency (see why in Zeitwerk::Loader::Callbacks#on_dir_autoloaded).
     #
-    # @sig Array[String]
+    #: Array[String]
     attr_reader :autoloaded_dirs
     internal :autoloaded_dirs
 
@@ -72,7 +72,7 @@ module Zeitwerk
     # On unload, the autoload paths are passed to callbacks, files deleted from
     # $LOADED_FEATURES, and the crefs are deleted.
     #
-    # @sig Hash[String, Zeitwerk::Cref]
+    #: Hash[String, Zeitwerk::Cref]
     attr_reader :to_unload
     internal :to_unload
 
@@ -81,7 +81,7 @@ module Zeitwerk
     # When these crefs get defined we know their children are spread over those
     # directories. We'll visit them to set up the corresponding autoloads.
     #
-    # @sig Zeitwerk::Cref::Map[String]
+    #: Zeitwerk::Cref::Map[String]
     attr_reader :namespace_dirs
     internal :namespace_dirs
 
@@ -92,15 +92,15 @@ module Zeitwerk
     # loader has only scanned the top-level, `shadowed_files` does not have the
     # shadowed files that may exist deep in the project tree.
     #
-    # @sig Set[String]
+    #: Set[String]
     attr_reader :shadowed_files
     internal :shadowed_files
 
-    # @sig Mutex
+    #: Mutex
     attr_reader :mutex
     private :mutex
 
-    # @sig Monitor
+    #: Monitor
     attr_reader :dirs_autoload_monitor
     private :dirs_autoload_monitor
 
@@ -124,7 +124,7 @@ module Zeitwerk
 
     # Sets autoloads in the root namespaces.
     #
-    # @sig () -> void
+    #: () -> void
     def setup
       mutex.synchronize do
         break if @setup
@@ -150,7 +150,7 @@ module Zeitwerk
     # means `unload` + `setup`. This one is available to be used together with
     # `unregister`, which is undocumented too.
     #
-    # @sig () -> void
+    #: () -> void
     def unload
       mutex.synchronize do
         raise SetupRequired unless @setup
@@ -230,7 +230,7 @@ module Zeitwerk
     # client code in the README of the project.
     #
     # @raise [Zeitwerk::Error]
-    # @sig () -> void
+    #: () -> void
     def reload
       raise ReloadingDisabledError unless reloading_enabled?
       raise SetupRequired unless @setup
@@ -244,7 +244,7 @@ module Zeitwerk
     # Returns a hash that maps the absolute paths of the managed files and
     # directories to their respective expected constant paths.
     #
-    # @sig () -> Hash[String, String]
+    #: () -> Hash[String, String]
     def all_expected_cpaths
       result = {}
 
@@ -274,7 +274,7 @@ module Zeitwerk
       result
     end
 
-    # @sig (String | Pathname) -> String?
+    #: (String | Pathname) -> String?
     def cpath_expected_at(path)
       abspath = File.expand_path(path)
 
@@ -328,7 +328,7 @@ module Zeitwerk
     # This is an undocumented method that I wrote to help transition from the
     # classic autoloader in Rails. Its usage was removed from Rails in 7.0.
     #
-    # @sig (String) -> bool
+    #: (String) -> bool
     def unloadable_cpath?(cpath)
       unloadable_cpaths.include?(cpath)
     end
@@ -339,7 +339,7 @@ module Zeitwerk
     # This is an undocumented method that I wrote to help transition from the
     # classic autoloader in Rails. Its usage was removed from Rails in 7.0.
     #
-    # @sig () -> Array[String]
+    #: () -> Array[String]
     def unloadable_cpaths
       to_unload.values.map(&:path)
     end
@@ -347,7 +347,7 @@ module Zeitwerk
     # This is a dangerous method.
     #
     # @experimental
-    # @sig () -> void
+    #: () -> void
     def unregister
       unregister_inceptions
       unregister_explicit_namespaces
@@ -359,7 +359,7 @@ module Zeitwerk
     # The return value of this predicate is only meaningful if the loader has
     # scanned the file. This is the case in the spots where we use it.
     #
-    # @sig (String) -> Boolean
+    #: (String) -> bool
     internal def shadowed_file?(file)
       shadowed_files.member?(file)
     end
@@ -369,7 +369,7 @@ module Zeitwerk
     class << self
       include RealModName
 
-      # @sig #call | #debug | nil
+      #: #call | #debug | nil
       attr_accessor :default_logger
 
       # This is a shortcut for
@@ -387,7 +387,7 @@ module Zeitwerk
       # This method returns a subclass of Zeitwerk::Loader, but the exact type
       # is private, client code can only rely on the interface.
       #
-      # @sig (bool) -> Zeitwerk::GemLoader
+      #: (?warn_on_extra_files: boolish) -> Zeitwerk::GemLoader
       def for_gem(warn_on_extra_files: true)
         called_from = caller_locations(1, 1).first.path
         Registry.loader_for_gem(called_from, namespace: Object, warn_on_extra_files: warn_on_extra_files)
@@ -408,7 +408,7 @@ module Zeitwerk
       # This method returns a subclass of Zeitwerk::Loader, but the exact type
       # is private, client code can only rely on the interface.
       #
-      # @sig (bool) -> Zeitwerk::GemLoader
+      #: (Module) -> Zeitwerk::GemLoader
       def for_gem_extension(namespace)
         unless namespace.is_a?(Module) # Note that Class < Module.
           raise Zeitwerk::Error, "#{namespace.inspect} is not a class or module object, should be"
@@ -425,7 +425,7 @@ module Zeitwerk
       # Broadcasts `eager_load` to all loaders. Those that have not been setup
       # are skipped.
       #
-      # @sig () -> void
+      #: () -> void
       def eager_load_all
         Registry.loaders.each do |loader|
           begin
@@ -439,7 +439,7 @@ module Zeitwerk
       # Broadcasts `eager_load_namespace` to all loaders. Those that have not
       # been setup are skipped.
       #
-      # @sig (Module) -> void
+      #: (Module) -> void
       def eager_load_namespace(mod)
         Registry.loaders.each do |loader|
           begin
@@ -453,7 +453,7 @@ module Zeitwerk
       # Returns an array with the absolute paths of the root directories of all
       # registered loaders. This is a read-only collection.
       #
-      # @sig () -> Array[String]
+      #: () -> Array[String]
       def all_dirs
         dirs = []
         Registry.loaders.each do |loader|
@@ -463,7 +463,7 @@ module Zeitwerk
       end
     end
 
-    # @sig (String, Module) -> void
+    #: (String, Module) -> void
     private def define_autoloads_for_dir(dir, parent)
       ls(dir) do |basename, abspath, ftype|
         if ftype == :file
@@ -481,7 +481,7 @@ module Zeitwerk
       end
     end
 
-    # @sig (Zeitwerk::Cref, String) -> void
+    #: (Zeitwerk::Cref, String) -> void
     private def autoload_subdir(cref, subdir)
       if autoload_path = autoload_path_set_by_me_for?(cref)
         if ruby?(autoload_path)
@@ -510,7 +510,7 @@ module Zeitwerk
       end
     end
 
-    # @sig (Zeitwerk::Cref, String) -> void
+    #: (Zeitwerk::Cref, String) -> void
     private def autoload_file(cref, file)
       if autoload_path = cref.autoload? || Registry.inceptions.registered?(cref)
         # First autoload for a Ruby file wins, just ignore subsequent ones.
@@ -531,7 +531,7 @@ module Zeitwerk
     # `dir` is the directory that would have autovivified a namespace. `file` is
     # the file where we've found the namespace is explicitly defined.
     #
-    # @sig (dir: String, file: String, cref: Zeitwerk::Cref) -> void
+    #: (dir: String, file: String, cref: Zeitwerk::Cref) -> void
     private def promote_namespace_from_implicit_to_explicit(dir:, file:, cref:)
       autoloads.delete(dir)
       Registry.autoloads.unregister(dir)
@@ -544,7 +544,7 @@ module Zeitwerk
       register_explicit_namespace(cref)
     end
 
-    # @sig (Zeitwerk::Cref, String) -> void
+    #: (Zeitwerk::Cref, String) -> void
     private def define_autoload(cref, abspath)
       cref.autoload(abspath)
 
@@ -562,7 +562,7 @@ module Zeitwerk
       register_inception(cref, abspath) unless cref.autoload?
     end
 
-    # @sig (Zeitwerk::Cref) -> String?
+    #: (Zeitwerk::Cref) -> String?
     private def autoload_path_set_by_me_for?(cref)
       if autoload_path = cref.autoload?
         autoload_path if autoloads.key?(autoload_path)
@@ -571,23 +571,23 @@ module Zeitwerk
       end
     end
 
-    # @sig (Zeitwerk::Cref) -> void
+    #: (Zeitwerk::Cref) -> void
     private def register_explicit_namespace(cref)
       Registry.explicit_namespaces.register(cref, self)
     end
 
-    # @sig () -> void
+    #: () -> void
     private def unregister_explicit_namespaces
       Registry.explicit_namespaces.unregister_loader(self)
     end
 
-    # @sig (Zeitwerk::Cref, String) -> void
+    #: (Zeitwerk::Cref, String) -> void
     private def register_inception(cref, abspath)
       inceptions[cref] = abspath
       Registry.inceptions.register(cref, abspath)
     end
 
-    # @sig () -> void
+    #: () -> void
     private def unregister_inceptions
       inceptions.each_key do |cref|
         Registry.inceptions.unregister(cref)
@@ -595,7 +595,7 @@ module Zeitwerk
       inceptions.clear
     end
 
-    # @sig (String) -> void
+    #: (String) -> void
     private def raise_if_conflicting_directory(dir)
       MUTEX.synchronize do
         dir_slash = dir + "/"
@@ -619,20 +619,20 @@ module Zeitwerk
       end
     end
 
-    # @sig (String, top, String) -> void
+    #: (String, top, String) -> void
     private def run_on_unload_callbacks(cref, value, abspath)
       # Order matters. If present, run the most specific one.
       on_unload_callbacks[cref.path]&.each { |c| c.call(value, abspath) }
       on_unload_callbacks[:ANY]&.each { |c| c.call(cref.path, value, abspath) }
     end
 
-    # @sig (Zeitwerk::Cref) -> void
+    #: (Zeitwerk::Cref) -> void
     private def unload_autoload(cref)
       cref.remove
       log("autoload for #{cref} removed") if logger
     end
 
-    # @sig (Module, Symbol) -> void
+    #: (Zeitwerk::Cref) -> void
     private def unload_cref(cref)
       # Let's optimistically remove_const. The way we use it, this is going to
       # succeed always if all is good.

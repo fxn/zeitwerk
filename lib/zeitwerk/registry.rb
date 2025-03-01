@@ -12,13 +12,13 @@ module Zeitwerk
       # them from being garbage collected.
       #
       # @private
-      # @sig Zeitwerk::Registry::Loaders
+      #: Zeitwerk::Registry::Loaders
       attr_reader :loaders
 
       # Registers gem loaders to let `for_gem` be idempotent in case of reload.
       #
       # @private
-      # @sig Hash[String, Zeitwerk::Loader]
+      #: Hash[String, Zeitwerk::Loader]
       attr_reader :gem_loaders_by_root_file
 
       # Maps absolute paths to the loaders responsible for them.
@@ -27,19 +27,19 @@ module Zeitwerk
       # invoke callbacks and autovivify modules.
       #
       # @private
-      # @sig Zeitwerk::Registry::Autoloads
+      #: Zeitwerk::Registry::Autoloads
       attr_reader :autoloads
 
       # @private
-      # @sig Zeitwerk::Registry::ExplicitNamespaces
+      #: Zeitwerk::Registry::ExplicitNamespaces
       attr_reader :explicit_namespaces
 
       # @private
-      # @sig Zeitwerk::Registry::Inceptions
+      #: Zeitwerk::Registry::Inceptions
       attr_reader :inceptions
 
       # @private
-      # @sig (Zeitwerk::Loader) -> void
+      #: (Zeitwerk::Loader) -> void
       def unregister_loader(loader)
         gem_loaders_by_root_file.delete_if { |_, l| l == loader }
       end
@@ -48,7 +48,7 @@ module Zeitwerk
       # file. That is how Zeitwerk::Loader.for_gem is idempotent.
       #
       # @private
-      # @sig (String) -> Zeitwerk::Loader
+      #: (String, namespace: Module, warn_on_extra_files: boolish) -> Zeitwerk::Loader
       def loader_for_gem(root_file, namespace:, warn_on_extra_files:)
         gem_loaders_by_root_file[root_file] ||= GemLoader.__new(root_file, namespace: namespace, warn_on_extra_files: warn_on_extra_files)
       end

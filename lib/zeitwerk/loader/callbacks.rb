@@ -6,7 +6,7 @@ module Zeitwerk::Loader::Callbacks # :nodoc: all
   # Invoked from our decorated Kernel#require when a managed file is autoloaded.
   #
   # @raise [Zeitwerk::NameError]
-  # @sig (String) -> void
+  #: (String) -> void
   internal def on_file_autoloaded(file)
     cref = autoloads.delete(file)
 
@@ -36,7 +36,7 @@ module Zeitwerk::Loader::Callbacks # :nodoc: all
   # Invoked from our decorated Kernel#require when a managed directory is
   # autoloaded.
   #
-  # @sig (String) -> void
+  #: (String) -> void
   internal def on_dir_autoloaded(dir)
     # Module#autoload does not serialize concurrent requires in CRuby < 3.2, and
     # we handle directories ourselves without going through Kernel#require, so
@@ -74,7 +74,7 @@ module Zeitwerk::Loader::Callbacks # :nodoc: all
   # autovivification. If the namespace has matching subdirectories, we descend
   # into them now.
   #
-  # @sig (Zeitwerk::Cref, Module) -> void
+  #: (Zeitwerk::Cref, Module) -> void
   internal def on_namespace_loaded(cref, namespace)
     if dirs = namespace_dirs.delete(cref)
       dirs.each do |dir|
@@ -85,7 +85,7 @@ module Zeitwerk::Loader::Callbacks # :nodoc: all
 
   private
 
-  # @sig (String, top, String) -> void
+  #: (String, top, String) -> void
   def run_on_load_callbacks(cpath, value, abspath)
     # Order matters. If present, run the most specific one.
     callbacks = reloading_enabled? ? on_load_callbacks[cpath] : on_load_callbacks.delete(cpath)

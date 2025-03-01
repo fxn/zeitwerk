@@ -10,12 +10,12 @@ module Zeitwerk
     private_class_method :new
 
     # @private
-    # @sig (String, bool) -> Zeitwerk::GemLoader
+    #: (String, namespace: Module, warn_on_extra_files: boolish) -> Zeitwerk::GemLoader
     def self.__new(root_file, namespace:, warn_on_extra_files:)
       new(root_file, namespace: namespace, warn_on_extra_files: warn_on_extra_files)
     end
 
-    # @sig (String, bool) -> void
+    #: (String, namespace: Module, warn_on_extra_files: boolish) -> void
     def initialize(root_file, namespace:, warn_on_extra_files:)
       super()
 
@@ -30,7 +30,7 @@ module Zeitwerk
       push_dir(@root_dir, namespace: namespace)
     end
 
-    # @sig () -> void
+    #: () -> void
     def setup
       warn_on_extra_files if @warn_on_extra_files
       super
@@ -38,7 +38,7 @@ module Zeitwerk
 
     private
 
-    # @sig () -> void
+    #: () -> void
     def warn_on_extra_files
       expected_namespace_dir = @root_file.delete_suffix(".rb")
 

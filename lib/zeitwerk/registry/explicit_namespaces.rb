@@ -19,6 +19,7 @@ module Zeitwerk::Registry
   #
   # **This is a private module.**
   class ExplicitNamespaces # :nodoc: all
+    #: () -> void
     def initialize
       # Maps crefs of explicit namespaces with their corresponding loader.
       #
@@ -30,29 +31,29 @@ module Zeitwerk::Registry
     # Registers `cref` as being the constant path of an explicit namespace
     # managed by `loader`.
     #
-    # @sig (Zeitwerk::Cref, Zeitwerk::Loader) -> void
+    #: (Zeitwerk::Cref, Zeitwerk::Loader) -> void
     def register(cref, loader)
       @loaders[cref] = loader
     end
 
-    # @sig (Module, Symbol) -> Zeitwerk::Loader?
+    #: (Module, Symbol) -> Zeitwerk::Loader?
     def loader_for(mod, cname)
       @loaders.delete_mod_cname(mod, cname)
     end
 
-    # @sig (Zeitwerk::Loader) -> void
+    #: (Zeitwerk::Loader) -> void
     def unregister_loader(loader)
       @loaders.delete_by_value(loader)
     end
 
     # This is an internal method only used by the test suite.
     #
-    # @sig (Symbol | String) -> Zeitwerk::Loader?
+    #: (Zeitwerk::Cref) -> Zeitwerk::Loader?
     def registered?(cref)
       @loaders[cref]
     end
 
-    # @sig () -> void
+    #: () -> void
     def clear # for tests
       @loaders.clear
     end

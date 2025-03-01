@@ -11,7 +11,7 @@ module Zeitwerk
     #
     # Takes into account hard-coded mappings configured with `inflect`.
     #
-    # @sig (String, String) -> String
+    #: (String, String) -> String
     def camelize(basename, _abspath)
       overrides[basename] || basename.split('_').each(&:capitalize!).join
     end
@@ -28,7 +28,7 @@ module Zeitwerk
     #   inflector.camelize("mysql_adapter", abspath)    # => "MySQLAdapter"
     #   inflector.camelize("users_controller", abspath) # => "UsersController"
     #
-    # @sig (Hash[String, String]) -> void
+    #: (Hash[String, String]) -> void
     def inflect(inflections)
       overrides.merge!(inflections)
     end
@@ -38,7 +38,7 @@ module Zeitwerk
     # Hard-coded basename to constant name user maps that override the default
     # inflection logic.
     #
-    # @sig () -> Hash[String, String]
+    #: () -> Hash[String, String]
     def overrides
       @overrides ||= {}
     end

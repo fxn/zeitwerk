@@ -2,7 +2,7 @@
 
 # This is a private module.
 module Zeitwerk::Internal
-  # @sig (Symbol) -> void
+  #: (Symbol) -> void
   def internal(method_name)
     private method_name
 

@@ -69,13 +69,14 @@
 # unnecessary cref objects for constants we do not manage (but we do not know in
 # advance there).
 class Zeitwerk::Cref::Map # :nodoc: all
+  #: () -> void
   def initialize
     @map = {}
     @map.compare_by_identity
     @mutex = Mutex.new
   end
 
-  # @sig (Zeitwerk::Cref, V) -> V
+  #: (Zeitwerk::Cref, top) -> top
   def []=(cref, value)
     @mutex.synchronize do
       cnames = (@map[cref.mod] ||= {})
@@ -83,14 +84,14 @@ class Zeitwerk::Cref::Map # :nodoc: all
     end
   end
 
-  # @sig (Zeitwerk::Cref) -> top?
+  #: (Zeitwerk::Cref) -> top
   def [](cref)
     @mutex.synchronize do
       @map[cref.mod]&.[](cref.cname)
     end
   end
 
-  # @sig (Zeitwerk::Cref, { () -> V }) -> V
+  #: (Zeitwerk::Cref, { () -> top }) -> top
   def get_or_set(cref, &block)
     @mutex.synchronize do
       cnames = (@map[cref.mod] ||= {})
@@ -98,7 +99,7 @@ class Zeitwerk::Cref::Map # :nodoc: all
     end
   end
 
-  # @sig (Zeitwerk::Cref) -> top?
+  #: (Zeitwerk::Cref) -> top
   def delete(cref)
     delete_mod_cname(cref.mod, cref.cname)
   end
@@ -106,7 +107,7 @@ class Zeitwerk::Cref::Map # :nodoc: all
   # Ad-hoc for loader_for, called from const_added. That is a hot path, I prefer
   # to not create a cref in every call, since that is global.
   #
-  # @sig (Module, Symbol) -> top?
+  #: (Module, Symbol) -> top
   def delete_mod_cname(mod, cname)
     @mutex.synchronize do
       if cnames = @map[mod]
@@ -117,7 +118,7 @@ class Zeitwerk::Cref::Map # :nodoc: all
     end
   end
 
-  # @sig (top) -> void
+  #: (top) -> void
   def delete_by_value(value)
     @mutex.synchronize do
       @map.delete_if do |mod, cnames|
@@ -129,7 +130,7 @@ class Zeitwerk::Cref::Map # :nodoc: all
 
   # Order of yielded crefs is undefined.
   #
-  # @sig () { (Zeitwerk::Cref) -> void } -> void
+  #: () { (Zeitwerk::Cref) -> void } -> void
   def each_key
     @mutex.synchronize do
       @map.each do |mod, cnames|
@@ -140,14 +141,14 @@ class Zeitwerk::Cref::Map # :nodoc: all
     end
   end
 
-  # @sig () -> void
+  #: () -> void
   def clear
     @mutex.synchronize do
       @map.clear
     end
   end
 
-  # @sig () -> bool
+  #: () -> bool
   def empty? # for tests
     @mutex.synchronize do
       @map.empty?

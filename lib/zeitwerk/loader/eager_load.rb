@@ -5,7 +5,7 @@ module Zeitwerk::Loader::EagerLoad
   # specific files and directories with `do_not_eager_load`, and that can be
   # overridden passing `force: true`.
   #
-  # @sig (true | false) -> void
+  #: (?force: boolish) -> void
   def eager_load(force: false)
     mutex.synchronize do
       break if @eager_loaded
@@ -28,7 +28,7 @@ module Zeitwerk::Loader::EagerLoad
     end
   end
 
-  # @sig (String | Pathname) -> void
+  #: (String | Pathname) -> void
   def eager_load_dir(path)
     raise Zeitwerk::SetupRequired unless @setup
 
@@ -70,7 +70,7 @@ module Zeitwerk::Loader::EagerLoad
     actual_eager_load_dir(abspath, namespace)
   end
 
-  # @sig (Module) -> void
+  #: (Module) -> void
   def eager_load_namespace(mod)
     raise Zeitwerk::SetupRequired unless @setup
 
@@ -112,7 +112,7 @@ module Zeitwerk::Loader::EagerLoad
   # The method is implemented as `constantize` for files, in a sense, to be able
   # to descend orderly and make sure the file is loadable.
   #
-  # @sig (String | Pathname) -> void
+  #: (String | Pathname) -> void
   def load_file(path)
     abspath = File.expand_path(path)
 
@@ -156,7 +156,7 @@ module Zeitwerk::Loader::EagerLoad
   # The caller is responsible for making sure `namespace` is the namespace that
   # corresponds to `dir`.
   #
-  # @sig (String, Module, Boolean) -> void
+  #: (String, Module, ?force: boolish) -> void
   private def actual_eager_load_dir(dir, namespace, force: false)
     honour_exclusions = !force
     return if honour_exclusions && excluded_from_eager_load?(dir)
@@ -189,7 +189,7 @@ module Zeitwerk::Loader::EagerLoad
   # In order to invoke this method, the caller has to ensure `child` is a
   # strict namespace descendant of `root_namespace`.
   #
-  # @sig (Module, String, Module, Boolean) -> void
+  #: (Module, String, String, Module) -> void
   private def eager_load_child_namespace(child, child_name, root_dir, root_namespace)
     suffix = child_name
     unless root_namespace.equal?(Object)

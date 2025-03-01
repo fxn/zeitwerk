@@ -3,28 +3,27 @@ module Zeitwerk::Registry
   # to know if a given cpath is an inception globally. This is what this
   # registry is for.
   class Inceptions # :nodoc:
-    # @sig () -> void
+    #: () -> void
     def initialize
-      # @sig Zeitwerk::Cref::Map[String]
-      @inceptions = Zeitwerk::Cref::Map.new
+      @inceptions = Zeitwerk::Cref::Map.new #: Zeitwerk::Cref::Map[String]
     end
 
-    # @sig (Zeitwerk::Cref, String) -> void
+    #: (Zeitwerk::Cref, String) -> void
     def register(cref, abspath)
       @inceptions[cref] = abspath
     end
 
-    # @sig (String) -> String?
+    #: (Zeitwerk::Cref) -> String?
     def registered?(cref)
       @inceptions[cref]
     end
 
-    # @sig (String) -> void
+    #: (Zeitwerk::Cref) -> void
     def unregister(cref)
       @inceptions.delete(cref)
     end
 
-    # @sig () -> void
+    #: () -> void
     def clear # for tests
       @inceptions.clear
     end

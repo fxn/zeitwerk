@@ -19,7 +19,7 @@ module Kernel
     alias_method :zeitwerk_original_require, :require
   end
 
-  # @sig (String) -> true | false
+  #: (String) -> bool
   def require(path)
     if loader = Zeitwerk::Registry.autoloads.registered?(path)
       if path.end_with?(".rb")

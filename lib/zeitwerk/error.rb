@@ -5,6 +5,7 @@ module Zeitwerk
   end
 
   class ReloadingDisabledError < Error
+    #: () -> void
     def initialize
       super("can't reload, please call loader.enable_reloading before setup")
     end
@@ -14,6 +15,7 @@ module Zeitwerk
   end
 
   class SetupRequired < Error
+    #: () -> void
     def initialize
       super("please, finish your configuration and call Zeitwerk::Loader#setup once all is ready")
     end

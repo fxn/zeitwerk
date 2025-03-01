@@ -1,15 +1,18 @@
 # frozen_string_literal: true
 
 module Zeitwerk::RealModName
+  #: UnboundMethod
   UNBOUND_METHOD_MODULE_NAME = Module.instance_method(:name)
   private_constant :UNBOUND_METHOD_MODULE_NAME
 
-  # Returns the real name of the class or module, as set after the first
-  # constant to which it was assigned (or nil).
+  # Returns the real name of the class or module.
   #
-  # The name method can be overridden, hence the indirection in this method.
+  # We need this indirection becasue the `name` method can be overridden, and
+  # because in practice what we really need is the constant paths of modules
+  # with a permanent name, not so much what the user considers to be the name of
+  # a certain class or module of theirs.
   #
-  # @sig (Module) -> String?
+  #: (Module) -> String?
   def real_mod_name(mod)
     UNBOUND_METHOD_MODULE_NAME.bind_call(mod)
   end

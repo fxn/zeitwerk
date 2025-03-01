@@ -19,7 +19,7 @@ module Zeitwerk
   # This is a dangerous method.
   #
   # @experimental
-  # @sig () -> void
+  #: () -> void
   def self.with_loader
     loader = Zeitwerk::Loader.new
     yield loader

@@ -1,31 +1,31 @@
 module Zeitwerk::Registry
   class Loaders # :nodoc:
-    # @sig () -> void
+    #: () -> void
     def initialize
-      @loaders = [] # @sig Array[Zeitwerk::Loader]
+      @loaders = [] #: Array[Zeitwerk::Loader]
     end
 
-    # @sig ({ (Zeitwerk::Loader) -> void }) -> void
+    #: ({ (Zeitwerk::Loader) -> void }) -> void
     def each(&block)
       @loaders.each(&block)
     end
 
-    # @sig (String, Zeitwerk::Loader) -> Zeitwerk::Loader
+    #: (Zeitwerk::Loader) -> void
     def register(loader)
       @loaders << loader
     end
 
-    # @sig (Zeitwerk::Loader) -> Zeitwerk::Loader?
+    #: (Zeitwerk::Loader) -> Zeitwerk::Loader?
     def unregister(loader)
       @loaders.delete(loader)
     end
 
-    # @sig (Zeitwerk::Loader) -> bool
+    #: (Zeitwerk::Loader) -> bool
     def registered?(loader) # for tests
       @loaders.include?(loader)
     end
 
-    # @sig (void) -> void
+    #: () -> void
     def clear # for tests
       @loaders.clear
     end
