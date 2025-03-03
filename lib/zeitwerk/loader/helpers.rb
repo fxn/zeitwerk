@@ -3,7 +3,7 @@
 module Zeitwerk::Loader::Helpers
   # --- Logging -----------------------------------------------------------------------------------
 
-  #: (#to_s) -> void
+  #: (to_s() -> String) -> void
   private def log(message)
     method_name = logger.respond_to?(:debug) ? :debug : :call
     logger.send(method_name, "Zeitwerk@#{tag}: #{message}")

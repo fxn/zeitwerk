@@ -7,10 +7,10 @@ module Zeitwerk::Loader::Config
   extend Zeitwerk::Internal
   include Zeitwerk::RealModName
 
-  #: #camelize
+  #: camelize(String, String) -> String
   attr_accessor :inflector
 
-  #: #call | #debug | nil
+  #: call(String) -> void | debug(String) -> void | nil
   attr_accessor :logger
 
   # Absolute paths of the root directories, mapped to their respective root namespaces:
@@ -137,7 +137,7 @@ module Zeitwerk::Loader::Config
 
   # Sets a tag for the loader, useful for logging.
   #
-  #: (#to_s) -> void
+  #: (to_s() -> String) -> void
   def tag=(tag)
     @tag = tag.to_s
   end

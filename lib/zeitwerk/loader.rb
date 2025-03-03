@@ -369,7 +369,7 @@ module Zeitwerk
     class << self
       include RealModName
 
-      #: #call | #debug | nil
+      #: call(String) -> void | debug(String) -> void | nil
       attr_accessor :default_logger
 
       # This is a shortcut for
