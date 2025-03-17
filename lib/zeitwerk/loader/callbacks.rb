@@ -5,8 +5,7 @@ module Zeitwerk::Loader::Callbacks # :nodoc: all
 
   # Invoked from our decorated Kernel#require when a managed file is autoloaded.
   #
-  # @raise [Zeitwerk::NameError]
-  #: (String) -> void
+  #: (String) -> void ! Zeitwerk::NameError
   internal def on_file_autoloaded(file)
     cref = autoloads.delete(file)
 

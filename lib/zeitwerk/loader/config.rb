@@ -105,8 +105,7 @@ module Zeitwerk::Loader::Config
   # the same process already manages that directory or one of its ascendants or
   # descendants.
   #
-  # @raise [Zeitwerk::Error]
-  #: (String | Pathname, namespace: Module) -> void
+  #: (String | Pathname, namespace: Module) -> void ! Zeitwerk::Error
   def push_dir(path, namespace: Object)
     unless namespace.is_a?(Module) # Note that Class < Module.
       raise Zeitwerk::Error, "#{namespace.inspect} is not a class or module object, should be"
@@ -171,8 +170,7 @@ module Zeitwerk::Loader::Config
   # You need to call this method before setup in order to be able to reload.
   # There is no way to undo this, either you want to reload or you don't.
   #
-  # @raise [Zeitwerk::Error]
-  #: () -> void
+  #: () -> void ! Zeitwerk::Error
   def enable_reloading
     mutex.synchronize do
       break if @reloading_enabled
@@ -245,9 +243,7 @@ module Zeitwerk::Loader::Config
   #     # ...
   #   end
   #
-  # @raise [TypeError]
-  #: (String) { (top, String) -> void } -> void
-  #| (:ANY) { (String, top, String) -> void } -> void
+  #: (String?) { (top, String) -> void } -> void ! TypeError
   def on_load(cpath = :ANY, &block)
     raise TypeError, "on_load only accepts strings" unless cpath.is_a?(String) || cpath == :ANY
 
@@ -270,9 +266,7 @@ module Zeitwerk::Loader::Config
   #     # ...
   #   end
   #
-  # @raise [TypeError]
-  #: (String) { (top, String) -> void } -> void
-  #| (:ANY) { (String, top, String) -> void } -> void
+  #: (String?) { (top, String) -> void } -> void ! TypeError
   def on_unload(cpath = :ANY, &block)
     raise TypeError, "on_unload only accepts strings" unless cpath.is_a?(String) || cpath == :ANY
 

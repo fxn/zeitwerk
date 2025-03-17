@@ -229,8 +229,7 @@ module Zeitwerk
     # This method is not thread-safe, please see how this can be achieved by
     # client code in the README of the project.
     #
-    # @raise [Zeitwerk::Error]
-    #: () -> void
+    #: () -> void ! Zeitwerk::Error
     def reload
       raise ReloadingDisabledError unless reloading_enabled?
       raise SetupRequired unless @setup

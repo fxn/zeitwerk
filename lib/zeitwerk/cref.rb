@@ -57,14 +57,12 @@ class Zeitwerk::Cref
     @mod.const_set(@cname, value)
   end
 
-  # @raise [NameError]
-  #: () -> top
+  #: () -> top ! NameError
   def get
     @mod.const_get(@cname, false)
   end
 
-  # @raise [NameError]
-  #: () -> void
+  #: () -> void ! NameError
   def remove
     @mod.__send__(:remove_const, @cname)
   end
