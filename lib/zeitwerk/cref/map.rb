@@ -68,6 +68,8 @@
 # which is ad-hoc for the hot path in `const_added`, we do not need to create
 # unnecessary cref objects for constants we do not manage (but we do not know in
 # advance there).
+
+#: [Value]
 class Zeitwerk::Cref::Map # :nodoc: all
   #: () -> void
   def initialize
@@ -76,7 +78,7 @@ class Zeitwerk::Cref::Map # :nodoc: all
     @mutex = Mutex.new
   end
 
-  #: (Zeitwerk::Cref, top) -> top
+  #: (Zeitwerk::Cref, Value) -> Value
   def []=(cref, value)
     @mutex.synchronize do
       cnames = (@map[cref.mod] ||= {})
@@ -84,14 +86,14 @@ class Zeitwerk::Cref::Map # :nodoc: all
     end
   end
 
-  #: (Zeitwerk::Cref) -> top
+  #: (Zeitwerk::Cref) -> Value?
   def [](cref)
     @mutex.synchronize do
       @map[cref.mod]&.[](cref.cname)
     end
   end
 
-  #: (Zeitwerk::Cref, { () -> top }) -> top
+  #: (Zeitwerk::Cref, { () -> Value }) -> Value
   def get_or_set(cref, &block)
     @mutex.synchronize do
       cnames = (@map[cref.mod] ||= {})
@@ -99,7 +101,7 @@ class Zeitwerk::Cref::Map # :nodoc: all
     end
   end
 
-  #: (Zeitwerk::Cref) -> top
+  #: (Zeitwerk::Cref) -> Value?
   def delete(cref)
     delete_mod_cname(cref.mod, cref.cname)
   end
@@ -107,7 +109,7 @@ class Zeitwerk::Cref::Map # :nodoc: all
   # Ad-hoc for loader_for, called from const_added. That is a hot path, I prefer
   # to not create a cref in every call, since that is global.
   #
-  #: (Module, Symbol) -> top
+  #: (Module, Symbol) -> Value?
   def delete_mod_cname(mod, cname)
     @mutex.synchronize do
       if cnames = @map[mod]
@@ -118,7 +120,7 @@ class Zeitwerk::Cref::Map # :nodoc: all
     end
   end
 
-  #: (top) -> void
+  #: (Value) -> void
   def delete_by_value(value)
     @mutex.synchronize do
       @map.delete_if do |mod, cnames|
