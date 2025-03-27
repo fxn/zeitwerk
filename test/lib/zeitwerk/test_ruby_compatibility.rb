@@ -270,9 +270,10 @@ class TestRubyCompatibility < LoaderTest
     $ensure_M_is_autoloaded_by_the_thread = Queue.new
 
     files = [["m.rb", <<-EOS]]
+      $ensure_M_is_autoloaded_by_the_thread.pop()
+
       module M
-        $ensure_M_is_autoloaded_by_the_thread << true
-        sleep 0.5
+        sleep 1
 
         def self.works?
           true
@@ -280,9 +281,14 @@ class TestRubyCompatibility < LoaderTest
       end
     EOS
     with_setup(files) do
-      t = Thread.new { M }
-      $ensure_M_is_autoloaded_by_the_thread.pop()
-      assert M.works?
+      t = Thread.new do
+        $ensure_M_is_autoloaded_by_the_thread << true
+        M
+      end
+
+      sleep 0.5 # Let the thread hit the sleep in m.rb.
+      assert M.works? # this should block until the thread has finished autoloading
+
       t.join
     end
   end
