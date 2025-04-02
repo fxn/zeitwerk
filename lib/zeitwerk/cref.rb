@@ -33,7 +33,7 @@ class Zeitwerk::Cref
 
   #: () -> String
   def path
-    @path ||= Object == @mod ? @cname.name : "#{real_mod_name(@mod)}::#{@cname}".freeze
+    @path ||= Object == @mod ? @cname.name : "#{real_mod_name(@mod)}::#{@cname.name}".freeze
   end
   alias to_s path
 
