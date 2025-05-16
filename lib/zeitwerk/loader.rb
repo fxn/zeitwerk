@@ -386,10 +386,10 @@ module Zeitwerk
       # This method returns a subclass of Zeitwerk::Loader, but the exact type
       # is private, client code can only rely on the interface.
       #
-      #: (?warn_on_extra_files: boolish) -> Zeitwerk::GemLoader
-      def for_gem(warn_on_extra_files: true)
-        called_from = caller_locations(1, 1).first.path
-        Registry.loader_for_gem(called_from, namespace: Object, warn_on_extra_files: warn_on_extra_files)
+      #: (?warn_on_extra_files: boolish, ?root_file: String?) -> Zeitwerk::GemLoader
+      def for_gem(warn_on_extra_files: true, root_file: nil)
+        root_file ||= caller_locations(1, 1).first.path
+        Registry.loader_for_gem(root_file, namespace: Object, warn_on_extra_files: warn_on_extra_files)
       end
 
       # This is a shortcut for
@@ -407,8 +407,8 @@ module Zeitwerk
       # This method returns a subclass of Zeitwerk::Loader, but the exact type
       # is private, client code can only rely on the interface.
       #
-      #: (Module) -> Zeitwerk::GemLoader
-      def for_gem_extension(namespace)
+      #: (Module, ?root_file: String?) -> Zeitwerk::GemLoader
+      def for_gem_extension(namespace, root_file: nil)
         unless namespace.is_a?(Module) # Note that Class < Module.
           raise Zeitwerk::Error, "#{namespace.inspect} is not a class or module object, should be"
         end
@@ -417,8 +417,8 @@ module Zeitwerk
           raise Zeitwerk::Error, "extending anonymous namespaces is unsupported"
         end
 
-        called_from = caller_locations(1, 1).first.path
-        Registry.loader_for_gem(called_from, namespace: namespace, warn_on_extra_files: false)
+        root_file ||= caller_locations(1, 1).first.path
+        Registry.loader_for_gem(root_file, namespace: namespace, warn_on_extra_files: false)
       end
 
       # Broadcasts `eager_load` to all loaders. Those that have not been setup
