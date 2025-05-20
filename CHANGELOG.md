@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 2.7.3 (20 May 2025)
+
+* The helper `Zeitwerk::Loader#cpath_expected_at` did not work correctly if the
+  inflector had logic that relied on the absolute path of the given file or
+  directory. This has been fixed.
+
+  This bug was found by [Codex](https://openai.com/codex/).
+
+* Perpetual internal work.
+
 ## 2.7.2 (18 February 2025)
 
 * Internal improvements and micro-optimizations.
