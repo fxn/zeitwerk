@@ -303,7 +303,7 @@ module Zeitwerk
         basename = File.basename(dir)
         return if hidden?(basename)
 
-        paths << [basename, abspath] unless collapse?(dir)
+        paths << [basename, dir] unless collapse?(dir)
       end
 
       return unless root_namespace
@@ -311,7 +311,7 @@ module Zeitwerk
       if paths.empty?
         real_mod_name(root_namespace)
       else
-        cnames = paths.reverse_each.map { |b, a| cname_for(b, a) }
+        cnames = paths.reverse_each.map { cname_for(_1, _2) }
 
         if root_namespace == Object
           cnames.join("::")

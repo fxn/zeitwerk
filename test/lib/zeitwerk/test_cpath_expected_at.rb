@@ -184,4 +184,16 @@ class TestCpathExpectedAtString < LoaderTest
       assert_equal "#{M_REAL_NAME}::A::B", loader.cpath_expected_at("a/b/collapsed")
     end
   end
+
+  test "passes directory paths to the inflector" do
+    loader.inflector = Class.new(Zeitwerk::Inflector) do
+      def camelize(_basename, abspath)
+        super(File.basename(abspath).delete_suffix(".rb"), abspath)
+      end
+    end.new
+
+    with_setup([["a/b/x.rb", "A::B::X = 1"]]) do
+      assert_equal "A::B", loader.cpath_expected_at("a/b")
+    end
+  end
 end
