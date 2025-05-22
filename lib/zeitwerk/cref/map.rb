@@ -44,7 +44,7 @@
 #
 #     as hash code instead.
 #
-# Benchamrks
+# Benchmarks
 # ----------
 #
 # Writing:
