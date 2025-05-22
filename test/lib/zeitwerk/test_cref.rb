@@ -8,7 +8,7 @@ class TestCref < LoaderTest
   end
 
   def new_cref(mod = klass, cname = :Foo)
-    Zeitwerk::Cref.new(mod, :Foo)
+    Zeitwerk::Cref.new(mod, cname)
   end
 
   test "#cname" do
