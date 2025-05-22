@@ -44,9 +44,9 @@ module Zeitwerk
     # file is normally required and, while doing so, the loader sets an autoload
     # on the gem namespace. That autoload hits this edge case.
     #
-    # There is some logic that neeeds to know if an autoload for a given
-    # constant already exists. We check Module#autoload? first, and fallback to
-    # the inceptions just in case.
+    # There is some logic that needs to know if an autoload for a given constant
+    # already exists. We check Module#autoload? first, and fallback to the
+    # inceptions just in case.
     #
     # This map keeps track of pairs (cref, autoload_path) found by the loader.
     # The object Zeitwerk::Registry.inceptions, on the other hand, acts as a
