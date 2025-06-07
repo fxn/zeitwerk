@@ -20,7 +20,7 @@ Gem::Specification.new do |spec|
   spec.version  = Zeitwerk::VERSION
   spec.metadata = {
     "homepage_uri"    => "https://github.com/fxn/zeitwerk",
-    "changelog_uri"   => "https://github.com/fxn/zeitwerk/blob/master/CHANGELOG.md",
+    "changelog_uri"   => "https://github.com/fxn/zeitwerk/blob/main/CHANGELOG.md",
     "source_code_uri" => "https://github.com/fxn/zeitwerk",
     "bug_tracker_uri" => "https://github.com/fxn/zeitwerk/issues"
   }
