@@ -417,7 +417,7 @@ enforced with stricter formal visibility.
 
   Please, remember that if you want to trace the activity of a loader, `Zeitwerk::Loader#log!` logs plenty of information.
 
-  See the [documentation](https://github.com/fxn/zeitwerk/blob/master/README.md#the-on_unload-callback) for further details.
+  See the [documentation](https://github.com/fxn/zeitwerk/blob/main/README.md#the-on_unload-callback) for further details.
 
 ### Assorted
 
@@ -456,7 +456,7 @@ enforced with stricter formal visibility.
   end
   ```
 
-  See the [documentation](https://github.com/fxn/zeitwerk/blob/master/README.md#the-on_load-callback) for further details.
+  See the [documentation](https://github.com/fxn/zeitwerk/blob/main/README.md#the-on_load-callback) for further details.
 
 ## 2.4.1 (29 October 2020)
 
