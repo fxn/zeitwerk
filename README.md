@@ -201,7 +201,7 @@ For example, given
 
 ```ruby
 loader.push_dir("#{__dir__}/models")
-loader.push_dir("#{__dir__}/serializers"))
+loader.push_dir("#{__dir__}/serializers")
 ```
 
 these are the expected classes and modules being defined by these files:
@@ -1334,7 +1334,7 @@ lib/tasks/my_gem.rake
   "/.../lib/my_gem/drivers"            => "MyGem::Drivers",
   "/.../lib/my_gem/drivers/unix.rb"    => "MyGem::Drivers::Unix",
   "/.../lib/my_gem/drivers/windows.rb" => "MyGem::Drivers::Windows",
-  "/.../lib/my_gem/collapsed"          => "MyGem"
+  "/.../lib/my_gem/collapsed"          => "MyGem",
   "/.../lib/my_gem/collapsed/foo.rb"   => "MyGem::Foo"
 }
 ```
