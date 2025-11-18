@@ -17,7 +17,7 @@
 # For example, if we store values 0, 1, and 2 for the crefs that would
 # correspond to `M::X`, `M::Y`, and `N::Z`, the map will look like this:
 #
-#   { M => { X: 0, :Y => 1 }, N => { Z: 2 } }
+#   { M => { X: 0, Y: 1 }, N => { Z: 2 } }
 #
 # This structure is internal, so only the needed interface is implemented.
 #
