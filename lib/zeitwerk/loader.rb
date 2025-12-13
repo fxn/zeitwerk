@@ -597,22 +597,24 @@ module Zeitwerk
     #: (String) -> void
     private def raise_if_conflicting_directory(dir)
       MUTEX.synchronize do
-        dir_slash = dir + "/"
-
         Registry.loaders.each do |loader|
           next if loader == self
-          next if loader.__ignores?(dir)
 
           loader.__roots.each_key do |root_dir|
-            next if ignores?(root_dir)
+            # Conflicting directories are rare, optimize for the common case.
+            next if !dir.start_with?(root_dir) && !root_dir.start_with?(dir)
 
+            dir_slash = dir + "/"
             root_dir_slash = root_dir + "/"
-            if dir_slash.start_with?(root_dir_slash) || root_dir_slash.start_with?(dir_slash)
-              require "pp" # Needed for pretty_inspect, even in Ruby 2.5.
-              raise Error,
-                "loader\n\n#{pretty_inspect}\n\nwants to manage directory #{dir}," \
-                " which is already managed by\n\n#{loader.pretty_inspect}\n"
-            end
+            next if !dir_slash.start_with?(root_dir_slash) && !root_dir_slash.start_with?(dir_slash)
+
+            next if ignores?(root_dir)
+            break if loader.__ignores?(dir)
+
+            require "pp" # Needed to have pretty_inspect available.
+            raise Error,
+              "loader\n\n#{pretty_inspect}\n\nwants to manage directory #{dir}," \
+              " which is already managed by\n\n#{loader.pretty_inspect}\n"
           end
         end
       end
