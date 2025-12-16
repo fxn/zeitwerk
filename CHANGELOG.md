@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 2.7.4 (16 Dec 2025)
+
+* Loaders have to manage disjoint source trees. Therefore, when a root directory
+  is configured Zeitwerk ensures it is not already managed by some other loader.
+  The performance of this validation has been improved.
+
+  Thanks to @ngan for sharing some benchmarks that led to revise this logic.
+
 ## 2.7.3 (20 May 2025)
 
 * The helper `Zeitwerk::Loader#cpath_expected_at` did not work correctly if the
