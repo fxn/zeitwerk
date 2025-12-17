@@ -7,7 +7,7 @@ module Zeitwerk::RealModName
 
   # Returns the real name of the class or module.
   #
-  # We need this indirection becasue the `name` method can be overridden, and
+  # We need this indirection because the `name` method can be overridden, and
   # because in practice what we really need is the constant paths of modules
   # with a permanent name, not so much what the user considers to be the name of
   # a certain class or module of theirs.
