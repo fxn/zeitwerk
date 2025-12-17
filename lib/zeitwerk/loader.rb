@@ -199,7 +199,7 @@ module Zeitwerk
           # To make it aware of changes, the gem defines singleton methods in
           # $LOADED_FEATURES:
           #
-          #   https://github.com/Shopify/bootsnap/blob/main/lib/bootsnap/load_path_cache/core_ext/loaded_features.rb
+          #   https://github.com/rails/bootsnap/blob/main/lib/bootsnap/load_path_cache/core_ext/loaded_features.rb
           #
           # Rails applications may depend on bootsnap, so for unloading to work
           # in that setting it is preferable that we restrict our API choice to
