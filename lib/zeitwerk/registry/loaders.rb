@@ -6,8 +6,8 @@ module Zeitwerk::Registry
     end
 
     #: ({ (Zeitwerk::Loader) -> void }) -> void
-    def each(&block)
-      @loaders.each(&block)
+    def each(&)
+      @loaders.each(&)
     end
 
     #: (Zeitwerk::Loader) -> void
