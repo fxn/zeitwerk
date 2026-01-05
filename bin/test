@@ -3,5 +3,5 @@
 if [[ -z $1 ]]; then
     bundle exec rake
 else
-    bundle exec rake TEST="$1"
+    bundle exec rake N="$1"
 fi
