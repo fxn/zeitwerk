@@ -56,7 +56,7 @@ module Zeitwerk::Loader::Helpers
   private def has_at_least_one_ruby_file?(dir)
     to_visit = [dir]
 
-    while (dir = to_visit.shift)
+    while (dir = to_visit.pop)
       Dir.each_child(dir) do |basename|
         next if hidden?(basename)
 
