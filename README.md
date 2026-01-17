@@ -58,6 +58,7 @@
   - [Reopening third-party namespaces](#reopening-third-party-namespaces)
   - [Introspection](#introspection)
     - [`Zeitwerk::Loader#dirs`](#zeitwerkloaderdirs)
+    - [Autoloaded Constants](#autoloaded-constants)
     - [`Zeitwerk::Loader#cpath_expected_at`](#zeitwerkloadercpath_expected_at)
     - [`Zeitwerk::Loader#all_expected_cpaths`](#zeitwerkloaderall_expected_cpaths)
   - [Encodings](#encodings)
@@ -1262,6 +1263,18 @@ loader.dirs(namespaces: true) # => { "/foo" => Object, "/bar" => Bar }
 By default, ignored root directories are filtered out. If you want them included, please pass `ignored: true`.
 
 These collections are read-only. Please add to them with `Zeitwerk::Loader#push_dir`.
+
+<a id="markdown-autoloaded-constants" name="autoloaded-constants"></a>
+#### Autoloaded Constants
+
+Zeitwerk does not keep track of autoloaded constants to minimize its memory footprint, but you can collect them with `on_load` if you will:
+
+```ruby
+autoloaded_cpaths = []
+loader.on_load do |cpath, _value, _abspath|
+  autoloaded_cpaths << cpath
+end
+```
 
 <a id="markdown-zeitwerkloadercpath_expected_at" name="zeitwerkloadercpath_expected_at"></a>
 #### `Zeitwerk::Loader#cpath_expected_at`
