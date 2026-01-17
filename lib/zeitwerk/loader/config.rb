@@ -279,7 +279,7 @@ module Zeitwerk::Loader::Config
   #
   #: () -> void
   def log!
-    @logger = ->(msg) { puts msg }
+    @logger ||= ->(msg) { puts msg }
   end
 
   # Returns true if the argument has been configured to be ignored, or is a

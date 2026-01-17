@@ -65,6 +65,16 @@ class TestLogging < LoaderTest
     assert_same Zeitwerk::Loader.default_logger, Zeitwerk::Loader.new.logger
   end
 
+  test "activating logs doesn't change the loader logger" do
+    assert_nil Zeitwerk::Loader.new.logger
+
+    Zeitwerk::Loader.default_logger = Object.new
+    loader = Zeitwerk::Loader.new
+    assert_same Zeitwerk::Loader.default_logger, loader.logger
+    loader.log!
+    assert_same Zeitwerk::Loader.default_logger, loader.logger
+  end
+
   test "logs loaded files" do
     files = [["x.rb", "X = true"]]
     with_files(files) do
