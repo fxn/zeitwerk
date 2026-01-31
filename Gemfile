@@ -4,8 +4,7 @@ source 'https://rubygems.org'
 
 gemspec
 
-gem "rake"
-gem "minitest"
+gem "minitest", "~> 6.0"
 gem "minitest-focus"
 gem "minitest-mock"
 gem "minitest-proveit"

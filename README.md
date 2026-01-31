@@ -1421,6 +1421,12 @@ To run one particular suite, pass its file name as an argument:
 bin/test test/lib/zeitwerk/test_eager_load.rb
 ```
 
+That also accepts a line number:
+
+```
+bin/test test/lib/zeitwerk/test_eager_load.rb:52
+```
+
 Furthermore, the project has a development dependency on [`minitest-focus`](https://github.com/seattlerb/minitest-focus). To run an individual test mark it with `focus`:
 
 ```ruby
