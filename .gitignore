@@ -1,3 +1,17 @@
 Gemfile.lock
 test/tmp
 *.gem
+
+ext/zeitwerk/Makefile
+ext/zeitwerk/mkmf.log
+ext/zeitwerk/*.o
+
+ext/zeitwerk/*.bundle
+ext/zeitwerk/*.so
+ext/zeitwerk/*.dylib
+ext/zeitwerk/*.dll
+
+lib/zeitwerk/*.bundle
+lib/zeitwerk/*.so
+lib/zeitwerk/*.dylib
+lib/zeitwerk/*.dll

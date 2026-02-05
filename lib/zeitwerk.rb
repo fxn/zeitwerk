@@ -16,6 +16,15 @@ module Zeitwerk
   require_relative "zeitwerk/core_ext/kernel"
   require_relative "zeitwerk/core_ext/module"
 
+  begin
+    require "zeitwerk/zeitwerk_native"
+    puts "Zeitwerk native helpers loaded" # while developing, to be deleted
+  rescue LoadError
+    puts "Zeitwerk native helpers NOT loaded" # while developing, to be deleted
+    puts $!.message
+    # No native extension available, it's OK.
+  end
+
   # This is a dangerous method.
   #
   # @experimental

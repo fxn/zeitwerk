@@ -13,33 +13,26 @@ module Zeitwerk::Loader::Helpers
 
   #: (String) { (String, String, Symbol) -> void } -> void
   private def ls(dir)
-    children = Dir.children(dir)
+    children = filtered_dir_entries_with_type(dir)
 
     # The order in which a directory is listed depends on the file system.
     #
     # Since client code may run in different platforms, it seems convenient to
     # order directory entries. This provides consistent eager loading across
     # platforms, for example.
-    children.sort!
+    children.sort_by! { |child| child[0] }
 
-    children.each do |basename|
-      next if hidden?(basename)
-
+    children.each do |basename, ftype|
       abspath = File.join(dir, basename)
       next if ignored_path?(abspath)
 
-      if dir?(abspath)
+      if ftype == :directory
         next if roots.key?(abspath)
 
         if !has_at_least_one_ruby_file?(abspath)
           log("directory #{abspath} is ignored because it has no Ruby files") if logger
           next
         end
-
-        ftype = :directory
-      else
-        next unless ruby?(abspath)
-        ftype = :file
       end
 
       # We freeze abspath because that saves allocations when passed later to
@@ -57,17 +50,12 @@ module Zeitwerk::Loader::Helpers
     to_visit = [dir]
 
     while (dir = to_visit.shift)
-      Dir.each_child(dir) do |basename|
-        next if hidden?(basename)
-
+      filtered_dir_entries_with_type(dir).each do |basename, ftype|
         abspath = File.join(dir, basename)
         next if ignored_path?(abspath)
 
-        if dir?(abspath)
-          to_visit << abspath unless roots.key?(abspath)
-        else
-          return true if ruby?(abspath)
-        end
+        return true if ftype == :file
+        to_visit << abspath unless roots.key?(abspath)
       end
     end
 
@@ -87,6 +75,34 @@ module Zeitwerk::Loader::Helpers
   #: (String) -> bool
   private def hidden?(basename)
     basename.start_with?(".")
+  end
+
+  # Portable Ruby fallback for the C function implemented in
+  # ext/zeitwerk/native.c.
+  #
+  #: (String) -> Array[[String, Symbol]]
+  private def filtered_dir_entries_with_type(dir)
+    children = []
+
+    Dir.each_child(dir) do |basename|
+      next if basename.start_with?(".")
+
+      abspath = File.join(dir, basename)
+      ftype = begin
+        stat = File.stat(abspath)
+        stat.file? ? :file : stat.directory? ? :directory : nil
+      rescue
+        nil
+      end
+
+      if ftype == :file
+        next unless ruby?(basename)
+      end
+
+      children << [basename, ftype] if ftype
+    end
+
+    children
   end
 
   #: (String) { (String) -> void } -> void
