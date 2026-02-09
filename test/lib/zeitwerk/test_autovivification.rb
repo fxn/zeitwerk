@@ -101,7 +101,7 @@ class TestAutovivification < LoaderTest
   end
 
   test "defines no namespace for empty directories" do
-    with_files([]) do
+    with_files do
       FileUtils.mkdir("foo")
       loader.push_dir(".")
       loader.setup
@@ -110,7 +110,7 @@ class TestAutovivification < LoaderTest
   end
 
   test "defines no namespace for empty directories (recursively)" do
-    with_files([]) do
+    with_files do
       FileUtils.mkdir_p("foo/bar/baz")
       loader.push_dir(".")
       loader.setup

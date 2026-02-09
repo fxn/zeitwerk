@@ -117,7 +117,7 @@ module Zeitwerk::Loader::EagerLoad
     abspath = File.expand_path(path)
 
     raise Zeitwerk::Error.new("#{abspath} does not exist") unless File.exist?(abspath)
-    raise Zeitwerk::Error.new("#{abspath} is not a Ruby file") if dir?(abspath) || !ruby?(abspath)
+    raise Zeitwerk::Error.new("#{abspath} is not a Ruby file") if !ruby?(abspath)
     raise Zeitwerk::Error.new("#{abspath} is ignored") if ignored_path?(abspath)
 
     basename = File.basename(abspath, ".rb")

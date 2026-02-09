@@ -292,7 +292,7 @@ module Zeitwerk::Loader::Config
 
     walk_up(abspath) do |path|
       return true  if ignored_path?(path)
-      return false if roots.key?(path)
+      return false if root_dir?(path)
     end
 
     false
@@ -322,7 +322,7 @@ module Zeitwerk::Loader::Config
 
     walk_up(abspath) do |path|
       return true  if eager_load_exclusions.member?(path)
-      return false if roots.key?(path)
+      return false if root_dir?(path)
     end
 
     false

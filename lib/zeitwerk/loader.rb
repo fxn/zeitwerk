@@ -279,12 +279,14 @@ module Zeitwerk
 
       raise Zeitwerk::Error.new("#{abspath} does not exist") unless File.exist?(abspath)
 
-      return unless dir?(abspath) || ruby?(abspath)
+      ftype = supported_ftype?(abspath)
+      return unless ftype
+
       return if ignored_path?(abspath)
 
       paths = []
 
-      if ruby?(abspath)
+      if :file == ftype
         basename = File.basename(abspath, ".rb")
         return if hidden?(basename)
 

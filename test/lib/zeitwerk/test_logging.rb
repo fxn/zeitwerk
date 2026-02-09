@@ -215,7 +215,7 @@ class TestLogging < LoaderTest
   end
 
   test "logs when eager loading a directory starts" do
-    with_files([]) do
+    with_files do
       assert_logged(%r(eager load directory #{Dir.pwd} start)) do
         loader.push_dir(".")
         loader.setup
@@ -225,7 +225,7 @@ class TestLogging < LoaderTest
   end
 
   test "logs when eager loading a directory ends" do
-    with_files([]) do
+    with_files do
       assert_logged(%r(eager load directory #{Dir.pwd} end)) do
         loader.push_dir(".")
         loader.setup

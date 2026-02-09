@@ -56,7 +56,7 @@ class LoaderTest < Minitest::Test
     FileUtils.mkdir_p(TMP_DIR)
   end
 
-  def with_files(files, rm: true)
+  def with_files(files = [], rm: true)
     mkdir_test
 
     Dir.chdir(TMP_DIR) do
@@ -84,19 +84,19 @@ class LoaderTest < Minitest::Test
 
   def with_setup(files = [], dirs: nil, namespace: Object, load_path: nil, rm: true)
     with_files(files, rm: rm) do
-      dirs ||= files.map do |file|
-        file[0] =~ %r{\A(rd\d+)/} ? $1 : "."
+      dirs ||= files.map do |file, _contents|
+        file =~ %r{\A(rd\d?)/} ? $1 : "."
       end.uniq
       dirs.each { |dir| loader.push_dir(dir, namespace: namespace) }
 
-      files.each do |file|
-        if File.basename(file[0]) == "ignored.rb"
-          loader.ignore(file[0])
-        elsif file[0] =~ %r{\A(ignored|.+/ignored)/}
+      files.each do |file, _contents|
+        if File.basename(file) == "ignored.rb"
+          loader.ignore(file)
+        elsif file =~ %r{\A(ignored|.+/ignored)/}
           loader.ignore($1)
         end
 
-        if file[0] =~ %r{\A(collapsed|.+/collapsed)/}
+        if file =~ %r{\A(collapsed|.+/collapsed)/}
           loader.collapse($1)
         end
       end
