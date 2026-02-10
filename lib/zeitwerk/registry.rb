@@ -45,7 +45,7 @@ module Zeitwerk
       end
 
       #: (Zeitwerk::Loader, String) -> Zeitwerk::Loader?
-      def conflicting_root_directory?(loader, new_root_dir)
+      def conflicting_root_dir?(loader, new_root_dir)
         @mutex.synchronize do
           loaders.each do |existing_loader|
             next if existing_loader == loader

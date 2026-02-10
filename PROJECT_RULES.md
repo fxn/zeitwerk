@@ -71,7 +71,7 @@ Any release can change the private interface, including patch releases.
 
 It is OK for predicates to return objects different than `true` and `false` if
 other choices make sense from a pragmatic point of view. Please, check the
-method `Zeitwerk::Registry.conflicting_root_directory?` for an example.
+method `Zeitwerk::Registry.conflicting_root_dir?` for an example.
 
 ## Documentation
 

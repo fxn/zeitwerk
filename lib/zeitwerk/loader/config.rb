@@ -117,7 +117,7 @@ module Zeitwerk::Loader::Config
 
     abspath = File.expand_path(path)
     if dir?(abspath)
-      raise_if_conflicting_root_directory(abspath)
+      raise_if_conflicting_root_dir(abspath)
       roots[abspath] = namespace
     else
       raise Zeitwerk::Error, "the root directory #{abspath} does not exist"

@@ -594,8 +594,8 @@ module Zeitwerk
     end
 
     #: (String) -> void
-    private def raise_if_conflicting_root_directory(root_dir)
-      if loader = Registry.conflicting_root_directory?(self, root_dir)
+    private def raise_if_conflicting_root_dir(root_dir)
+      if loader = Registry.conflicting_root_dir?(self, root_dir)
         require "pp" # Needed to have pretty_inspect available.
         raise Error,
           "loader\n\n#{pretty_inspect}\n\nwants to manage directory #{root_dir}," \
