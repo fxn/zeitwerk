@@ -41,7 +41,7 @@ Note that Zeitwerk does not deal with file or directory objects, only with paths
 * Use always strings for constant paths.
 * Use always strings for paths, not pathnames. Pathnames are only accepted coming from the user, but internally everything is strings.
 
-## Public interface definition
+## Public interface definition for end-users
 
 Documented public methods conform the public interface. In particular:
 
@@ -51,6 +51,21 @@ Documented public methods conform the public interface. In particular:
 * Undocumented public methods can be used in the Rails integration. We control both repositories, and Rails usage may help refine the actual public interface.
 
 Any release can change the private interface, including patch releases.
+
+## Library-public (not end-user public) interface
+
+* The public interface for end-users is also public internal interface.
+* Additionally, we have internal methods, which are library-public.
+* Such methods are declared with the `internal` DSL. For example:
+
+    ```ruby
+    internal :autoloads
+    ```
+
+  defines a private method `autoloads`, and also a public alias `__autoloads`.
+  It is OK for internal code to access the alias. The purpose of the leading
+  underscores is to flag end-users and tooling that this method does not
+  belong to the public end-users interface.
 
 ## Documentation
 
