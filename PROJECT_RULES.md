@@ -67,6 +67,12 @@ Any release can change the private interface, including patch releases.
   underscores is to flag end-users and tooling that this method does not
   belong to the public end-users interface.
 
+## Predicates
+
+It is OK for predicates to return objects different than `true` and `false` if
+other choices make sense from a pragmatic point of view. Please, check the
+method `Zeitwerk::Registry.conflicting_root_directory?` for an example.
+
 ## Documentation
 
 Try to word the documentation in terms of classes, modules, and namespaces. Do that with extra care to avoid introducing leaky metaphors.
