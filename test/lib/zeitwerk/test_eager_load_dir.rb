@@ -316,6 +316,25 @@ class TestEagerLoadDir < LoaderTest
     end
   end
 
+  test "does not inflect ancestor directories if the argument is unmanaged" do
+    called = false
+
+    loader.inflector = Class.new(Zeitwerk::Inflector) do
+      define_method(:camelize) do |basename, abspath|
+        called = true
+        super(basename, abspath)
+      end
+    end.new
+
+    with_setup do
+      called = false
+
+      e = assert_raises(Zeitwerk::Error) { loader.eager_load_dir(__dir__) }
+      assert_equal "I do not manage #{__dir__}", e.message
+      assert !called
+    end
+  end
+
   test "raises if called before setup" do
     assert_raises(Zeitwerk::SetupRequired) do
       loader.eager_load_dir(__dir__)

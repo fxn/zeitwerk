@@ -258,12 +258,12 @@ module Zeitwerk
           ls(dir) do |basename, abspath, ftype|
             if ftype == :file
               basename.delete_suffix!(".rb")
-              result[abspath] = prefix + inflector.camelize(basename, abspath)
+              result[abspath] = "#{prefix}#{cname_for(basename, abspath)}"
             else
               if collapse?(abspath)
                 queue << [abspath, cpath]
               else
-                queue << [abspath, prefix + inflector.camelize(basename, abspath)]
+                queue << [abspath, "#{prefix}#{cname_for(basename, abspath)}"]
               end
             end
           end

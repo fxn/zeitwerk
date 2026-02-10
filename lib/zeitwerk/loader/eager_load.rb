@@ -36,7 +36,7 @@ module Zeitwerk::Loader::EagerLoad
 
     raise Zeitwerk::Error.new("#{abspath} is not a directory") unless dir?(abspath)
 
-    cnames = []
+    paths = []
 
     root_namespace = nil
     walk_up(abspath) do |dir|
@@ -48,9 +48,7 @@ module Zeitwerk::Loader::EagerLoad
       basename = File.basename(dir)
       return if hidden?(basename)
 
-      unless collapse?(dir)
-        cnames << inflector.camelize(basename, dir).to_sym
-      end
+      paths << [basename, dir] unless collapse?(dir)
     end
 
     raise Zeitwerk::Error.new("I do not manage #{abspath}") unless root_namespace
@@ -58,7 +56,8 @@ module Zeitwerk::Loader::EagerLoad
     return if @eager_loaded
 
     namespace = root_namespace
-    cnames.reverse_each do |cname|
+    paths.reverse_each do |basename, dir|
+      cname = cname_for(basename, dir)
       # Can happen if there are no Ruby files. This is not an error condition,
       # the directory is actually managed. Could have Ruby files later.
       return unless namespace.const_defined?(cname, false)
@@ -120,13 +119,11 @@ module Zeitwerk::Loader::EagerLoad
     raise Zeitwerk::Error.new("#{abspath} is not a Ruby file") if !ruby?(abspath)
     raise Zeitwerk::Error.new("#{abspath} is ignored") if ignored_path?(abspath)
 
-    basename = File.basename(abspath, ".rb")
-    raise Zeitwerk::Error.new("#{abspath} is ignored") if hidden?(basename)
-
-    base_cname = inflector.camelize(basename, abspath).to_sym
+    file_basename = File.basename(abspath, ".rb")
+    raise Zeitwerk::Error.new("#{abspath} is ignored") if hidden?(file_basename)
 
     root_namespace = nil
-    cnames = []
+    paths = []
 
     walk_up(File.dirname(abspath)) do |dir|
       raise Zeitwerk::Error.new("#{abspath} is ignored") if ignored_path?(dir)
@@ -136,15 +133,16 @@ module Zeitwerk::Loader::EagerLoad
       basename = File.basename(dir)
       raise Zeitwerk::Error.new("#{abspath} is ignored") if hidden?(basename)
 
-      unless collapse?(dir)
-        cnames << inflector.camelize(basename, dir).to_sym
-      end
+      paths << [basename, dir] unless collapse?(dir)
     end
 
     raise Zeitwerk::Error.new("I do not manage #{abspath}") unless root_namespace
 
+    base_cname = cname_for(file_basename, abspath)
+
     namespace = root_namespace
-    cnames.reverse_each do |cname|
+    paths.reverse_each do |basename, dir|
+      cname = cname_for(basename, dir)
       namespace = namespace.const_get(cname, false)
     end
 
@@ -176,7 +174,7 @@ module Zeitwerk::Loader::EagerLoad
           if collapse?(abspath)
             queue << [abspath, namespace]
           else
-            cname = inflector.camelize(basename, abspath).to_sym
+            cname = cname_for(basename, abspath)
             queue << [abspath, namespace.const_get(cname, false)]
           end
         end
@@ -213,7 +211,7 @@ module Zeitwerk::Loader::EagerLoad
 
           if collapse?(abspath)
             dirs << abspath
-          elsif segment == inflector.camelize(basename, abspath)
+          elsif segment == cname_for(basename, abspath).to_s
             next_dirs << abspath
           end
         end

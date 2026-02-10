@@ -125,6 +125,26 @@ class TestLoadFileErrors < LoaderTest
     end
   end
 
+  test "does not inflect ancestor directories if the file is unmanaged" do
+    called = false
+
+    loader.inflector = Class.new(Zeitwerk::Inflector) do
+      define_method(:camelize) do |basename, abspath|
+        called = true
+        super(basename, abspath)
+      end
+    end.new
+
+    files = [["rd1/x.rb", "X = 1"], ["external/x.rb", ""]]
+    with_setup(files, dirs: %w(rd1)) do
+      called = false
+
+      e = assert_raises { loader.load_file("external/x.rb") }
+      assert_equal "I do not manage #{File.expand_path('external/x.rb')}", e.message
+      assert !called
+    end
+  end
+
   test "raises if the file is shadowed" do
     files = [["rd1/x.rb", "X = 1"], ["rd2/x.rb", "SHADOWED"]]
     with_setup(files) do
