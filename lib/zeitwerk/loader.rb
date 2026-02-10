@@ -18,9 +18,6 @@ module Zeitwerk
     include Config
     include EagerLoad
 
-    MUTEX = Mutex.new #: Mutex
-    private_constant :MUTEX
-
     # Maps absolute paths for which an autoload has been set ---and not
     # executed--- to their corresponding Zeitwerk::Cref object.
     #
@@ -597,28 +594,12 @@ module Zeitwerk
     end
 
     #: (String) -> void
-    private def raise_if_conflicting_directory(dir)
-      MUTEX.synchronize do
-        Registry.loaders.each do |loader|
-          next if loader == self
-
-          loader.__roots.each_key do |root_dir|
-            # Conflicting directories are rare, optimize for the common case.
-            next if !dir.start_with?(root_dir) && !root_dir.start_with?(dir)
-
-            dir_slash = dir + "/"
-            root_dir_slash = root_dir + "/"
-            next if !dir_slash.start_with?(root_dir_slash) && !root_dir_slash.start_with?(dir_slash)
-
-            next if ignores?(root_dir)
-            break if loader.__ignores?(dir)
-
-            require "pp" # Needed to have pretty_inspect available.
-            raise Error,
-              "loader\n\n#{pretty_inspect}\n\nwants to manage directory #{dir}," \
-              " which is already managed by\n\n#{loader.pretty_inspect}\n"
-          end
-        end
+    private def raise_if_conflicting_root_directory(root_dir)
+      if loader = Registry.conflicting_root_directory?(self, root_dir)
+        require "pp" # Needed to have pretty_inspect available.
+        raise Error,
+          "loader\n\n#{pretty_inspect}\n\nwants to manage directory #{root_dir}," \
+          " which is already managed by\n\n#{loader.pretty_inspect}\n"
       end
     end
 

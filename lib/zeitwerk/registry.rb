@@ -44,6 +44,31 @@ module Zeitwerk
         gem_loaders_by_root_file.delete_if { |_, l| l == loader }
       end
 
+      #: (Zeitwerk::Loader, String) -> Zeitwerk::Loader?
+      def conflicting_root_directory?(loader, new_root_dir)
+        @mutex.synchronize do
+          loaders.each do |existing_loader|
+            next if existing_loader == loader
+
+            existing_loader.__roots.each_key do |existing_root_dir|
+              # Conflicting directories are rare, optimize for the common case.
+              next if !new_root_dir.start_with?(existing_root_dir) && !existing_root_dir.start_with?(new_root_dir)
+
+              new_root_dir_slash = new_root_dir + "/"
+              existing_root_dir_slash = existing_root_dir + "/"
+              next if !new_root_dir_slash.start_with?(existing_root_dir_slash) && !existing_root_dir_slash.start_with?(new_root_dir_slash)
+
+              next if loader.__ignores?(existing_root_dir)
+              break if existing_loader.__ignores?(new_root_dir)
+
+              return existing_loader
+            end
+          end
+
+          nil
+        end
+      end
+
       # This method returns always a loader, the same instance for the same root
       # file. That is how Zeitwerk::Loader.for_gem is idempotent.
       #
@@ -59,5 +84,6 @@ module Zeitwerk
     @autoloads                = Autoloads.new
     @explicit_namespaces      = ExplicitNamespaces.new
     @inceptions               = Inceptions.new
+    @mutex                    = Mutex.new
   end
 end
