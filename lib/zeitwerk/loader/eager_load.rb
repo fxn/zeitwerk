@@ -34,19 +34,19 @@ module Zeitwerk::Loader::EagerLoad
 
     abspath = File.expand_path(path)
 
-    raise Zeitwerk::Error.new("#{abspath} is not a directory") unless dir?(abspath)
+    raise Zeitwerk::Error.new("#{abspath} is not a directory") unless @fs.dir?(abspath)
 
     paths = []
 
     root_namespace = nil
-    walk_up(abspath) do |dir|
+    @fs.walk_up(abspath) do |dir|
       return if ignored_path?(dir)
       return if eager_load_exclusions.member?(dir)
 
       break if root_namespace = roots[dir]
 
       basename = File.basename(dir)
-      return if hidden?(basename)
+      return if @fs.hidden?(basename)
 
       paths << [basename, dir] unless collapse?(dir)
     end
@@ -116,22 +116,22 @@ module Zeitwerk::Loader::EagerLoad
     abspath = File.expand_path(path)
 
     raise Zeitwerk::Error.new("#{abspath} does not exist") unless File.exist?(abspath)
-    raise Zeitwerk::Error.new("#{abspath} is not a Ruby file") if !ruby?(abspath)
+    raise Zeitwerk::Error.new("#{abspath} is not a Ruby file") if !@fs.rb_extension?(abspath)
     raise Zeitwerk::Error.new("#{abspath} is ignored") if ignored_path?(abspath)
 
     file_basename = File.basename(abspath, ".rb")
-    raise Zeitwerk::Error.new("#{abspath} is ignored") if hidden?(file_basename)
+    raise Zeitwerk::Error.new("#{abspath} is ignored") if @fs.hidden?(file_basename)
 
     root_namespace = nil
     paths = []
 
-    walk_up(File.dirname(abspath)) do |dir|
+    @fs.walk_up(File.dirname(abspath)) do |dir|
       raise Zeitwerk::Error.new("#{abspath} is ignored") if ignored_path?(dir)
 
       break if root_namespace = roots[dir]
 
       basename = File.basename(dir)
-      raise Zeitwerk::Error.new("#{abspath} is ignored") if hidden?(basename)
+      raise Zeitwerk::Error.new("#{abspath} is ignored") if @fs.hidden?(basename)
 
       paths << [basename, dir] unless collapse?(dir)
     end
@@ -163,7 +163,7 @@ module Zeitwerk::Loader::EagerLoad
 
     queue = [[dir, namespace]]
     while (current_dir, namespace = queue.shift)
-      ls(current_dir) do |basename, abspath, ftype|
+      @fs.ls(current_dir) do |basename, abspath, ftype|
         next if honour_exclusions && eager_load_exclusions.member?(abspath)
 
         if ftype == :file
@@ -206,7 +206,7 @@ module Zeitwerk::Loader::EagerLoad
 
     suffix.split("::").each do |segment|
       while (dir = dirs.shift)
-        ls(dir) do |basename, abspath, ftype|
+        @fs.ls(dir) do |basename, abspath, ftype|
           next unless ftype == :directory
 
           if collapse?(abspath)

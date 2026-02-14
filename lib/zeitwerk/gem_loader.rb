@@ -42,7 +42,7 @@ module Zeitwerk
     def warn_on_extra_files
       expected_namespace_dir = @root_file.delete_suffix(".rb")
 
-      ls(@root_dir) do |basename, abspath, ftype|
+      @fs.ls(@root_dir) do |basename, abspath, ftype|
         next if abspath == @root_file
         next if abspath == expected_namespace_dir
 

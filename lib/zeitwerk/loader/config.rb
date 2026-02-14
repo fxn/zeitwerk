@@ -116,7 +116,7 @@ module Zeitwerk::Loader::Config
     end
 
     abspath = File.expand_path(path)
-    if dir?(abspath)
+    if @fs.dir?(abspath)
       raise_if_conflicting_root_dir(abspath)
       roots[abspath] = namespace
     else
@@ -290,7 +290,7 @@ module Zeitwerk::Loader::Config
     # Common use case.
     return false if ignored_paths.empty?
 
-    walk_up(abspath) do |path|
+    @fs.walk_up(abspath) do |path|
       return true  if ignored_path?(path)
       return false if root_dir?(path)
     end
@@ -299,19 +299,19 @@ module Zeitwerk::Loader::Config
   end
 
   #: (String) -> bool
-  private def ignored_path?(abspath)
+  internal def ignored_path?(abspath)
     ignored_paths.member?(abspath)
   end
 
   #: () -> Array[String]
   private def actual_roots
     roots.reject do |root_dir, _root_namespace|
-      !dir?(root_dir) || ignored_path?(root_dir)
+      !@fs.dir?(root_dir) || ignored_path?(root_dir)
     end
   end
 
   #: (String) -> bool
-  private def root_dir?(dir)
+  internal def root_dir?(dir)
     roots.key?(dir)
   end
 
@@ -320,7 +320,7 @@ module Zeitwerk::Loader::Config
     # Optimize this common use case.
     return false if eager_load_exclusions.empty?
 
-    walk_up(abspath) do |path|
+    @fs.walk_up(abspath) do |path|
       return true  if eager_load_exclusions.member?(path)
       return false if root_dir?(path)
     end

@@ -9,6 +9,7 @@ module Zeitwerk
     require_relative "loader/callbacks"
     require_relative "loader/config"
     require_relative "loader/eager_load"
+    require_relative "loader/file_system"
 
     extend Internal
 
@@ -112,6 +113,7 @@ module Zeitwerk
       @shadowed_files  = Set.new
       @setup           = false
       @eager_loaded    = false
+      @fs              = FileSystem.new(self)
 
       @mutex = Mutex.new
       @dirs_autoload_monitor = Monitor.new
@@ -168,7 +170,7 @@ module Zeitwerk
             # and the constant path would escape unloadable_cpath? This is just
             # defensive code to clean things up as much as we are able to.
             unload_cref(cref)
-            unloaded_files.add(abspath) if ruby?(abspath)
+            unloaded_files.add(abspath) if @fs.rb_extension?(abspath)
           end
         end
 
@@ -186,7 +188,7 @@ module Zeitwerk
           end
 
           unload_cref(cref)
-          unloaded_files.add(abspath) if ruby?(abspath)
+          unloaded_files.add(abspath) if @fs.rb_extension?(abspath)
         end
 
         unless unloaded_files.empty?
@@ -252,7 +254,7 @@ module Zeitwerk
 
           prefix = cpath == "Object" ? "" : cpath + "::"
 
-          ls(dir) do |basename, abspath, ftype|
+          @fs.ls(dir) do |basename, abspath, ftype|
             if ftype == :file
               basename.delete_suffix!(".rb")
               result[abspath] = "#{prefix}#{cname_for(basename, abspath)}"
@@ -276,7 +278,7 @@ module Zeitwerk
 
       raise Zeitwerk::Error.new("#{abspath} does not exist") unless File.exist?(abspath)
 
-      ftype = supported_ftype?(abspath)
+      ftype = @fs.supported_ftype?(abspath)
       return unless ftype
 
       return if ignored_path?(abspath)
@@ -285,7 +287,7 @@ module Zeitwerk
 
       if :file == ftype
         basename = File.basename(abspath, ".rb")
-        return if hidden?(basename)
+        return if @fs.hidden?(basename)
 
         paths << [basename, abspath]
         walk_up_from = File.dirname(abspath)
@@ -295,12 +297,12 @@ module Zeitwerk
 
       root_namespace = nil
 
-      walk_up(walk_up_from) do |dir|
+      @fs.walk_up(walk_up_from) do |dir|
         break if root_namespace = roots[dir]
         return if ignored_path?(dir)
 
         basename = File.basename(dir)
-        return if hidden?(basename)
+        return if @fs.hidden?(basename)
 
         paths << [basename, dir] unless collapse?(dir)
       end
@@ -361,6 +363,13 @@ module Zeitwerk
     internal def shadowed_file?(file)
       shadowed_files.member?(file)
     end
+
+    #: (to_s() -> String) -> void
+    internal def log(message)
+      method_name = logger.respond_to?(:debug) ? :debug : :call
+      logger.send(method_name, "Zeitwerk@#{tag}: #{message}")
+    end
+
 
     # --- Class methods ---------------------------------------------------------------------------
 
@@ -463,7 +472,7 @@ module Zeitwerk
 
     #: (String, Module) -> void
     private def define_autoloads_for_dir(dir, parent)
-      ls(dir) do |basename, abspath, ftype|
+      @fs.ls(dir) do |basename, abspath, ftype|
         if ftype == :file
           basename.delete_suffix!(".rb")
           cref = Cref.new(parent, cname_for(basename, abspath))
@@ -482,7 +491,7 @@ module Zeitwerk
     #: (Zeitwerk::Cref, String) -> void
     private def autoload_subdir(cref, subdir)
       if autoload_path = autoload_path_set_by_me_for?(cref)
-        if ruby?(autoload_path)
+        if @fs.rb_extension?(autoload_path)
           # Scanning visited a Ruby file first, and now a directory for the same
           # constant has been found. This means we are dealing with an explicit
           # namespace whose definition was seen first.
@@ -512,7 +521,7 @@ module Zeitwerk
     private def autoload_file(cref, file)
       if autoload_path = cref.autoload? || Registry.inceptions.registered?(cref)
         # First autoload for a Ruby file wins, just ignore subsequent ones.
-        if ruby?(autoload_path)
+        if @fs.rb_extension?(autoload_path)
           shadowed_files << file
           log("file #{file} is ignored because #{autoload_path} has precedence") if logger
         else
@@ -547,7 +556,7 @@ module Zeitwerk
       cref.autoload(abspath)
 
       if logger
-        if ruby?(abspath)
+        if @fs.rb_extension?(abspath)
           log("autoload set for #{cref}, to be loaded from #{abspath}")
         else
           log("autoload set for #{cref}, to be autovivified from #{abspath}")
