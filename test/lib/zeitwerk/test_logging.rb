@@ -31,7 +31,7 @@ class TestLogging < LoaderTest
     loader.logger = nil # make sure we are setting something
     loader.log!
     message = "test log!"
-    assert_logged(/#{message}\n/) { loader.send(:log, message) }
+    assert_logged(/#{message}\n/) { loader.__log { message } }
   end
 
   test "accepts objects that respond to :call" do
@@ -43,7 +43,7 @@ class TestLogging < LoaderTest
     loader.logger = logger
 
     message = "test message :call"
-    assert_logged(message) { loader.send(:log, message) }
+    assert_logged(message) { loader.__log { message } }
   end
 
   test "accepts objects that respond to :debug" do
@@ -55,7 +55,7 @@ class TestLogging < LoaderTest
     loader.logger = logger
 
     message = "test message :debug"
-    assert_logged(message) { loader.send(:log, message) }
+    assert_logged(message) { loader.__log { message } }
   end
 
   test "new loaders get assigned the default global logger" do

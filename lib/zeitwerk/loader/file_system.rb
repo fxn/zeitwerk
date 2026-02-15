@@ -25,7 +25,7 @@ class Zeitwerk::Loader::FileSystem # :nodoc:
 
     children.each do |basename, abspath, ftype|
       if :directory == ftype && !has_at_least_one_ruby_file?(abspath)
-        @loader.__log("directory #{abspath} is ignored because it has no Ruby files") if @loader.logger
+        @loader.__log { "directory #{abspath} is ignored because it has no Ruby files" }
         next
       end
 

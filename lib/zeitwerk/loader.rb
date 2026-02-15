@@ -364,8 +364,11 @@ module Zeitwerk
       shadowed_files.member?(file)
     end
 
-    #: (to_s() -> String) -> void
-    internal def log(message)
+    #: { () -> String } -> void
+    internal def log
+      return unless logger
+
+      message = yield
       method_name = logger.respond_to?(:debug) ? :debug : :call
       logger.send(method_name, "Zeitwerk@#{tag}: #{message}")
     end
@@ -512,7 +515,7 @@ module Zeitwerk
       else
         # For whatever reason the constant that corresponds to this namespace has
         # already been defined, we have to recurse.
-        log("the namespace #{cref} already exists, descending into #{subdir}") if logger
+        log { "the namespace #{cref} already exists, descending into #{subdir}" }
         define_autoloads_for_dir(subdir, cref.get)
       end
     end
@@ -523,13 +526,13 @@ module Zeitwerk
         # First autoload for a Ruby file wins, just ignore subsequent ones.
         if @fs.rb_extension?(autoload_path)
           shadowed_files << file
-          log("file #{file} is ignored because #{autoload_path} has precedence") if logger
+          log { "file #{file} is ignored because #{autoload_path} has precedence" }
         else
           promote_namespace_from_implicit_to_explicit(dir: autoload_path, file: file, cref: cref)
         end
       elsif cref.defined?
         shadowed_files << file
-        log("file #{file} is ignored because #{cref} is already defined") if logger
+        log { "file #{file} is ignored because #{cref} is already defined" }
       else
         define_autoload(cref, file)
       end
@@ -543,7 +546,7 @@ module Zeitwerk
       autoloads.delete(dir)
       Registry.autoloads.unregister(dir)
 
-      log("earlier autoload for #{cref} discarded, it is actually an explicit namespace defined in #{file}") if logger
+      log { "earlier autoload for #{cref} discarded, it is actually an explicit namespace defined in #{file}" }
 
       # Order matters: When Module#const_added is triggered by the autoload, we
       # don't want the namespace to be registered yet.
@@ -557,9 +560,9 @@ module Zeitwerk
 
       if logger
         if @fs.rb_extension?(abspath)
-          log("autoload set for #{cref}, to be loaded from #{abspath}")
+          log { "autoload set for #{cref}, to be loaded from #{abspath}" }
         else
-          log("autoload set for #{cref}, to be autovivified from #{abspath}")
+          log { "autoload set for #{cref}, to be autovivified from #{abspath}" }
         end
       end
 
@@ -622,7 +625,7 @@ module Zeitwerk
     #: (Zeitwerk::Cref) -> void
     private def unload_autoload(cref)
       cref.remove
-      log("autoload for #{cref} removed") if logger
+      log { "autoload for #{cref} removed" }
     end
 
     #: (Zeitwerk::Cref) -> void
@@ -634,7 +637,7 @@ module Zeitwerk
       # There are a few edge scenarios in which this may happen. If the constant
       # is gone, that is OK, anyway.
     else
-      log("#{cref} unloaded") if logger
+      log { "#{cref} unloaded" }
     end
   end
 end

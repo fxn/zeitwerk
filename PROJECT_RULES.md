@@ -85,14 +85,6 @@ Zeitwerk is infrastructure, so it should have minimal cost both in speed and mem
 
 Be extra careful, allocate as little as possible, store as little as possible. Always use absolute file names for `autoload` and `require`.
 
-Always log using this pattern:
-
-```ruby
-log(message) if logger
-```
-
-to avoid unnecessary calls, and unnecessary computed values in the message.
-
 Some projects may have hundreds of root directories and hundreds of thousands of files, please remember that.
 
 However, do not write ugly code. Ugly code should be extremely justified in terms of performance. Instead, keep it simple, write simple performant code that reads well and is idiomatic.

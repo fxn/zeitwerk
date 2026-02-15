@@ -11,7 +11,7 @@ module Zeitwerk::Loader::EagerLoad
       break if @eager_loaded
       raise Zeitwerk::SetupRequired unless @setup
 
-      log("eager load start") if logger
+      log { "eager load start" }
 
       actual_roots.each do |root_dir, root_namespace|
         actual_eager_load_dir(root_dir, root_namespace, force: force)
@@ -24,7 +24,7 @@ module Zeitwerk::Loader::EagerLoad
 
       @eager_loaded = true
 
-      log("eager load end") if logger
+      log { "eager load end" }
     end
   end
 
@@ -159,7 +159,7 @@ module Zeitwerk::Loader::EagerLoad
     honour_exclusions = !force
     return if honour_exclusions && excluded_from_eager_load?(dir)
 
-    log("eager load directory #{dir} start") if logger
+    log { "eager load directory #{dir} start" }
 
     queue = [[dir, namespace]]
     while (current_dir, namespace = queue.shift)
@@ -181,7 +181,7 @@ module Zeitwerk::Loader::EagerLoad
       end
     end
 
-    log("eager load directory #{dir} end") if logger
+    log { "eager load directory #{dir} end" }
   end
 
   # In order to invoke this method, the caller has to ensure `child` is a

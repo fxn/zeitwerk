@@ -12,12 +12,12 @@ module Zeitwerk::Loader::Callbacks # :nodoc: all
     Zeitwerk::Registry.autoloads.unregister(file)
 
     if cref.defined?
-      log("constant #{cref} loaded from file #{file}") if logger
+      log { "constant #{cref} loaded from file #{file}" }
       to_unload[file] = cref if reloading_enabled?
       run_on_load_callbacks(cref.path, cref.get, file) unless on_load_callbacks.empty?
     else
       msg = "expected file #{file} to define constant #{cref}, but didn't"
-      log(msg) if logger
+      log { msg }
 
       # Ruby still keeps the autoload defined, but we remove it because the
       # contract in Zeitwerk is more strict.
@@ -52,7 +52,7 @@ module Zeitwerk::Loader::Callbacks # :nodoc: all
     dirs_autoload_monitor.synchronize do
       if cref = autoloads.delete(dir)
         implicit_namespace = cref.set(Module.new)
-        log("module #{cref} autovivified from directory #{dir}") if logger
+        log { "module #{cref} autovivified from directory #{dir}" }
 
         to_unload[dir] = cref if reloading_enabled?
 
