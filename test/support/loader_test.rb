@@ -67,7 +67,7 @@ class LoaderTest < Minitest::Test
           FileUtils.touch(fname)
         end
       end
-      yield
+      yield TMP_DIR
     end
   ensure
     mkdir_test if rm
@@ -82,7 +82,7 @@ class LoaderTest < Minitest::Test
   end
 
   def with_setup(files = [], dirs: nil, namespace: Object, load_path: nil, rm: true)
-    with_files(files, rm: rm) do
+    with_files(files, rm: rm) do |cwd|
       dirs ||= files.map do |file, _contents|
         file =~ %r{\A(rd\d?)/} ? $1 : "."
       end.uniq
@@ -102,9 +102,9 @@ class LoaderTest < Minitest::Test
 
       loader.setup
       if load_path
-        with_load_path(load_path) { yield }
+        with_load_path(load_path) { yield cwd }
       else
-        yield
+        yield cwd
       end
     end
   end
