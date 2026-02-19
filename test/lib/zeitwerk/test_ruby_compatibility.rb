@@ -74,8 +74,8 @@ class TestRubyCompatibility < LoaderTest
   # specially for large code bases.
   test "you can set autoloads on directories" do
     files = ["admin/users_controller.rb", "class UsersController; end"]
-    with_setup(files) do
-      assert_equal "#{Dir.pwd}/admin", Object.autoload?(:Admin)
+    with_setup(files) do |cwd|
+      assert_equal "#{cwd}/admin", Object.autoload?(:Admin)
     end
   end
 

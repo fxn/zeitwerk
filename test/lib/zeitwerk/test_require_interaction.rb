@@ -137,8 +137,8 @@ class TestRequireInteraction < LoaderTest
       EOS
       ["my_gem/foo.rb", "class MyGem::Foo; end"]
     ]
-    with_files(files) do
-      with_load_path(Dir.pwd) do
+    with_files(files) do |cwd|
+      with_load_path(cwd) do
         assert_required "my_gem"
       end
     end
@@ -159,16 +159,16 @@ class TestRequireInteraction < LoaderTest
       EOS
       ["hotel/pricing.rb", "class Hotel::Pricing; end"]
     ]
-    with_files(files) do
+    with_files(files) do |cwd|
       iter = ->(dir, &block) do
-        if dir == Dir.pwd
+        if dir == cwd
           block.call("hotel.rb")
           block.call("hotel")
         end
       end
       Dir.stub :foreach, iter do
         e = assert_raises(NameError) do
-          with_load_path(Dir.pwd) do
+          with_load_path(cwd) do
             assert_required "hotel"
           end
         end
@@ -192,16 +192,16 @@ class TestRequireInteraction < LoaderTest
       EOS
       ["hotel/pricing.rb", "class Hotel::Pricing; end"]
     ]
-    with_files(files) do
+    with_files(files) do |cwd|
       iter = ->(dir, &block) do
-        if dir == Dir.pwd
+        if dir == cwd
           block.call("hotel")
           block.call("hotel.rb")
         end
       end
       Dir.stub :foreach, iter do
         e = assert_raises(NameError) do
-          with_load_path(Dir.pwd) do
+          with_load_path(cwd) do
             assert_required "hotel"
           end
         end

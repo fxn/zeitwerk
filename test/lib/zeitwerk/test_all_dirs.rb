@@ -17,11 +17,11 @@ class TestAllDirs < LoaderTest
       ["loaderA/a.rb", "A = true"],
       ["loaderB/b.rb", "B = true"]
     ]
-    with_files(files) do
+    with_files(files) do |cwd|
       new_loader(dirs: "loaderA")
       new_loader(dirs: "loaderB")
 
-      assert_equal ["#{Dir.pwd}/loaderA", "#{Dir.pwd}/loaderB"], Zeitwerk::Loader.all_dirs
+      assert_equal ["#{cwd}/loaderA", "#{cwd}/loaderB"], Zeitwerk::Loader.all_dirs
     end
   end
 end
