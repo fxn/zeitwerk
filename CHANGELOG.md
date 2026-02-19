@@ -2,7 +2,7 @@
 
 ## 2.7.5 (19 Feb 2026)
 
-* If available, tree traversal is based on `Dir.scan`, which saves syscalls in common platforms. This method is a recent addition to Ruby contributed by @byroot, so you need to be on Ruby `main` to leverage this for now.
+* If available, tree traversal is based on `Dir.scan`, which saves syscalls in common platforms. This method is a recent addition to Ruby contributed by @byroot, so you need to be on Ruby `master` to leverage this for now.
 
 * Tree traversal is a tad more performant, regardless of the previous point. Gains are marginal when eager loading, because it is dominated by loading the code, but `Zeitwerk::Loader#all_expected_cpaths` was 14% faster in some benchmarks, for example.
 
