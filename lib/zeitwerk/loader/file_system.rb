@@ -77,8 +77,14 @@ class Zeitwerk::Loader::FileSystem # :nodoc:
   #: (String) -> bool
   def has_at_least_one_ruby_file?(dir)
     to_visit = [dir]
+    visited = {} #: Hash[[Integer, Integer], true]
 
     while (dir = to_visit.shift)
+      stat = File.stat(dir)
+      key = [stat.dev, stat.ino]
+      next if visited[key]
+      visited[key] = true
+
       relevant_dir_entries(dir) do |_, abspath, ftype|
         return true if :file == ftype
         to_visit << abspath

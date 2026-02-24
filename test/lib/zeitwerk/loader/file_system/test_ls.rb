@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "fileutils"
+require "timeout"
 require "test_helper"
 
 class TestFileSystemLS < LoaderTest
@@ -42,6 +43,32 @@ class TestFileSystemLS < LoaderTest
       FileUtils.mkdir("project")
       FileUtils.ln_s("#{cwd}/out/original", "#{cwd}/project/symlink")
       assert_equal [["symlink", "#{cwd}/project/symlink", :directory]], yielded("#{cwd}/project")
+    end
+  end
+
+  test "ls does not loop forever if a directory graph has cycles" do
+    begin
+      original = @fs.method(:relevant_dir_entries)
+      stat = Struct.new(:dev, :ino)
+
+      @fs.define_singleton_method(:relevant_dir_entries) do |dir, &block|
+        if block
+          case dir
+          when "/a"
+            block.call("b", "/b", :directory)
+          when "/b"
+            block.call("a", "/a", :directory)
+          end
+        else
+          original.call(dir)
+        end
+      end
+
+      File.stub :stat, ->(dir) { dir == "/a" ? stat.new(1, 1) : stat.new(1, 2) } do
+        assert_equal false, Timeout.timeout(1) { @fs.send(:has_at_least_one_ruby_file?, "/a") }
+      end
+    ensure
+      @fs.singleton_class.send(:define_method, :relevant_dir_entries, original)
     end
   end
 
