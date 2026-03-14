@@ -3,7 +3,7 @@
 module Zeitwerk
   module Registry # :nodoc: all
     require_relative "registry/autoloads"
-    require_relative "registry/explicit_namespaces"
+    require_relative "registry/namespaces"
     require_relative "registry/inceptions"
     require_relative "registry/loaders"
 
@@ -31,8 +31,8 @@ module Zeitwerk
       attr_reader :autoloads
 
       # @private
-      #: Zeitwerk::Registry::ExplicitNamespaces
-      attr_reader :explicit_namespaces
+      #: Zeitwerk::Registry::Namespaces
+      attr_reader :namespaces
 
       # @private
       #: Zeitwerk::Registry::Inceptions
@@ -82,7 +82,7 @@ module Zeitwerk
     @loaders                  = Loaders.new
     @gem_loaders_by_root_file = {}
     @autoloads                = Autoloads.new
-    @explicit_namespaces      = ExplicitNamespaces.new
+    @namespaces               = Namespaces.new
     @inceptions               = Inceptions.new
     @mutex                    = Mutex.new
   end

@@ -62,8 +62,6 @@ module Zeitwerk::Loader::Callbacks # :nodoc: all
         # these to be able to unregister later if eager loading.
         autoloaded_dirs << dir
 
-        on_namespace_loaded(cref, implicit_namespace)
-
         run_on_load_callbacks(cref.path, implicit_namespace, dir) unless on_load_callbacks.empty?
       end
     end

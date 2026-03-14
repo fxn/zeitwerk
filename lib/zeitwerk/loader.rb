@@ -213,8 +213,7 @@ module Zeitwerk
         shadowed_files.clear
 
         unregister_inceptions
-        unregister_explicit_namespaces
-
+        Registry.namespaces.unregister_loader(self)
         Registry.autoloads.unregister_loader(self)
 
         @setup        = false
@@ -350,7 +349,7 @@ module Zeitwerk
     #: () -> void
     def unregister
       unregister_inceptions
-      unregister_explicit_namespaces
+      Registry.namespaces.unregister_loader(self)
       Registry.loaders.unregister(self)
       Registry.autoloads.unregister_loader(self)
       Registry.unregister_loader(self)
@@ -479,39 +478,25 @@ module Zeitwerk
         if ftype == :file
           basename.delete_suffix!(".rb")
           cref = Cref.new(parent, cname_for(basename, abspath))
-          autoload_file(cref, abspath)
+          visit_file(cref, abspath)
+        elsif collapse?(abspath)
+          define_autoloads_for_dir(abspath, parent)
         else
-          if collapse?(abspath)
-            define_autoloads_for_dir(abspath, parent)
-          else
-            cref = Cref.new(parent, cname_for(basename, abspath))
-            autoload_subdir(cref, abspath)
-          end
+          cref = Cref.new(parent, cname_for(basename, abspath))
+          visit_subdir(cref, abspath)
         end
       end
     end
 
     #: (Zeitwerk::Cref, String) -> void
-    private def autoload_subdir(cref, subdir)
-      if autoload_path = autoload_path_set_by_me_for?(cref)
-        if @fs.rb_extension?(autoload_path)
-          # Scanning visited a Ruby file first, and now a directory for the same
-          # constant has been found. This means we are dealing with an explicit
-          # namespace whose definition was seen first.
-          #
-          # Registering is idempotent, and we have to keep the autoload pointing
-          # to the file. This may run again if more directories are found later
-          # on, no big deal.
-          register_explicit_namespace(cref)
-        end
-        # If the existing autoload points to a file, it has to be preserved, if
-        # not, it is fine as it is. In either case, we do not need to override.
-        # Just remember the subdirectory conforms this namespace.
+    private def visit_subdir(cref, subdir)
+      if autoload_path_set_by_me_for?(cref)
         namespace_dirs.get_or_set(cref) { [] } << subdir
+        Registry.namespaces.register(cref, self)
       elsif !cref.defined?
-        # First time we find this namespace, set an autoload for it.
-        namespace_dirs.get_or_set(cref) { [] } << subdir
         define_autoload(cref, subdir)
+        namespace_dirs.get_or_set(cref) { [] } << subdir
+        Registry.namespaces.register(cref, self)
       else
         # For whatever reason the constant that corresponds to this namespace has
         # already been defined, we have to recurse.
@@ -521,7 +506,7 @@ module Zeitwerk
     end
 
     #: (Zeitwerk::Cref, String) -> void
-    private def autoload_file(cref, file)
+    private def visit_file(cref, file)
       if autoload_path = cref.autoload? || Registry.inceptions.registered?(cref)
         # First autoload for a Ruby file wins, just ignore subsequent ones.
         if @fs.rb_extension?(autoload_path)
@@ -548,10 +533,11 @@ module Zeitwerk
 
       log { "earlier autoload for #{cref} discarded, it is actually an explicit namespace defined in #{file}" }
 
-      # Order matters: When Module#const_added is triggered by the autoload, we
-      # don't want the namespace to be registered yet.
+      # We unregister and register again so the const_added triggered by the
+      # autoload does not find the namespace in the registry.
+      Registry.namespaces.unregister_cref(cref)
       define_autoload(cref, file)
-      register_explicit_namespace(cref)
+      Registry.namespaces.register(cref, self)
     end
 
     #: (Zeitwerk::Cref, String) -> void
@@ -579,16 +565,6 @@ module Zeitwerk
       else
         inceptions[cref]
       end
-    end
-
-    #: (Zeitwerk::Cref) -> void
-    private def register_explicit_namespace(cref)
-      Registry.explicit_namespaces.register(cref, self)
-    end
-
-    #: () -> void
-    private def unregister_explicit_namespaces
-      Registry.explicit_namespaces.unregister_loader(self)
     end
 
     #: (Zeitwerk::Cref, String) -> void

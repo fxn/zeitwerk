@@ -3,7 +3,7 @@
 module Zeitwerk::ConstAdded # :nodoc:
   #: (Symbol) -> void
   def const_added(cname)
-    if loader = Zeitwerk::Registry.explicit_namespaces.loader_for(self, cname)
+    if loader = Zeitwerk::Registry.namespaces.loader_for(self, cname)
       namespace = const_get(cname, false)
       cref = Zeitwerk::Cref.new(self, cname)
 

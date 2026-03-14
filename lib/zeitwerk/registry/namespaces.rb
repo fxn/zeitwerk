@@ -1,24 +1,18 @@
 # frozen_string_literal: true
 
 module Zeitwerk::Registry
-  # A registry for explicit namespaces.
+  # A registry for namespaces.
   #
-  # When a loader determines that a certain file should define an explicit
-  # namespace, it registers it here, associating its cref with itself.
+  # When a namespace is autoloaded, our global const_added callback retrieves
+  # its loader by calling loader_for. The loader then scans the subdirectories
+  # that conform the namespace and sets autoloads for their expected constants.
   #
-  # If the namespace is autoloaded, our const_added callback retrieves its
-  # loader by calling loader_for. That way, the loader is able to scan the
-  # subdirectories that conform the namespace and set autoloads for their
-  # expected constants just in time.
-  #
-  # Once autoloaded, the namespace is unregistered.
-  #
-  # The implementation assumes an explicit namespace is managed by one loader.
+  # The implementation assumes each namespace is managed by one single loader.
   # Loaders that reopen namespaces owned by other projects are responsible for
   # loading their constant before setup. This is documented.
   #
-  # **This is a private module.**
-  class ExplicitNamespaces # :nodoc: all
+  # @private
+  class Namespaces # :nodoc: all
     #: () -> void
     def initialize
       # Maps crefs of explicit namespaces with their corresponding loader.
@@ -28,9 +22,6 @@ module Zeitwerk::Registry
       @loaders = Zeitwerk::Cref::Map.new
     end
 
-    # Registers `cref` as being the constant path of an explicit namespace
-    # managed by `loader`.
-    #
     #: (Zeitwerk::Cref, Zeitwerk::Loader) -> void
     def register(cref, loader)
       @loaders[cref] = loader
@@ -41,15 +32,18 @@ module Zeitwerk::Registry
       @loaders.delete_mod_cname(mod, cname)
     end
 
+      #: (Zeitwerk::Cref) -> Zeitwerk::Loader?
+    def unregister_cref(cref)
+      @loaders.delete(cref)
+    end
+
     #: (Zeitwerk::Loader) -> void
     def unregister_loader(loader)
       @loaders.delete_by_value(loader)
     end
 
-    # This is an internal method only used by the test suite.
-    #
     #: (Zeitwerk::Cref) -> Zeitwerk::Loader?
-    def registered?(cref)
+    def registered?(cref) # for tests
       @loaders[cref]
     end
 
