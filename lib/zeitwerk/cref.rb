@@ -66,4 +66,11 @@ class Zeitwerk::Cref
   def remove
     @mod.__send__(:remove_const, @cname)
   end
+
+  #: () -> String?
+  def location
+    if location = @mod.const_source_location(@cname)
+      location.join(":")
+    end
+  end
 end

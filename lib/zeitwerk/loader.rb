@@ -501,7 +501,11 @@ module Zeitwerk
         end
       elsif cref.defined?
         shadowed_files << file
-        log { "file #{file} is ignored because #{cref} is already defined" }
+        if location = cref.location
+          log { "file #{file} is ignored because #{cref} is already defined in #{location}" }
+        else
+          log { "file #{file} is ignored because #{cref} is already defined (unknown location)" }
+        end
       else
         define_autoload(cref, file)
       end

@@ -85,4 +85,13 @@ class TestCref < LoaderTest
   test "#remove with unknown cname" do
     assert_raises(NameError) { new_cref.remove }
   end
+
+  test "#location returns file:line if the constant exists" do
+    expected_location = Zeitwerk.const_source_location(:Loader).join(":")
+    assert_equal expected_location, new_cref(Zeitwerk, :Loader).location
+  end
+
+  test "#location returns nil otherwise" do
+    assert_nil new_cref(Object, :NonExistent).location
+  end
 end
