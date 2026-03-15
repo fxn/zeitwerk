@@ -479,49 +479,18 @@ module Zeitwerk
         if ftype == :file
           basename.delete_suffix!(".rb")
           cref = Cref.new(parent, cname_for(basename, abspath))
-          autoload_file(cref, abspath)
+          visit_file(cref, abspath)
+        elsif collapse?(abspath)
+          define_autoloads_for_dir(abspath, parent)
         else
-          if collapse?(abspath)
-            define_autoloads_for_dir(abspath, parent)
-          else
-            cref = Cref.new(parent, cname_for(basename, abspath))
-            autoload_subdir(cref, abspath)
-          end
+          cref = Cref.new(parent, cname_for(basename, abspath))
+          visit_subdir(cref, abspath)
         end
       end
     end
 
     #: (Zeitwerk::Cref, String) -> void
-    private def autoload_subdir(cref, subdir)
-      if autoload_path = autoload_path_set_by_me_for?(cref)
-        if @fs.rb_extension?(autoload_path)
-          # Scanning visited a Ruby file first, and now a directory for the same
-          # constant has been found. This means we are dealing with an explicit
-          # namespace whose definition was seen first.
-          #
-          # Registering is idempotent, and we have to keep the autoload pointing
-          # to the file. This may run again if more directories are found later
-          # on, no big deal.
-          register_explicit_namespace(cref)
-        end
-        # If the existing autoload points to a file, it has to be preserved, if
-        # not, it is fine as it is. In either case, we do not need to override.
-        # Just remember the subdirectory conforms this namespace.
-        namespace_dirs.get_or_set(cref) { [] } << subdir
-      elsif !cref.defined?
-        # First time we find this namespace, set an autoload for it.
-        namespace_dirs.get_or_set(cref) { [] } << subdir
-        define_autoload(cref, subdir)
-      else
-        # For whatever reason the constant that corresponds to this namespace has
-        # already been defined, we have to recurse.
-        log { "the namespace #{cref} already exists, descending into #{subdir}" }
-        define_autoloads_for_dir(subdir, cref.get)
-      end
-    end
-
-    #: (Zeitwerk::Cref, String) -> void
-    private def autoload_file(cref, file)
+    private def visit_file(cref, file)
       if autoload_path = cref.autoload? || Registry.inceptions.registered?(cref)
         # First autoload for a Ruby file wins, just ignore subsequent ones.
         if @fs.rb_extension?(autoload_path)
@@ -535,6 +504,29 @@ module Zeitwerk
         log { "file #{file} is ignored because #{cref} is already defined" }
       else
         define_autoload(cref, file)
+      end
+    end
+
+    #: (Zeitwerk::Cref, String) -> void
+    private def visit_subdir(cref, subdir)
+      if autoload_path = autoload_path_set_by_me_for?(cref)
+        if @fs.rb_extension?(autoload_path)
+          # Scanning visited a Ruby file first, and now a directory for the same
+          # constant has been found. This is an explicit namespace.
+          #
+          # The namespace may be spread over multiple directories and perhaps it
+          # was already registered, but registering is idempotent, just do it.
+          register_explicit_namespace(cref)
+        end
+        namespace_dirs.get_or_set(cref) { [] } << subdir
+      elsif !cref.defined?
+        define_autoload(cref, subdir)
+        namespace_dirs.get_or_set(cref) { [] } << subdir
+      else
+        # For whatever reason the constant that corresponds to this namespace has
+        # already been defined, we have to recurse.
+        log { "the namespace #{cref} already exists, descending into #{subdir}" }
+        define_autoloads_for_dir(subdir, cref.get)
       end
     end
 
