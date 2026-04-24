@@ -96,18 +96,9 @@ class Zeitwerk::Loader::FileSystem # :nodoc:
     each_ruby_file_or_directory(dir) do |basename, abspath, ftype|
       next if @loader.__ignored_path?(abspath)
 
-      if :link == ftype
-        begin
-          ftype = File.stat(abspath).ftype.to_sym
-        rescue Errno::ENOENT
-          warn "ignoring broken symlink #{abspath}"
-          next
-        end
-      end
-
       if :file == ftype
-        yield basename, abspath, ftype if rb_extension?(basename)
-      elsif :directory == ftype
+        yield basename, abspath, ftype
+      else
         # Conceptually, root directories represent a separate project tree.
         yield basename, abspath, ftype unless @loader.__root_dir?(abspath)
       end
@@ -155,9 +146,7 @@ class Zeitwerk::Loader::FileSystem # :nodoc:
           yield basename, abspath, :file # By convention.
         else
           abspath = File.join(dir, basename).freeze
-          if dir?(abspath)
-            yield basename, abspath, :directory
-          end
+          yield basename, abspath, :directory if dir?(abspath)
         end
       end
     end
