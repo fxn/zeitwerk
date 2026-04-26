@@ -316,6 +316,11 @@ module Zeitwerk::Loader::Config
   end
 
   #: (String) -> bool
+  internal def collapse?(dir)
+    collapse_dirs.member?(dir)
+  end
+
+  #: (String) -> bool
   private def excluded_from_eager_load?(abspath)
     # Optimize this common use case.
     return false if eager_load_exclusions.empty?
@@ -326,11 +331,6 @@ module Zeitwerk::Loader::Config
     end
 
     false
-  end
-
-  #: (String) -> bool
-  private def collapse?(dir)
-    collapse_dirs.member?(dir)
   end
 
   #: (String | Pathname | Array[String | Pathname]) -> Array[String]

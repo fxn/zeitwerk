@@ -1290,15 +1290,7 @@ loader.cpath_expected_at("app/models/hotel")            # => "Hotel"
 loader.cpath_expected_at("app/models/hotel/billing.rb") # => "Hotel::Billing"
 ```
 
-If `collapsed` is a collapsed directory:
-
-```ruby
-loader.cpath_expected_at("a/b/collapsed/c") # => "A::B::C"
-loader.cpath_expected_at("a/b/collapsed")   # => "A::B", edge case
-loader.cpath_expected_at("a/b")             # => "A::B"
-```
-
-If the argument corresponds to an [ignored file or directory](#ignoring-parts-of-the-project), the method returns `nil`. Same if the argument is not managed by the loader.
+If the argument corresponds to a [collapsed](#collapsing-directories) directory or an [ignored](#ignoring-parts-of-the-project) file or directory, the method returns `nil`. Same if the argument is not managed by the loader.
 
 `Zeitwerk::Error` is raised if the given path does not exist:
 
@@ -1329,10 +1321,10 @@ For example, if `lib` is the root directory of a gem with the following contents
 lib/.DS_Store
 lib/my_gem.rb
 lib/my_gem/version.rb
-lib/my_gem/ignored.rb
 lib/my_gem/drivers/unix.rb
 lib/my_gem/drivers/windows.rb
 lib/my_gem/collapsed/foo.rb
+lib/my_gem/ignored.rb
 lib/tasks/my_gem.rake
 ```
 
@@ -1347,14 +1339,13 @@ lib/tasks/my_gem.rake
   "/.../lib/my_gem/drivers"            => "MyGem::Drivers",
   "/.../lib/my_gem/drivers/unix.rb"    => "MyGem::Drivers::Unix",
   "/.../lib/my_gem/drivers/windows.rb" => "MyGem::Drivers::Windows",
-  "/.../lib/my_gem/collapsed"          => "MyGem",
   "/.../lib/my_gem/collapsed/foo.rb"   => "MyGem::Foo"
 }
 ```
 
-In the previous example we assume `lib/my_gem/ignored.rb` is ignored, and therefore it is not present in the returned hash. Also, `lib/my_gem/collapsed` is a collapsed directory, so the expected namespace at that level is still `MyGem` (this is an edge case).
+In the previous example `lib/my_gem/collapsed` is a collapsed directory and `lib/my_gem/ignored.rb` is an ignored file. These are excluded.
 
-The file `lib/.DS_Store` is hidden, hence excluded. The directory `lib/tasks` is also not present because it contains no files with extension ".rb".
+The file `lib/.DS_Store` is hidden, hence excluded too. The directory `lib/tasks` is also excluded because it contains no files with extension ".rb".
 
 Directory paths do not have trailing slashes.
 

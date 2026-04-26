@@ -171,12 +171,8 @@ module Zeitwerk::Loader::EagerLoad
             cref.get
           end
         else
-          if collapse?(abspath)
-            queue << [abspath, namespace]
-          else
-            cname = cname_for(basename, abspath)
-            queue << [abspath, namespace.const_get(cname, false)]
-          end
+          cname = cname_for(basename, abspath)
+          queue << [abspath, namespace.const_get(cname, false)]
         end
       end
     end
@@ -207,11 +203,7 @@ module Zeitwerk::Loader::EagerLoad
     suffix.split("::").each do |segment|
       while (dir = dirs.shift)
         @fs.ls(dir) do |basename, abspath, ftype|
-          next unless ftype == :directory
-
-          if collapse?(abspath)
-            dirs << abspath
-          elsif segment == cname_for(basename, abspath).to_s
+          if ftype == :directory && segment == cname_for(basename, abspath).to_s
             next_dirs << abspath
           end
         end

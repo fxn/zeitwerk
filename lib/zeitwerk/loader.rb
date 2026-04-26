@@ -259,11 +259,7 @@ module Zeitwerk
               basename.delete_suffix!(".rb")
               result[abspath] = "#{prefix}#{cname_for(basename, abspath)}"
             else
-              if collapse?(abspath)
-                queue << [abspath, cpath]
-              else
-                queue << [abspath, "#{prefix}#{cname_for(basename, abspath)}"]
-              end
+              queue << [abspath, "#{prefix}#{cname_for(basename, abspath)}"]
             end
           end
         end
@@ -282,10 +278,11 @@ module Zeitwerk
       return unless ftype
 
       return if ignored_path?(abspath)
+      return if collapse?(abspath)
 
       paths = []
 
-      if :file == ftype
+      if ftype == :file
         basename = File.basename(abspath, ".rb")
         return if @fs.hidden?(basename)
 
@@ -480,8 +477,6 @@ module Zeitwerk
           basename.delete_suffix!(".rb")
           cref = Cref.new(parent, cname_for(basename, abspath))
           visit_file(cref, abspath)
-        elsif collapse?(abspath)
-          define_autoloads_for_dir(abspath, parent)
         else
           cref = Cref.new(parent, cname_for(basename, abspath))
           visit_subdir(cref, abspath)

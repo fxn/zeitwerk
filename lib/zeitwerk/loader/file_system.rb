@@ -12,8 +12,20 @@ class Zeitwerk::Loader::FileSystem # :nodoc:
     @loader = loader
   end
 
+  # This method lists directories, filtering out the following:
+  #
+  # - Hidden entries.
+  # - Ignored entries.
+  # - Files whose extension is not `.rb`.
+  # - Collapsed directories. Instead, we recurse to list their contents.
+  # - Nested root directories, since they represent separate trees.
+  # - Subdirectories that (recursively) contain no Ruby files.
+  #
+  # For every entry that is not excluded, `ls` yields its basename, absolute
+  # path, and file type, which can only be :file or :directory.
+  #
   #: (String) { (String, String, Symbol) -> void } -> void
-  def ls(dir)
+  def ls(dir, &)
     children = relevant_dir_entries(dir)
 
     # The order in which a directory is listed depends on the file system.
@@ -24,9 +36,14 @@ class Zeitwerk::Loader::FileSystem # :nodoc:
     children.sort_by!(&:first)
 
     children.each do |basename, abspath, ftype|
-      if :directory == ftype && !has_at_least_one_ruby_file?(abspath)
-        @loader.__log { "directory #{abspath} is ignored because it has no Ruby files" }
-        next
+      if ftype == :directory
+        if !has_at_least_one_ruby_file?(abspath)
+          @loader.__log { "directory #{abspath} is ignored because it has no Ruby files" }
+          next
+        elsif @loader.__collapse?(abspath)
+          ls(abspath, &)
+          next
+        end
       end
 
       yield basename, abspath, ftype
@@ -80,7 +97,7 @@ class Zeitwerk::Loader::FileSystem # :nodoc:
 
     while (dir = to_visit.shift)
       relevant_dir_entries(dir) do |_, abspath, ftype|
-        return true if :file == ftype
+        return true if ftype == :file
         to_visit << abspath
       end
     end
@@ -96,7 +113,7 @@ class Zeitwerk::Loader::FileSystem # :nodoc:
     each_ruby_file_or_directory(dir) do |basename, abspath, ftype|
       next if @loader.__ignored_path?(abspath)
 
-      if :file == ftype
+      if ftype == :file
         yield basename, abspath, ftype
       else
         # Conceptually, root directories represent a separate project tree.
@@ -126,10 +143,10 @@ class Zeitwerk::Loader::FileSystem # :nodoc:
         if rb_extension?(basename)
           abspath = File.join(dir, basename).freeze
           yield basename, abspath, :file # By convention.
-        elsif :directory == ftype
+        elsif ftype == :directory
           abspath = File.join(dir, basename).freeze
           yield basename, abspath, :directory
-        elsif :link == ftype
+        elsif ftype == :link
           abspath = File.join(dir, basename).freeze
           yield basename, abspath, :directory if dir?(abspath)
         end
