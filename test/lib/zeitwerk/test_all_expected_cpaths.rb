@@ -93,8 +93,10 @@ class TestAllExpectedCpaths < LoaderTest
       expected_cpaths(
         "." => "Object",
         "x.rb" => "X",
+        "collapsed" => "Object",
         "collapsed/y.rb" => "Y",
         "m" => "M",
+        "m/collapsed" => "M",
         "m/collapsed/n" => "M::N",
         "m/collapsed/n/x.rb" => "M::N::X"
       )

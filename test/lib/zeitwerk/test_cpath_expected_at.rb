@@ -174,12 +174,14 @@ class TestCpathExpectedAtString < LoaderTest
   test "supports collapsed directories (Object)" do
     with_setup([["a/b/collapsed/x.rb", "A::B::X = 1"]]) do
       assert_equal "A::B::X", loader.cpath_expected_at("a/b/collapsed/x.rb")
+      assert_equal "A::B", loader.cpath_expected_at("a/b/collapsed")
     end
   end
 
   test "supports collapsed directories (Custom)" do
     with_setup([["a/b/collapsed/x.rb", "A::B::X = 1"]], namespace: M) do
       assert_equal "#{M_REAL_NAME}::A::B::X", loader.cpath_expected_at("a/b/collapsed/x.rb")
+      assert_equal "#{M_REAL_NAME}::A::B", loader.cpath_expected_at("a/b/collapsed")
     end
   end
 

@@ -254,12 +254,14 @@ module Zeitwerk
 
           prefix = cpath == "Object" ? "" : cpath + "::"
 
-          @fs.ls(dir) do |basename, abspath, ftype|
+          @fs.ls(dir, collapse: false) do |basename, abspath, ftype|
             if ftype == :file
               basename.delete_suffix!(".rb")
               result[abspath] = "#{prefix}#{cname_for(basename, abspath)}"
+            elsif collapse?(abspath)
+              queue.unshift([abspath, cpath])
             else
-              queue << [abspath, "#{prefix}#{cname_for(basename, abspath)}"]
+              queue.push([abspath, "#{prefix}#{cname_for(basename, abspath)}"])
             end
           end
         end
@@ -278,7 +280,6 @@ module Zeitwerk
       return unless ftype
 
       return if ignored_path?(abspath)
-      return if collapse?(abspath)
 
       paths = []
 

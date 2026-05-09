@@ -9,9 +9,9 @@ class TestFileSystemLS < LoaderTest
     @fs = loader.instance_variable_get(:@fs)
   end
 
-  def yielded(dir)
+  def yielded(dir, collapse: true)
     yielded = []
-    @fs.ls(dir) { |*entry| yielded << entry }
+    @fs.ls(dir, collapse: collapse) { |*entry| yielded << entry }
     yielded
   end
 
@@ -90,6 +90,24 @@ class TestFileSystemLS < LoaderTest
   test "ls ignores nested root directories" do
     with_setup(["rd/user.rb"], dirs: %w(. rd)) do |cwd|
       assert_empty yielded(cwd)
+    end
+  end
+
+  test "ls descends into collapsed directories if collapse is true (one)" do
+    with_setup(["collapsed/x.rb"]) do |cwd|
+      assert_equal ["x.rb"], yielded(cwd).map(&:first)
+    end
+  end
+
+  test "ls descends into collapsed directories if collapse is true (several)" do
+    with_setup(["collapsed/collapsed/x.rb"]) do |cwd|
+      assert_equal ["x.rb"], yielded(cwd).map(&:first)
+    end
+  end
+
+  test "ls yields collapsed directories if collapse is false" do
+    with_setup(["collapsed/x.rb"]) do |cwd|
+      assert_equal ["collapsed"], yielded(cwd, collapse: false).map(&:first)
     end
   end
 end

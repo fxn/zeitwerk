@@ -95,9 +95,11 @@ class LoaderTest < Minitest::Test
           loader.ignore($1)
         end
 
-        if file =~ %r{\A(collapsed|.+/collapsed)/}
-          loader.collapse($1)
+        segments = file.split("/")
+        collapsed = segments.each_index.filter_map do |i|
+          segments[0..i].join("/") if segments[i] == "collapsed"
         end
+        loader.collapse(collapsed) unless collapsed.empty?
       end
 
       loader.setup

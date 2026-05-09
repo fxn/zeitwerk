@@ -17,15 +17,17 @@ class Zeitwerk::Loader::FileSystem # :nodoc:
   # - Hidden entries.
   # - Ignored entries.
   # - Files whose extension is not `.rb`.
-  # - Collapsed directories. Instead, we recurse to list their contents.
   # - Nested root directories, since they represent separate trees.
   # - Subdirectories that (recursively) contain no Ruby files.
+  #
+  # If `collapse` is true, collapsed directories are not yielded, instead, the
+  # method recurses so that the caller gets a conceptually flat listing.
   #
   # For every entry that is not excluded, `ls` yields its basename, absolute
   # path, and file type, which can only be :file or :directory.
   #
   #: (String) { (String, String, Symbol) -> void } -> void
-  def ls(dir, &)
+  def ls(dir, collapse: true, &)
     children = relevant_dir_entries(dir)
 
     # The order in which a directory is listed depends on the file system.
@@ -40,8 +42,8 @@ class Zeitwerk::Loader::FileSystem # :nodoc:
         if !has_at_least_one_ruby_file?(abspath)
           @loader.__log { "directory #{abspath} is ignored because it has no Ruby files" }
           next
-        elsif @loader.__collapse?(abspath)
-          ls(abspath, &)
+        elsif collapse && @loader.__collapse?(abspath)
+          ls(abspath, collapse: collapse, &)
           next
         end
       end
