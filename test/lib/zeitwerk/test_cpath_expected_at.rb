@@ -53,13 +53,13 @@ class TestCpathExpectedAtNil < LoaderTest
   end
 
   test "returns nil if the argument is ignored" do
-    with_setup([["ignored.rb", nil]]) do
+    with_setup([["ignored.rb"]]) do
       assert_nil loader.cpath_expected_at("ignored.rb")
     end
   end
 
   test "returns nil if the argument is a hidden Ruby file" do
-    with_setup([[".foo.rb", nil]]) do
+    with_setup([[".foo.rb"]]) do
       assert_nil loader.cpath_expected_at(".foo.rb")
     end
   end
@@ -72,13 +72,13 @@ class TestCpathExpectedAtNil < LoaderTest
   end
 
   test "returns nil if an ancestor is ignored" do
-    with_setup([["ignored/x.rb", nil]]) do
+    with_setup([["ignored/x.rb"]]) do
       assert_nil loader.cpath_expected_at("ignored/x.rb")
     end
   end
 
   test "returns nil if an ancestor is a hidden directory" do
-    with_setup([[".foo/x.rb", nil]]) do
+    with_setup([[".foo/x.rb"]]) do
       assert_nil loader.cpath_expected_at(".foo/x.rb")
     end
   end
@@ -94,13 +94,13 @@ class TestCpathExpectedAtString < LoaderTest
   M_REAL_NAME = "#{name}::M"
 
   test "returns the name of the root namespace for a root directory (Object)" do
-    with_setup([["README.md", nil]]) do
+    with_setup([["README.md"]]) do
       assert_equal "Object", loader.cpath_expected_at(".")
     end
   end
 
   test "returns the name of the root namespace for a root directory (Object, Pathname)" do
-    with_setup([["README.md", nil]]) do
+    with_setup([["README.md"]]) do
       assert_equal "Object", loader.cpath_expected_at(Pathname.new("."))
     end
   end
