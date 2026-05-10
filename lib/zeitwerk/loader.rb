@@ -91,6 +91,7 @@ module Zeitwerk
     attr_reader :dirs_autoload_monitor
     private :dirs_autoload_monitor
 
+    #: () -> void
     def initialize
       super
 

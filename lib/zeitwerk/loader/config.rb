@@ -82,6 +82,7 @@ module Zeitwerk::Loader::Config
   attr_reader :on_unload_callbacks
   private :on_unload_callbacks
 
+  #: () -> void
   def initialize
     @inflector              = Zeitwerk::Inflector.new
     @logger                 = self.class.default_logger
