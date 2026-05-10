@@ -20,6 +20,7 @@
   - [Implicit namespaces](#implicit-namespaces)
   - [Explicit namespaces](#explicit-namespaces)
   - [Collapsing directories](#collapsing-directories)
+  - [Different files, different constant paths](#different-files-different-constant-paths)
   - [Testing compliance](#testing-compliance)
 - [Usage](#usage)
   - [Setup](#setup)
@@ -53,7 +54,6 @@
     - [Use case: Files that do not follow the conventions](#use-case-files-that-do-not-follow-the-conventions)
     - [Use case: The adapter pattern](#use-case-the-adapter-pattern)
     - [Use case: Test files mixed with implementation files](#use-case-test-files-mixed-with-implementation-files)
-  - [Shadowed files](#shadowed-files)
   - [Beware of circular dependencies](#beware-of-circular-dependencies)
   - [Reopening third-party namespaces](#reopening-third-party-namespaces)
   - [Introspection](#introspection)
@@ -312,6 +312,37 @@ To illustrate usage of glob patterns, if `actions` in the example above is part 
 loader.collapse("#{__dir__}/*/actions")
 ```
 
+<a id="markdown-different-files-different-constant-paths" name="different-files-different-constant-paths"></a>
+### Different files, different constant paths
+
+While namespaces can be spread over an arbitrary number of directories, different files must map to different constant paths. Violations of this rule raise `Zeitwerk::ConstantPathConflict`.
+
+For example, assuming `app/controllers` and `app/models` are root directories:
+
+```ruby
+app/controllers/foo.rb
+app/models/foo.rb # raises Zeitwerk::ConstantPathConflict
+```
+
+That is an error condition because both files map to `Foo`.
+
+Another example, assuming that `collapsed` is a collapsed directory:
+
+```ruby
+app/models/foo.rb
+app/models/collapsed/foo.rb # raises Zeitwerk::ConstantPathConflict
+```
+
+Again, that is an error condition because both files map to `Foo`.
+
+Same if the file maps to a constant that already exists:
+
+```ruby
+app/models/string.rb # raises Zeitwerk::ConstantPathConflict
+```
+
+In this case, `app/models/string.rb` maps to `String`, but it cannot possibly define `String`, since that constant is already defined.
+
 <a id="markdown-testing-compliance" name="testing-compliance"></a>
 ### Testing compliance
 
@@ -551,7 +582,7 @@ This is useful when the loader is not eager loading the entire project, but you 
 
 Both strings and `Pathname` objects are supported as arguments. If the argument is not a directory managed by the receiver, the method raises `Zeitwerk::Error`.
 
-[Eager load exclusions](#eager-load-exclusions), [ignored files and directories](#ignoring-parts-of-the-project), and [shadowed files](#shadowed-files) are not eager loaded.
+[Eager load exclusions](#eager-load-exclusions) and [ignored files and directories](#ignoring-parts-of-the-project) are not eager loaded.
 
 `Zeitwerk::Loader#eager_load_dir` is idempotent, but compatible with reloading. If you eager load a directory and then reload, eager loading that directory will load its (current) contents again.
 
@@ -588,7 +619,7 @@ There might exist external source trees implementing part of the namespace. This
 
 This method is flexible about what it accepts. Its semantics have to be interpreted as: "_If_ you manage this namespace, or part of this namespace, please eager load what you got". In particular, if the receiver does not manage the namespace, it will simply do nothing, this is not an error condition.
 
-[Eager load exclusions](#eager-load-exclusions), [ignored files and directories](#ignoring-parts-of-the-project), and [shadowed files](#shadowed-files) are not eager loaded.
+[Eager load exclusions](#eager-load-exclusions) and [ignored files and directories](#ignoring-parts-of-the-project).
 
 `Zeitwerk::Loader#eager_load_namespace` is idempotent, but compatible with reloading. If you eager load a namespace and then reload, eager loading that namespace will load its (current) descendants again.
 
@@ -641,7 +672,7 @@ loader.load_file("#{__dir__}/custom_web_app/routes.rb")
 
 This is useful when the loader is not eager loading the entire project, but you still need an individual file to be loaded for things to function properly.
 
-Both strings and `Pathname` objects are supported as arguments. The method raises `Zeitwerk::Error` if the argument is not a Ruby file, is [ignored](#ignoring-parts-of-the-project), is [shadowed](#shadowed-files), or is not managed by the receiver.
+Both strings and `Pathname` objects are supported as arguments. The method raises `Zeitwerk::Error` if the argument is not a Ruby file, is [ignored](#ignoring-parts-of-the-project), or is not managed by the receiver.
 
 `Zeitwerk::Loader#load_file` is idempotent, but compatible with reloading. If you load a file and then reload, a new call will load its (current) contents again.
 
@@ -1149,35 +1180,6 @@ tests = "#{__dir__}/**/*_test.rb"
 loader.ignore(tests)
 loader.setup
 ```
-
-<a id="markdown-shadowed-files" name="shadowed-files"></a>
-### Shadowed files
-
-In Ruby, if you have several files called `foo.rb` in different directories of `$LOAD_PATH` and execute
-
-```ruby
-require "foo"
-```
-
-the first one found gets loaded, and the rest are ignored.
-
-Zeitwerk behaves in a similar way. If `foo.rb` is present in several root directories (at the same namespace level), the constant `Foo` is autoloaded from the first one, and the rest of the files are not evaluated. If logging is enabled, you'll see something like
-
-```
-file #{file} is ignored because #{previous_occurrence} has precedence
-```
-
-(This message is not public interface and may change, you cannot rely on that exact wording.)
-
-Even if there's only one `foo.rb`, if the constant `Foo` is already defined when Zeitwerk finds `foo.rb`, then the file is ignored too. This could happen if `Foo` was defined by a dependency, for example. If logging is enabled, you'll see something like
-
-```
-file #{file} is ignored because #{constant_path} is already defined
-```
-
-(This message is not public interface and may change, you cannot rely on that exact wording.)
-
-Shadowing only applies to Ruby files, namespace definition can be spread over multiple directories. And you can also reopen third-party namespaces if done [orderly](#reopening-third-party-namespaces).
 
 <a id="markdown-beware-of-circular-dependencies" name="beware-of-circular-dependencies"></a>
 ### Beware of circular dependencies

@@ -83,17 +83,6 @@ module Zeitwerk
     attr_reader :namespace_dirs
     internal :namespace_dirs
 
-    # A shadowed file is a file managed by this loader that is ignored when
-    # setting autoloads because its matching constant is already taken.
-    #
-    # This private set is populated lazily, as we descend. For example, if the
-    # loader has only scanned the top-level, `shadowed_files` does not have the
-    # shadowed files that may exist deep in the project tree.
-    #
-    #: Set[String]
-    attr_reader :shadowed_files
-    internal :shadowed_files
-
     #: Mutex
     attr_reader :mutex
     private :mutex
@@ -110,7 +99,6 @@ module Zeitwerk
       @autoloaded_dirs = []
       @to_unload       = {}
       @namespace_dirs  = Zeitwerk::Cref::Map.new
-      @shadowed_files  = Set.new
       @setup           = false
       @eager_loaded    = false
       @fs              = FileSystem.new(self)
@@ -153,73 +141,78 @@ module Zeitwerk
     def unload
       mutex.synchronize do
         raise SetupRequired unless @setup
+        __unload
+      end
+    end
 
-        # We are going to keep track of the files that were required by our
-        # autoloads to later remove them from $LOADED_FEATURES, thus making them
-        # loadable by Kernel#require again.
-        #
-        # Directories are not stored in $LOADED_FEATURES, keeping track of files
-        # is enough.
-        unloaded_files = Set.new
+    # This is an internal method.
+    #
+    #: () -> void
+    def __unload
+      # We are going to keep track of the files that were required by our
+      # autoloads to later remove them from $LOADED_FEATURES, thus making them
+      # loadable by Kernel#require again.
+      #
+      # Directories are not stored in $LOADED_FEATURES, keeping track of files
+      # is enough.
+      unloaded_files = Set.new
 
-        autoloads.each do |abspath, cref|
-          if cref.autoload?
-            unload_autoload(cref)
-          else
-            # Could happen if loaded with require_relative. That is unsupported,
-            # and the constant path would escape unloadable_cpath? This is just
-            # defensive code to clean things up as much as we are able to.
-            unload_cref(cref)
-            unloaded_files.add(abspath) if @fs.rb_extension?(abspath)
-          end
-        end
-
-        to_unload.each do |abspath, cref|
-          unless on_unload_callbacks.empty?
-            begin
-              value = cref.get
-            rescue ::NameError
-              # Perhaps the user deleted the constant by hand, or perhaps an
-              # autoload failed to define the expected constant but the user
-              # rescued the exception.
-            else
-              run_on_unload_callbacks(cref, value, abspath)
-            end
-          end
-
+      autoloads.each do |abspath, cref|
+        if cref.autoload?
+          unload_autoload(cref)
+        else
+          # Could happen if loaded with require_relative. That is unsupported,
+          # and the constant path would escape unloadable_cpath? This is just
+          # defensive code to clean things up as much as we are able to.
           unload_cref(cref)
           unloaded_files.add(abspath) if @fs.rb_extension?(abspath)
         end
+      end
 
-        unless unloaded_files.empty?
-          # Bootsnap decorates Kernel#require to speed it up using a cache and
-          # this optimization does not check if $LOADED_FEATURES has the file.
-          #
-          # To make it aware of changes, the gem defines singleton methods in
-          # $LOADED_FEATURES:
-          #
-          #   https://github.com/rails/bootsnap/blob/main/lib/bootsnap/load_path_cache/core_ext/loaded_features.rb
-          #
-          # Rails applications may depend on bootsnap, so for unloading to work
-          # in that setting it is preferable that we restrict our API choice to
-          # one of those methods.
-          $LOADED_FEATURES.reject! { |file| unloaded_files.member?(file) }
+      to_unload.each do |abspath, cref|
+        unless on_unload_callbacks.empty?
+          begin
+            value = cref.get
+          rescue ::NameError
+            # Perhaps the user deleted the constant by hand, or perhaps an
+            # autoload failed to define the expected constant but the user
+            # rescued the exception.
+          else
+            run_on_unload_callbacks(cref, value, abspath)
+          end
         end
 
-        autoloads.clear
-        autoloaded_dirs.clear
-        to_unload.clear
-        namespace_dirs.clear
-        shadowed_files.clear
-
-        unregister_inceptions
-        unregister_explicit_namespaces
-
-        Registry.autoloads.unregister_loader(self)
-
-        @setup        = false
-        @eager_loaded = false
+        unload_cref(cref)
+        unloaded_files.add(abspath) if @fs.rb_extension?(abspath)
       end
+
+      unless unloaded_files.empty?
+        # Bootsnap decorates Kernel#require to speed it up using a cache and
+        # this optimization does not check if $LOADED_FEATURES has the file.
+        #
+        # To make it aware of changes, the gem defines singleton methods in
+        # $LOADED_FEATURES:
+        #
+        #   https://github.com/rails/bootsnap/blob/main/lib/bootsnap/load_path_cache/core_ext/loaded_features.rb
+        #
+        # Rails applications may depend on bootsnap, so for unloading to work
+        # in that setting it is preferable that we restrict our API choice to
+        # one of those methods.
+        $LOADED_FEATURES.reject! { |file| unloaded_files.member?(file) }
+      end
+
+      autoloads.clear
+      autoloaded_dirs.clear
+      to_unload.clear
+      namespace_dirs.clear
+
+      unregister_inceptions
+      unregister_explicit_namespaces
+
+      Registry.autoloads.unregister_loader(self)
+
+      @setup        = false
+      @eager_loaded = false
     end
 
     # Unloads all loaded code, and calls setup again so that the loader is able
@@ -354,14 +347,6 @@ module Zeitwerk
       Registry.unregister_loader(self)
     end
 
-    # The return value of this predicate is only meaningful if the loader has
-    # scanned the file. This is the case in the spots where we use it.
-    #
-    #: (String) -> bool
-    internal def shadowed_file?(file)
-      shadowed_files.member?(file)
-    end
-
     #: { () -> String } -> void
     internal def log
       return unless logger
@@ -490,18 +475,12 @@ module Zeitwerk
       if autoload_path = cref.autoload? || Registry.inceptions.registered?(cref)
         # First autoload for a Ruby file wins, just ignore subsequent ones.
         if @fs.rb_extension?(autoload_path)
-          shadowed_files << file
-          log { "file #{file} is ignored because #{autoload_path} has precedence" }
+          raise ConstantPathConflict.new(cref, location: autoload_path, conflicting_file: file)
         else
           promote_namespace_from_implicit_to_explicit(dir: autoload_path, file: file, cref: cref)
         end
       elsif cref.defined?
-        shadowed_files << file
-        if location = cref.location
-          log { "file #{file} is ignored because #{cref} is already defined in #{location}" }
-        else
-          log { "file #{file} is ignored because #{cref} is already defined (unknown location)" }
-        end
+        raise ConstantPathConflict.new(cref, location: cref.location, conflicting_file: file)
       else
         define_autoload(cref, file)
       end

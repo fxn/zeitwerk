@@ -115,13 +115,13 @@ class TestRubyCompatibility < LoaderTest
     end
   end
 
-  # In some spots like shadowed files detection we need to check if constants
-  # are already defined in the parent class or module. In order to do this and
-  # still be lazy, we rely on this property of const_defined?
+  # In some spots we need to check if constants are already defined in the
+  # parent class or module. In order to do this and still be lazy, we rely on
+  # this property of const_defined?
   #
   # This also matters for autoloads already set by 3rd-party code, for example
   # in reopened namespaces. Zeitwerk won't override them, but thanks to this
-  # characteristic of const_defined? if won't trigger them either.
+  # characteristic of const_defined? it won't trigger them either.
   test "const_defined? is true for autoloads and does not load the file, if the file exists" do
     on_teardown { remove_const :X }
 

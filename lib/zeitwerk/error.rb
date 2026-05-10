@@ -20,4 +20,15 @@ module Zeitwerk
       super("please, finish your configuration and call Zeitwerk::Loader#setup once all is ready")
     end
   end
+
+  class ConstantPathConflict < Error
+    #: (Zeitwerk::Cref, location: String?, conflicting_file: String) -> void
+    def initialize(cref, location:, conflicting_file:)
+      if location
+        super("#{cref} is already defined at #{location}, so #{conflicting_file} is invalid")
+      else
+        super("#{cref} is already defined, possibly by C code, so #{conflicting_file} is invalid")
+      end
+    end
+  end
 end

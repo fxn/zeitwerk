@@ -82,8 +82,8 @@ class TestUnload < LoaderTest
       EOS
       ["rd1/user.rb", "class User; end"],
       ["rd1/api/v1/users_controller.rb", "class Api::V1::UsersController; end"],
-      ["rd1/admin/root.rb", "class Admin::Root; end"],
-      ["rd2/user.rb", "class User; end"]
+      ["rd2/admin.rb", "Admin = Class.new"],
+      ["rd2/admin/root.rb", "class Admin::Root; end"],
     ]
     with_files(files) do
       with_load_path(".") do
@@ -159,22 +159,6 @@ class TestUnload < LoaderTest
       la.unload
       assert_nil Zeitwerk::Registry.explicit_namespaces.registered?(crefM)
       assert Zeitwerk::Registry.explicit_namespaces.registered?(crefX) == lb
-    end
-  end
-
-  test "unload clears the set of shadowed files" do
-    files = [
-      ["a/m.rb", "module M; end"],
-      ["b/m.rb", "module M; end"],
-    ]
-    with_files(files) do
-      loader.push_dir("a")
-      loader.push_dir("b")
-      loader.setup
-
-      assert !loader.__shadowed_files.empty? # precondition
-      loader.unload
-      assert loader.__shadowed_files.empty?
     end
   end
 

@@ -26,10 +26,7 @@ class LoaderTest < Minitest::Test
 
   def reset_constants
     Zeitwerk::Registry.loaders.each do |loader|
-      begin
-        loader.unload
-      rescue Zeitwerk::SetupRequired
-      end
+      loader.__unload
     end
   end
 

@@ -1,9 +1,10 @@
 module Zeitwerk::Loader::EagerLoad
   # Eager loads all files in the root directories, recursively. Files do not
-  # need to be in `$LOAD_PATH`, absolute file names are used. Ignored and
-  # shadowed files are not eager loaded. You can opt-out specifically in
-  # specific files and directories with `do_not_eager_load`, and that can be
-  # overridden passing `force: true`.
+  # need to be in `$LOAD_PATH`, absolute file names are used.
+  #
+  # Ignored files are not eager loaded. You can opt-out specifically in specific
+  # files and directories with `do_not_eager_load`, and that can be overridden
+  # passing `force: true`.
   #
   #: (?force: boolish) -> void
   def eager_load(force: false)
@@ -106,7 +107,7 @@ module Zeitwerk::Loader::EagerLoad
 
   # Loads the given Ruby file.
   #
-  # Raises if the argument is ignored, shadowed, or not managed by the receiver.
+  # Raises if the argument is ignored or not managed by the receiver.
   #
   # The method is implemented as `constantize` for files, in a sense, to be able
   # to descend orderly and make sure the file is loadable.
@@ -145,8 +146,6 @@ module Zeitwerk::Loader::EagerLoad
       cname = cname_for(basename, dir)
       namespace = namespace.const_get(cname, false)
     end
-
-    raise Zeitwerk::Error.new("#{abspath} is shadowed") if shadowed_file?(abspath)
 
     namespace.const_get(base_cname, false)
   end

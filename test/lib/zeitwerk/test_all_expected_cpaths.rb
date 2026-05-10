@@ -68,17 +68,19 @@ class TestAllExpectedCpaths < LoaderTest
     end
   end
 
-  test "includes shadowed files" do
+  test "includes conflicting files" do
     files = [
-      ["rd1/x.rb", "X = 1"],
-      ["rd2/x.rb", "X = 1"],
+      ["rd1/m/x.rb", "M::X = 1"],
+      ["rd2/m/x.rb", "M::X = 2"]
     ]
     with_setup(files) do
       expected_cpaths(
         "rd1" => "Object",
-        "rd1/x.rb" => "X",
         "rd2" => "Object",
-        "rd2/x.rb" => "X"
+        "rd1/m" => "M",
+        "rd2/m" => "M",
+        "rd1/m/x.rb" => "M::X",
+        "rd2/m/x.rb" => "M::X"
       )
     end
   end

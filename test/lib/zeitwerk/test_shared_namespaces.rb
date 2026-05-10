@@ -41,14 +41,10 @@ class TestSharedNamespaces < LoaderTest
     mod = Module.new
     ::M = mod
 
-    files = [
-      ["m.rb", "class M; end"],
-      ["m/x.rb", "M::X = true"]
-    ]
+    files = [["m/x.rb", "M::X = true"]]
     with_setup(files) do
       assert M::X
       loader.reload
-      assert_same mod, M
       assert M::X
     end
   end

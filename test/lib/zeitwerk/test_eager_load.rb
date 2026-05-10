@@ -247,31 +247,15 @@ class TestEagerLoad < LoaderTest
     end
   end
 
-  test "eager loading skips shadowed files" do
+  test "eager loading raises if there are conflicting files" do
     files = [
-      ["a/foo.rb", "Foo = 1"],
-      ["b/foo.rb", "Foo = 1"]
+      ["rd1/m/x.rb", "M::X = 1"],
+      ["rd2/m/x.rb", "M::X = 1"]
     ]
-    with_files(files) do
-      la = new_loader(dirs: "a")
-      lb = new_loader(dirs: "b")
-
-      la.eager_load
-      lb.eager_load
-
-      assert required?(files[0])
-      assert !required?(files[1])
-    end
-  end
-
-  test "eager loading skips files that would map to already loaded constants" do
-    on_teardown { remove_const :X }
-
-    files = [["x.rb", "X = 1"]]
-    ::X = 1
     with_setup(files) do
-      loader.eager_load
-      assert !required?(files[0])
+      assert_raises(Zeitwerk::ConstantPathConflict) do
+        loader.eager_load
+      end
     end
   end
 

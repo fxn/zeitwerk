@@ -50,4 +50,18 @@ class TestMultipleLoaders < LoaderTest
       assert App1::Foo::Bar::Baz
     end
   end
+
+  test "raises if a definition is managed by a different loader" do
+    files = [["a/x.rb", "X = 1"], ["b/x.rb", "X = 2"]]
+    with_files(files) do
+      first_loader = new_loader(dirs: "a")
+      second_loader = new_loader(dirs: "b", setup: false)
+
+      first_loader.setup
+
+      assert_raises(Zeitwerk::ConstantPathConflict) do
+        second_loader.setup
+      end
+    end
+  end
 end

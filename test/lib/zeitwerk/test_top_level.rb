@@ -43,16 +43,6 @@ class TestTopLevel < LoaderTest
     end
   end
 
-  test "autoloads only the first of multiple occurrences" do
-    files = [
-      ["rd1/user.rb", "User = :model"],
-      ["rd2/user.rb", "User = :decorator"],
-    ]
-    with_setup(files) do
-      assert_equal :model, User
-    end
-  end
-
   test "anything other than Ruby and visible directories is ignored" do
     files = [
       ["x.txt", ""],              # Programmer notes
@@ -69,6 +59,29 @@ class TestTopLevel < LoaderTest
     ]
     with_setup(files) do
       assert_empty loader.__autoloads
+    end
+  end
+
+  test "raises if there are conflicting files" do
+    files = [["rd1/x.rb", "X = 1"], ["rd2/x.rb", "X = 1"]]
+    with_files(files) do
+      loader.push_dir("rd1")
+      loader.push_dir("rd2")
+
+      assert_raises(Zeitwerk::ConstantPathConflict) do
+        loader.setup
+      end
+    end
+  end
+
+  test "raises if there are files that map to already defined constants" do
+    files = [["string.rb"]]
+    with_files(files) do
+      loader.push_dir(".")
+
+      assert_raises(Zeitwerk::ConstantPathConflict) do
+        loader.setup
+      end
     end
   end
 end
