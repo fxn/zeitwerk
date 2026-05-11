@@ -253,7 +253,7 @@ class TestEagerLoad < LoaderTest
       ["rd2/m/x.rb", "M::X = 1"]
     ]
     with_setup(files) do
-      assert_raises(Zeitwerk::ConstantPathConflict) do
+      assert_raises(Zeitwerk::NameConflct) do
         loader.eager_load
       end
     end

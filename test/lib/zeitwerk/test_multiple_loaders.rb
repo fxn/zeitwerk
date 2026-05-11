@@ -59,7 +59,7 @@ class TestMultipleLoaders < LoaderTest
 
       first_loader.setup
 
-      assert_raises(Zeitwerk::ConstantPathConflict) do
+      assert_raises(Zeitwerk::NameConflct) do
         second_loader.setup
       end
     end

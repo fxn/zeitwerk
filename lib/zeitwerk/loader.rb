@@ -476,12 +476,12 @@ module Zeitwerk
       if autoload_path = cref.autoload? || Registry.inceptions.registered?(cref)
         # First autoload for a Ruby file wins, just ignore subsequent ones.
         if @fs.rb_extension?(autoload_path)
-          raise ConstantPathConflict.new(cref, location: autoload_path, conflicting_file: file)
+          raise NameConflct.new(cref, location: autoload_path, conflicting_file: file)
         else
           promote_namespace_from_implicit_to_explicit(dir: autoload_path, file: file, cref: cref)
         end
       elsif cref.defined?
-        raise ConstantPathConflict.new(cref, location: cref.location, conflicting_file: file)
+        raise NameConflct.new(cref, location: cref.location, conflicting_file: file)
       else
         define_autoload(cref, file)
       end

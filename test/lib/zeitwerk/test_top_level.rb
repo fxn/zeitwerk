@@ -68,7 +68,7 @@ class TestTopLevel < LoaderTest
       loader.push_dir("rd1")
       loader.push_dir("rd2")
 
-      assert_raises(Zeitwerk::ConstantPathConflict) do
+      assert_raises(Zeitwerk::NameConflct) do
         loader.setup
       end
     end
@@ -79,7 +79,7 @@ class TestTopLevel < LoaderTest
     with_files(files) do
       loader.push_dir(".")
 
-      assert_raises(Zeitwerk::ConstantPathConflict) do
+      assert_raises(Zeitwerk::NameConflct) do
         loader.setup
       end
     end

@@ -315,13 +315,13 @@ loader.collapse("#{__dir__}/*/actions")
 <a id="markdown-different-files-different-constant-paths" name="different-files-different-constant-paths"></a>
 ### Different files, different constant paths
 
-While namespaces can be spread over an arbitrary number of directories, different files must map to different constant paths. Violations of this rule raise `Zeitwerk::ConstantPathConflict`.
+While namespaces can be spread over an arbitrary number of directories, different files must map to different constant paths. Violations of this rule raise `Zeitwerk::NameConflct`.
 
 For example, assuming `app/controllers` and `app/models` are root directories:
 
 ```ruby
 app/controllers/foo.rb
-app/models/foo.rb # raises Zeitwerk::ConstantPathConflict
+app/models/foo.rb # raises Zeitwerk::NameConflct
 ```
 
 That is an error condition because both files map to `Foo`.
@@ -330,7 +330,7 @@ Another example, assuming that `collapsed` is a collapsed directory:
 
 ```ruby
 app/models/foo.rb
-app/models/collapsed/foo.rb # raises Zeitwerk::ConstantPathConflict
+app/models/collapsed/foo.rb # raises Zeitwerk::NameConflct
 ```
 
 Again, that is an error condition because both files map to `Foo`.
@@ -338,7 +338,7 @@ Again, that is an error condition because both files map to `Foo`.
 Same if the file maps to a constant that already exists:
 
 ```ruby
-app/models/string.rb # raises Zeitwerk::ConstantPathConflict
+app/models/string.rb # raises Zeitwerk::NameConflct
 ```
 
 In this case, `app/models/string.rb` maps to `String`, but it cannot possibly define `String`, since that constant is already defined.

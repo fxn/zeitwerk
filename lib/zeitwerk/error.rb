@@ -21,7 +21,7 @@ module Zeitwerk
     end
   end
 
-  class ConstantPathConflict < Error
+  class NameConflct < Error
     #: (Zeitwerk::Cref, location: String?, conflicting_file: String) -> void
     def initialize(cref, location:, conflicting_file:)
       if location
