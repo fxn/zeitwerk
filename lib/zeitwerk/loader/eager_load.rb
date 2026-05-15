@@ -120,7 +120,7 @@ module Zeitwerk::Loader::EagerLoad
     raise Zeitwerk::Error.new("#{abspath} is not a Ruby file") if !@fs.rb_extension?(abspath)
     raise Zeitwerk::Error.new("#{abspath} is ignored") if ignored_path?(abspath)
 
-    file_basename = File.basename(abspath, ".rb")
+    file_basename = File.basename(abspath)
     raise Zeitwerk::Error.new("#{abspath} is ignored") if @fs.hidden?(file_basename)
 
     root_namespace = nil
@@ -139,15 +139,18 @@ module Zeitwerk::Loader::EagerLoad
 
     raise Zeitwerk::Error.new("I do not manage #{abspath}") unless root_namespace
 
-    base_cname = cname_for(file_basename, abspath)
-
     namespace = root_namespace
     paths.reverse_each do |basename, dir|
       cname = cname_for(basename, dir)
       namespace = namespace.const_get(cname, false)
     end
 
-    namespace.const_get(base_cname, false)
+    if file_basename == @nsfile
+      namespace
+    else
+      cname = cname_for(file_basename.delete_suffix(".rb"), abspath)
+      namespace.const_get(cname, false)
+    end
   end
 
   # The caller is responsible for making sure `namespace` is the namespace that

@@ -100,6 +100,28 @@ class TestNsfilesFeatures < LoaderTest
       assert_kind_of Class, Widget
     end
   end
+
+  test "nsfiles are supported by load_file" do
+    files = [["widget/ns.rb", "Widget = Class.new"]]
+    with_setup(files) do
+      loader.load_file("widget/ns.rb")
+
+      assert_kind_of Class, Widget
+    end
+  end
+
+  test "multiple nsfiles are supported by load_file" do
+    files = [
+      ["widget/ns.rb", "Widget = Class.new"],
+      ["widget/uploader/ns.rb", "Widget::Uploader = Class.new"]
+    ]
+    with_setup(files) do
+      loader.load_file("widget/uploader/ns.rb")
+
+      assert_kind_of Class, Widget
+      assert_kind_of Class, Widget::Uploader
+    end
+  end
 end
 
 class TestNsfilesErrorConditions < LoaderTest
