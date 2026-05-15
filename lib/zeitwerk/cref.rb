@@ -69,7 +69,7 @@ class Zeitwerk::Cref
 
   #: () -> String?
   def location
-    if location = @mod.const_source_location(@cname)
+    if (location = @mod.const_source_location(@cname)) && !location.empty?
       location.join(":")
     end
   end

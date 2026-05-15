@@ -91,7 +91,11 @@ class TestCref < LoaderTest
     assert_equal expected_location, new_cref(Zeitwerk, :Loader).location
   end
 
-  test "#location returns nil otherwise" do
+  test "#location returns nil if the constant does not exist" do
     assert_nil new_cref(Object, :NonExistent).location
+  end
+
+  test "#location returns nil if the constant is defined but an empty array is returned" do
+    assert_nil new_cref(Object, :Object).location
   end
 end
