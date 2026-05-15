@@ -118,7 +118,7 @@ module Zeitwerk
         break if @setup
 
         actual_roots.each do |root_dir, root_namespace|
-          define_autoloads_for_dir(root_dir, root_namespace)
+          define_autoloads_for_dir(root_dir, root_namespace, external: true)
         end
 
         on_setup_callbacks.each(&:call)
@@ -228,8 +228,11 @@ module Zeitwerk
       raise SetupRequired unless @setup
 
       unload
+
       recompute_ignored_paths
       recompute_collapse_dirs
+      recompute_collapse_parents
+
       setup
     end
 
@@ -250,8 +253,12 @@ module Zeitwerk
 
           @fs.ls(dir, collapse: false) do |basename, abspath, ftype|
             if ftype == :file
-              basename.delete_suffix!(".rb")
-              result[abspath] = "#{prefix}#{cname_for(basename, abspath)}"
+              if basename == @nsfile
+                result[abspath] = cpath
+              else
+                basename.delete_suffix!(".rb")
+                result[abspath] = "#{prefix}#{cname_for(basename, abspath)}"
+              end
             elsif collapse?(abspath)
               queue.unshift([abspath, cpath])
             else
@@ -278,10 +285,10 @@ module Zeitwerk
       paths = []
 
       if ftype == :file
-        basename = File.basename(abspath, ".rb")
+        basename = File.basename(abspath)
         return if @fs.hidden?(basename)
 
-        paths << [basename, abspath]
+        paths << [basename.delete_suffix(".rb"), abspath] unless basename == @nsfile
         walk_up_from = File.dirname(abspath)
       else
         walk_up_from = abspath
@@ -457,16 +464,32 @@ module Zeitwerk
       end
     end
 
-    #: (String, Module) -> void
-    private def define_autoloads_for_dir(dir, parent)
+    # Scans `dir` and sets autoloads in `mod` for the constants its contents are
+    # expected to define.
+    #
+    # The `external` flag indicates whether `mod` has been externally defined,
+    # as is the case with root namespaces or reopened third-party namespaces.
+    #
+    #: (String, Module, external: boolish) -> void
+    private def define_autoloads_for_dir(dir, mod, external:)
       @fs.ls(dir) do |basename, abspath, ftype|
         if ftype == :file
+          if basename == @nsfile
+            if external
+              cpath = real_mod_name(mod)
+              location = Object.const_source_location(cpath)&.join(":")
+              location = nil if location&.empty?
+              raise Zeitwerk::NameConflict.new(cpath, location: location, conflicting_file: abspath)
+            end
+            next # Pass if this is a managed namespace, the nsfile was already probed when visiting the parent directory.
+          end
+
           basename.delete_suffix!(".rb")
-          cref = Cref.new(parent, cname_for(basename, abspath))
+          cref = Cref.new(mod, cname_for(basename, abspath))
           visit_file(cref, abspath)
         else
-          cref = Cref.new(parent, cname_for(basename, abspath))
-          visit_subdir(cref, abspath)
+          cref = Cref.new(mod, cname_for(basename, abspath))
+          visit_subdir(cref, abspath, external:)
         end
       end
     end
@@ -474,39 +497,52 @@ module Zeitwerk
     #: (Zeitwerk::Cref, String) -> void
     private def visit_file(cref, file)
       if autoload_path = cref.autoload? || Registry.inceptions.registered?(cref)
-        # First autoload for a Ruby file wins, just ignore subsequent ones.
         if @fs.rb_extension?(autoload_path)
-          raise NameConflct.new(cref, location: autoload_path, conflicting_file: file)
+          raise NameConflict.new(cref.path, location: autoload_path, conflicting_file: file)
         else
           promote_namespace_from_implicit_to_explicit(dir: autoload_path, file: file, cref: cref)
         end
       elsif cref.defined?
-        raise NameConflct.new(cref, location: cref.location, conflicting_file: file)
+        raise NameConflict.new(cref.path, location: cref.location, conflicting_file: file)
       else
         define_autoload(cref, file)
       end
     end
 
-    #: (Zeitwerk::Cref, String) -> void
-    private def visit_subdir(cref, subdir)
+    #: (Zeitwerk::Cref, String, external: boolish) -> void
+    private def visit_subdir(cref, subdir, external:)
       if autoload_path = autoload_path_set_by_me_for?(cref)
         if @fs.rb_extension?(autoload_path)
+          # The namespace that corresponds to this subdirectory is defined in a
+          # file, either regular or nsfile. Therefore, a nsfile would be a
+          # duplication.
+          if nsfile_abspath = @fs.has_a_nsfile?(subdir)
+            raise Zeitwerk::NameConflict.new(cref.path, location: autoload_path, conflicting_file: nsfile_abspath)
+          end
           # Scanning visited a Ruby file first, and now a directory for the same
           # constant has been found. This is an explicit namespace.
           #
           # The namespace may be spread over multiple directories and perhaps it
           # was already registered, but registering is idempotent, just do it.
           register_explicit_namespace(cref)
+        elsif nsfile_abspath = @fs.has_a_nsfile?(subdir)
+          # Scanning found a matching directory first, and now we saw a nsfile.
+          promote_namespace_from_implicit_to_explicit(dir: subdir, file: nsfile_abspath, cref: cref)
         end
         namespace_dirs.get_or_set(cref) { [] } << subdir
       elsif !cref.defined?
-        define_autoload(cref, subdir)
+        if nsfile_abspath = @fs.has_a_nsfile?(subdir)
+          define_autoload(cref, nsfile_abspath)
+          register_explicit_namespace(cref)
+        else
+          define_autoload(cref, subdir)
+        end
         namespace_dirs.get_or_set(cref) { [] } << subdir
       else
         # For whatever reason the constant that corresponds to this namespace has
         # already been defined, we have to recurse.
         log { "the namespace #{cref} already exists, descending into #{subdir}" }
-        define_autoloads_for_dir(subdir, cref.get)
+        define_autoloads_for_dir(subdir, cref.get, external:)
       end
     end
 

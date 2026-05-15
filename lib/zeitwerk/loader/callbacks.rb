@@ -77,7 +77,7 @@ module Zeitwerk::Loader::Callbacks # :nodoc: all
   internal def on_namespace_loaded(cref, namespace)
     if dirs = namespace_dirs.delete(cref)
       dirs.each do |dir|
-        define_autoloads_for_dir(dir, namespace)
+        define_autoloads_for_dir(dir, namespace, external: false)
       end
     end
   end

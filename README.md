@@ -19,6 +19,8 @@
     - [Nested root directories](#nested-root-directories)
   - [Implicit namespaces](#implicit-namespaces)
   - [Explicit namespaces](#explicit-namespaces)
+    - [Explicit namespaces defined in ordinary files](#explicit-namespaces-defined-in-ordinary-files)
+    - [Explicit namespaces defined in nsfiles](#explicit-namespaces-defined-in-nsfiles)
   - [Collapsing directories](#collapsing-directories)
   - [Different files, different constant paths](#different-files-different-constant-paths)
   - [Testing compliance](#testing-compliance)
@@ -264,16 +266,25 @@ To trigger this behavior, the directory must contain non-ignored Ruby files with
 <a id="markdown-explicit-namespaces" name="explicit-namespaces"></a>
 ### Explicit namespaces
 
-Classes and modules that act as namespaces can also be explicitly defined, though. For instance, consider
+Classes and modules that act as namespaces can also be explicitly defined in a file, in which case, such file must be unique.
+
+This can be done with ordinary files named after the corresponding constant path, or with special namespace files, or _nsfiles_ for short:
+
+<a id="markdown-explicit-namespaces-defined-in-ordinary-files" name="explicit-namespaces-defined-in-ordinary-files"></a>
+#### Explicit namespaces defined in ordinary files
+
+Let's consider:
 
 ```
 app/models/hotel.rb         -> Hotel
 app/models/hotel/pricing.rb -> Hotel::Pricing
 ```
 
-There, `app/models/hotel.rb` defines `Hotel`, and thus Zeitwerk does not autovivify a module.
+Since there is a file `app/models/hotel.rb` and also a directory `app/models/hotel`, Zeitwerk realizes `Hotel` is a namespace that is defined in `app/models/hotel.rb`, so it won't autovivify a module.
 
-The classes and modules from the namespace are already available in the body of the class or module defining it:
+In order to realize this, the directory or directories conforming the namespace do not need to be next to the file, as in the example, they could be in some other root directory.
+
+The classes and modules from an explicit namespace are already available in the body of the class or module that defines it:
 
 ```ruby
 class Hotel < ApplicationRecord
@@ -285,6 +296,49 @@ end
 When autoloaded, Zeitwerk verifies the expected constant (`Hotel` in the example) stores a class or module object. If it doesn't, `Zeitwerk::Error` is raised.
 
 An explicit namespace must be managed by one single loader. Loaders that reopen namespaces owned by other projects are responsible for loading their constants before setup.
+
+<a id="markdown-explicit-namespaces-defined-in-nsfiles" name="explicit-namespaces-defined-in-nsfiles"></a>
+#### Explicit namespaces defined in nsfiles
+
+If the loader has an nsfile configured (defaults to `nil`):
+
+```ruby
+loader.nsfile = 'ns.rb' # must be configured before setup
+```
+
+you can alternatively define the explicit namespace inside its directory:
+
+```
+my_component/ns.rb     # MyComponent
+my_component/widget.rb # MyComponent::Widget
+```
+
+This may be handy for self-contained units for which a `my_component.rb` file in the parent directory may not feel right.
+
+A loader's nsfile has to be a non-hidden basename with a `.rb` extension, as in the example above. Nsfiles are not inflected, so as long as those conditions hold, they may contain leading underscores, hyphens, etc.
+
+Collapsed directories work as expected. For example, if we assume that `src` is collapsed, and that `assets` and `tests` are ignored, you could have the code organized this way:
+
+```
+my_component/src/ns.rb     # MyComponent
+my_component/src/widget.rb # MyComponent::Widget
+my_component/assets/widget.js
+my_component/tests/test_widget.rb
+```
+
+Loaders with an nsfile configured also support explicit namespaces defined in ordinary files. The styles are not exclusive. Some parts of the project may be component-oriented, while in other parts ordinary files may feel more natural. That works.
+
+However, attempting to define the same namespace using an ordinary file and an nsfile is an error condition that raises `Zeitwerk::NameConflict`.
+
+Nsfiles in root directories raise `Zeitwerk::NameConflict` too, since the namespace in a root directory is externally defined.
+
+Please, note that a project file whose basename is equal to the nsfile is always considered to be an nsfile. You cannot opt out. Therefore, if we have:
+
+```ruby
+loader.nsfile = 'index.rb'
+```
+
+there is no way `foo/index.rb` can define `Foo::Index` in any part of the project, it must define `Foo`.
 
 <a id="markdown-collapsing-directories" name="collapsing-directories"></a>
 ### Collapsing directories
@@ -315,13 +369,13 @@ loader.collapse("#{__dir__}/*/actions")
 <a id="markdown-different-files-different-constant-paths" name="different-files-different-constant-paths"></a>
 ### Different files, different constant paths
 
-While namespaces can be spread over an arbitrary number of directories, different files must map to different constant paths. Violations of this rule raise `Zeitwerk::NameConflct`.
+While namespaces can be spread over an arbitrary number of directories, different files must map to different constant paths. Violations of this rule raise `Zeitwerk::NameConflict`.
 
 For example, assuming `app/controllers` and `app/models` are root directories:
 
 ```ruby
 app/controllers/foo.rb
-app/models/foo.rb # raises Zeitwerk::NameConflct
+app/models/foo.rb # raises Zeitwerk::NameConflict
 ```
 
 That is an error condition because both files map to `Foo`.
@@ -330,7 +384,7 @@ Another example, assuming that `collapsed` is a collapsed directory:
 
 ```ruby
 app/models/foo.rb
-app/models/collapsed/foo.rb # raises Zeitwerk::NameConflct
+app/models/collapsed/foo.rb # raises Zeitwerk::NameConflict
 ```
 
 Again, that is an error condition because both files map to `Foo`.
@@ -338,7 +392,7 @@ Again, that is an error condition because both files map to `Foo`.
 Same if the file maps to a constant that already exists:
 
 ```ruby
-app/models/string.rb # raises Zeitwerk::NameConflct
+app/models/string.rb # raises Zeitwerk::NameConflict
 ```
 
 In this case, `app/models/string.rb` maps to `String`, but it cannot possibly define `String`, since that constant is already defined.
@@ -1314,7 +1368,9 @@ loader.cpath_expected_at("non_existing_file.rb") # => Zeitwerk::Error
 loader.cpath_expected_at("8.rb") # => Zeitwerk::NameError
 ```
 
-This method does not parse file contents and does not guarantee files define the returned constant path. It just says which is the _expected_ one.
+This method does not parse file contents and does not guarantee files define the returned constant path.
+
+Similarly, this method does not validate the project tree. If the project has multiple nsfiles for the same namespace, for example, the call will return the expected constant path for each of them.
 
 `Zeitwerk::Loader#cpath_expected_at` is designed to be used with individual paths. If you want to know all the expected constant paths in the project, please use `Zeitwerk::Loader#all_expected_cpaths`, documented next.
 

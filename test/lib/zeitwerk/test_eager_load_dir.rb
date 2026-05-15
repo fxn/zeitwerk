@@ -119,7 +119,7 @@ class TestEagerLoadDir < LoaderTest
       ["rd2/n/x.rb", "N::X = 2"]
     ]
     with_setup(files) do
-      assert_raises(Zeitwerk::NameConflct) do
+      assert_raises(Zeitwerk::NameConflict) do
         loader.eager_load_dir("rd2")
       end
     end

@@ -29,6 +29,12 @@ module Zeitwerk::Loader::Config
   attr_reader :roots
   internal :roots
 
+  # Basename of files that define namespaces. For example, if `nsfile` is
+  # "ns.rb", then `foo/ns.rb` defines the `Foo` namespace.
+  #
+  #: String?
+  attr_reader :nsfile
+
   # Absolute paths of files, directories, or glob patterns to be ignored.
   #
   #: Set[String]
@@ -50,11 +56,19 @@ module Zeitwerk::Loader::Config
   private :collapse_glob_patterns
 
   # The actual collection of absolute directory names at the time the collapse
-  # glob patterns were expanded. Computed on setup, and recomputed on reload.
+  # glob patterns were expanded. Computed on setup and recomputed on reload.
   #
   #: Set[String]
   attr_reader :collapse_dirs
   private :collapse_dirs
+
+  # Absolute paths of directories that are parents of collapsed directories.
+  # This is a cache to optimize some tree walks. Computed on setup and
+  # recomputed on reload.
+  #
+  #: Set[String]
+  attr_reader :collapse_parents
+  private :collapse_parents
 
   # Absolute paths of files or directories not to be eager loaded.
   #
@@ -89,10 +103,12 @@ module Zeitwerk::Loader::Config
     @tag                    = SecureRandom.hex(3)
     @initialized_at         = Time.now
     @roots                  = {}
+    @nsfile                 = nil
     @ignored_glob_patterns  = Set.new
     @ignored_paths          = Set.new
     @collapse_glob_patterns = Set.new
     @collapse_dirs          = Set.new
+    @collapse_parents       = Set.new
     @eager_load_exclusions  = Set.new
     @reloading_enabled      = false
     @on_setup_callbacks     = []
@@ -140,6 +156,18 @@ module Zeitwerk::Loader::Config
   #: (to_s() -> String) -> void
   def tag=(tag)
     @tag = tag.to_s
+  end
+
+  #: (String?) -> void ! TypeError, ArgumentError
+  def nsfile=(nsfile)
+    unless nsfile.nil?
+      raise TypeError,     "nsfiles must be strings"              unless nsfile.is_a?(String)
+      raise ArgumentError, "nsfiles must have .rb extension"      unless @fs.rb_extension?(nsfile)
+      raise ArgumentError, "nsfiles must be basenames, not paths" unless File.basename(nsfile) == nsfile
+      raise ArgumentError, "nsfiles cannot be hidden"             if @fs.hidden?(nsfile)
+    end
+
+    @nsfile = nsfile
   end
 
   # If `namespaces` is falsey (default), returns an array with the absolute
@@ -215,7 +243,11 @@ module Zeitwerk::Loader::Config
     glob_patterns = expand_paths(glob_patterns)
     mutex.synchronize do
       collapse_glob_patterns.merge(glob_patterns)
-      collapse_dirs.merge(expand_glob_patterns(glob_patterns))
+      new_collapse_dirs = expand_glob_patterns(glob_patterns)
+      collapse_dirs.merge(new_collapse_dirs)
+      new_collapse_dirs.each do |dir|
+        collapse_parents << File.dirname(dir)
+      end
     end
   end
 
@@ -322,6 +354,11 @@ module Zeitwerk::Loader::Config
   end
 
   #: (String) -> bool
+  internal def collapse_parent?(dir)
+    collapse_parents.member?(dir)
+  end
+
+  #: (String) -> bool
   private def excluded_from_eager_load?(abspath)
     # Optimize this common use case.
     return false if eager_load_exclusions.empty?
@@ -354,5 +391,13 @@ module Zeitwerk::Loader::Config
   #: () -> void
   private def recompute_collapse_dirs
     collapse_dirs.replace(expand_glob_patterns(collapse_glob_patterns))
+  end
+
+  #: () -> void
+  private def recompute_collapse_parents
+    collapse_parents.clear
+    collapse_dirs.each do |dir|
+      collapse_parents << File.dirname(dir)
+    end
   end
 end

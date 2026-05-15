@@ -21,13 +21,13 @@ module Zeitwerk
     end
   end
 
-  class NameConflct < Error
-    #: (Zeitwerk::Cref, location: String?, conflicting_file: String) -> void
-    def initialize(cref, location:, conflicting_file:)
+  class NameConflict < Error
+    #: (String, location: String?, conflicting_file: String) -> void
+    def initialize(name, location:, conflicting_file:)
       if location
-        super("#{cref} is already defined at #{location}, so #{conflicting_file} is invalid")
+        super("#{name} is already defined at #{location}, so #{conflicting_file} is invalid")
       else
-        super("#{cref} is already defined, possibly by C code, so #{conflicting_file} is invalid")
+        super("#{name} is already defined, possibly by C code, so #{conflicting_file} is invalid")
       end
     end
   end

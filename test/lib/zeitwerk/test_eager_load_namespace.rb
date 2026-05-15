@@ -112,7 +112,7 @@ class TestEagerLoadNamespaceWithObjectRootNamespace < LoaderTest
   test "raises if there are multiple definitions" do
     files = [["rd1/m/x.rb", "X = 1"], ["rd2/m/x.rb", "M::X = 1"]]
     with_setup(files) do
-      assert_raises(Zeitwerk::NameConflct) do
+      assert_raises(Zeitwerk::NameConflict) do
         loader.eager_load_namespace(Object)
       end
     end
@@ -325,7 +325,7 @@ class TestEagerLoadNamespaceWithCustomRootNamespace < LoaderTest
   test "raises if there are multiple definitions" do
     files = [["rd1/ns/x.rb", "#{CN}::Ns::X = 1"], ["rd2/ns/x.rb", "#{CN}::Ns::X = 1"]]
     with_setup(files, namespace: CN) do
-      assert_raises(Zeitwerk::NameConflct) do
+      assert_raises(Zeitwerk::NameConflict) do
         loader.eager_load_namespace(CN)
       end
     end
