@@ -177,6 +177,20 @@ class TestLogging < LoaderTest
     end
   end
 
+  test "logs files shadowed by already defined constants" do
+    on_teardown { remove_const :X }
+
+    ::X = 1; location = "#{__FILE__}:#{__LINE__}"
+
+    files = [["x.rb", "X = 1"]]
+    with_files(files) do
+      loader.push_dir(".")
+      assert_logged(%r(file .*?/x\.rb is ignored because X is already defined in #{location})) do
+        loader.setup
+      end
+    end
+  end
+
   test "logs directories being ignored because they have no Ruby files" do
     files = [["tasks/foo.rake", ""]]
     with_files(files) do

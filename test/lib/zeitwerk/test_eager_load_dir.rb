@@ -113,15 +113,16 @@ class TestEagerLoadDir < LoaderTest
     end
   end
 
-  test "raises if there are multiple definitions" do
+  test "does not eager load shadowed files" do
     files = [
-      ["rd1/n/x.rb", "N::X = 1"],
-      ["rd2/n/x.rb", "N::X = 2"]
+      ["rd1/x.rb", "X = 1"],
+      ["rd2/x.rb", "SHADOWED"]
     ]
     with_setup(files) do
-      assert_raises(Zeitwerk::ShadowedFileError) do
-        loader.eager_load_dir("rd2")
-      end
+      loader.eager_load_dir("rd2")
+
+      assert !required?(files[0])
+      assert !required?(files[1])
     end
   end
 

@@ -145,12 +145,11 @@ class TestLoadFileErrors < LoaderTest
     end
   end
 
-  test "raises on conflicting files" do
-    files = [["rd1/m/x.rb", "M::X = 1"], ["rd2/m/x.rb", "SHADOWED"]]
+  test "raises if the file is shadowed" do
+    files = [["rd1/x.rb", "X = 1"], ["rd2/x.rb", "SHADOWED"]]
     with_setup(files) do
-      assert_raises(Zeitwerk::ShadowedFileError) do
-        loader.load_file("rd2/m/x.rb")
-      end
+      e = assert_raises { loader.load_file("rd2/x.rb") }
+      assert_equal "#{File.expand_path('rd2/x.rb')} is shadowed", e.message
     end
   end
 end

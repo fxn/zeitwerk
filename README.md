@@ -266,9 +266,7 @@ To trigger this behavior, the directory must contain non-ignored Ruby files with
 <a id="markdown-explicit-namespaces" name="explicit-namespaces"></a>
 ### Explicit namespaces
 
-Classes and modules that act as namespaces can also be explicitly defined in a file, in which case, such file must be unique.
-
-This can be done with ordinary files named after the corresponding constant path, or with special namespace files, or _nsfiles_ for short:
+Classes and modules that act as namespaces can also be explicitly defined in a file. This can be done with ordinary files named after the corresponding constant path, or with special namespace files, or _nsfiles_ for short.
 
 <a id="markdown-explicit-namespaces-defined-in-ordinary-files" name="explicit-namespaces-defined-in-ordinary-files"></a>
 #### Explicit namespaces defined in ordinary files
@@ -605,7 +603,7 @@ This is useful when the loader is not eager loading the entire project, but you 
 
 Both strings and `Pathname` objects are supported as arguments. If the argument is not a directory managed by the receiver, the method raises `Zeitwerk::Error`.
 
-[Eager load exclusions](#eager-load-exclusions) and [ignored files and directories](#ignoring-parts-of-the-project) are not eager loaded.
+[Eager load exclusions](#eager-load-exclusions), [ignored files and directories](#ignoring-parts-of-the-project), and [shadowed files](#shadowed-files) are not eager loaded.
 
 `Zeitwerk::Loader#eager_load_dir` is idempotent, but compatible with reloading. If you eager load a directory and then reload, eager loading that directory will load its (current) contents again.
 
@@ -642,7 +640,7 @@ There might exist external source trees implementing part of the namespace. This
 
 This method is flexible about what it accepts. Its semantics have to be interpreted as: "_If_ you manage this namespace, or part of this namespace, please eager load what you got". In particular, if the receiver does not manage the namespace, it will simply do nothing, this is not an error condition.
 
-[Eager load exclusions](#eager-load-exclusions) and [ignored files and directories](#ignoring-parts-of-the-project).
+[Eager load exclusions](#eager-load-exclusions), [ignored files and directories](#ignoring-parts-of-the-project), and [shadowed files](#shadowed-files) are not eager loaded.
 
 `Zeitwerk::Loader#eager_load_namespace` is idempotent, but compatible with reloading. If you eager load a namespace and then reload, eager loading that namespace will load its (current) descendants again.
 
@@ -695,7 +693,7 @@ loader.load_file("#{__dir__}/custom_web_app/routes.rb")
 
 This is useful when the loader is not eager loading the entire project, but you still need an individual file to be loaded for things to function properly.
 
-Both strings and `Pathname` objects are supported as arguments. The method raises `Zeitwerk::Error` if the argument is not a Ruby file, is [ignored](#ignoring-parts-of-the-project), or is not managed by the receiver.
+Both strings and `Pathname` objects are supported as arguments. The method raises `Zeitwerk::Error` if the argument is not a Ruby file, is [ignored](#ignoring-parts-of-the-project), is [shadowed](#shadowed-files), or is not managed by the receiver.
 
 `Zeitwerk::Loader#load_file` is idempotent, but compatible with reloading. If you load a file and then reload, a new call will load its (current) contents again.
 
@@ -1207,35 +1205,31 @@ loader.setup
 <a id="markdown-shadowed-files" name="shadowed-files"></a>
 ### Shadowed files
 
-While namespaces can be spread over an arbitrary number of directories, different files must map to different constant paths.
+In Ruby, if you have several files called `foo.rb` in different directories of `$LOAD_PATH` and execute
 
-A managed file is called a _shadowed file_ if the constant path it is expected to define is already taken. When autoloading, eager loading, or loading individual files, loaders raise `Zeitwerk::ShadowedFileError` if they encounter one.
-
-For example, assuming `app/controllers` and `app/models` are root directories:
-
-```
-app/controllers/foo.rb
-app/models/foo.rb # raises Zeitwerk::ShadowedFileError
+```ruby
+require "foo"
 ```
 
-That is an error condition because both files map to `Foo`.
+the first one found gets loaded, and the rest are ignored.
 
-Another example, assuming that `collapsed` is a collapsed directory:
-
-```
-app/models/foo.rb
-app/models/collapsed/foo.rb # raises Zeitwerk::ShadowedFileError
-```
-
-Again, that is an error condition because both files map to `Foo`.
-
-Same if the file maps to a constant that already exists:
+Zeitwerk behaves in a similar way. If `foo.rb` is present in several root directories (at the same namespace level), the constant `Foo` is autoloaded from the first one, and the rest of the files are not evaluated. If logging is enabled, you'll see something like
 
 ```
-app/models/string.rb # raises Zeitwerk::ShadowedFileError
+file #{file} is ignored because #{previous_occurrence} has precedence
 ```
 
-In this case, `app/models/string.rb` maps to `String`, but it cannot possibly define `String`, since that constant is already defined.
+(This message is not public interface and may change, you cannot rely on that exact wording.)
+
+Even if there's only one `foo.rb`, if the constant `Foo` is already defined when Zeitwerk finds `foo.rb`, then the file is ignored too. This could happen if `Foo` was defined by a dependency, for example. If logging is enabled, you'll see something like
+
+```
+file #{file} is ignored because #{constant_path} is already defined
+```
+
+(This message is not public interface and may change, you cannot rely on that exact wording.)
+
+Shadowing only applies to Ruby files, namespace definition can be spread over multiple directories. And you can also reopen third-party namespaces if done [orderly](#reopening-third-party-namespaces).
 
 <a id="markdown-beware-of-circular-dependencies" name="beware-of-circular-dependencies"></a>
 ### Beware of circular dependencies
@@ -1372,7 +1366,7 @@ loader.cpath_expected_at("8.rb") # => Zeitwerk::NameError
 
 This method does not parse file contents and does not guarantee files define the returned constant path.
 
-Similarly, this method does not validate the project tree. If the project has multiple nsfiles for the same namespace, for example, the call will return the expected constant path for each of them.
+Similarly, this method does not validate the project tree. If the project has conflicting oridinary and nsfiles for the same namespace, for example, the call will return the expected constant path for each of them without raising.
 
 `Zeitwerk::Loader#cpath_expected_at` is designed to be used with individual paths. If you want to know all the expected constant paths in the project, please use `Zeitwerk::Loader#all_expected_cpaths`, documented next.
 
@@ -1420,7 +1414,9 @@ Directory paths do not have trailing slashes.
 
 The order of the hash entries is undefined.
 
-This method does not look for shadowed files, parse file contents, or execute them, and does not guarantee files define the corresponding constant paths. It just says which are the _expected_ ones.
+This method does not parse file contents and does not guarantee files define the returned constant path.
+
+Similarly, this method does not validate the project tree. If the project has conflicting oridinary and nsfiles for the same namespace, for example, the call will return the expected constant path for each of them without raising.
 
 <a id="markdown-encodings" name="encodings"></a>
 ### Encodings

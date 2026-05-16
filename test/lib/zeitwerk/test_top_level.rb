@@ -62,26 +62,19 @@ class TestTopLevel < LoaderTest
     end
   end
 
-  test "raises if there are conflicting files" do
-    files = [["rd1/x.rb", "X = 1"], ["rd2/x.rb", "X = 1"]]
-    with_files(files) do
-      loader.push_dir("rd1")
-      loader.push_dir("rd2")
-
-      assert_raises(Zeitwerk::ShadowedFileError) do
-        loader.setup
-      end
+  test "shadowed file managed by the loader" do
+    files = [["rd1/x.rb", "X = :rd1"], ["rd2/x.rb", "X = :rd2"]]
+    with_setup(files) do
+      assert_equal :rd1, X
     end
   end
 
-  test "raises if there are files that map to already defined constants" do
-    files = [["string.rb"]]
-    with_files(files) do
-      loader.push_dir(".")
+  test "file shadowed by an already defined constant" do
+    string_oid = String.object_id
 
-      assert_raises(Zeitwerk::ShadowedFileError) do
-        loader.setup
-      end
+    files = [["string.rb"]]
+    with_setup(files) do
+      assert_equal string_oid, String.object_id
     end
   end
 end

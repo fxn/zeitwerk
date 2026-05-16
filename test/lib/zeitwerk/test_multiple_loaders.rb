@@ -51,17 +51,13 @@ class TestMultipleLoaders < LoaderTest
     end
   end
 
-  test "raises if a definition is managed by a different loader" do
-    files = [["a/x.rb", "X = 1"], ["b/x.rb", "X = 2"]]
+  test "raises if a file is shadowed by an autoload from by a different loader" do
+    files = [["a/x.rb", "X = :a"], ["b/x.rb", "X = :b"]]
     with_files(files) do
-      first_loader = new_loader(dirs: "a")
-      second_loader = new_loader(dirs: "b", setup: false)
+      _first_loader = new_loader(dirs: "a")
+      _second_loader = new_loader(dirs: "b")
 
-      first_loader.setup
-
-      assert_raises(Zeitwerk::ShadowedFileError) do
-        second_loader.setup
-      end
+      assert_equal :a, X
     end
   end
 end

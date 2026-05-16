@@ -109,12 +109,13 @@ class TestEagerLoadNamespaceWithObjectRootNamespace < LoaderTest
     end
   end
 
-  test "raises if there are multiple definitions" do
-    files = [["rd1/m/x.rb", "X = 1"], ["rd2/m/x.rb", "M::X = 1"]]
+  test "does not eager load shadowed files" do
+    files = [["rd1/x.rb", "X = 1"], ["rd2/x.rb", "X = 1"]]
     with_setup(files) do
-      assert_raises(Zeitwerk::ShadowedFileError) do
-        loader.eager_load_namespace(Object)
-      end
+      loader.eager_load_namespace(Object)
+
+      assert required?(files[0])
+      assert !required?(files[1])
     end
   end
 
@@ -322,12 +323,13 @@ class TestEagerLoadNamespaceWithCustomRootNamespace < LoaderTest
     end
   end
 
-  test "raises if there are multiple definitions" do
-    files = [["rd1/ns/x.rb", "#{CN}::Ns::X = 1"], ["rd2/ns/x.rb", "#{CN}::Ns::X = 1"]]
+  test "does not eager load shadowed files" do
+    files = [["rd1/x.rb", "#{CN}::X = 1"], ["rd2/x.rb", "#{CN}::X = 1"]]
     with_setup(files, namespace: CN) do
-      assert_raises(Zeitwerk::ShadowedFileError) do
-        loader.eager_load_namespace(CN)
-      end
+      loader.eager_load_namespace(CN)
+
+      assert required?(files[0])
+      assert !required?(files[1])
     end
   end
 

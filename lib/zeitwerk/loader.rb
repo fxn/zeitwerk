@@ -83,6 +83,17 @@ module Zeitwerk
     attr_reader :namespace_dirs
     internal :namespace_dirs
 
+    # A shadowed file is a file managed by this loader that is ignored when
+    # setting autoloads because its matching constant is already taken.
+    #
+    # This private set is populated lazily, as we descend. For example, if the
+    # loader has only scanned the top-level, `shadowed_files` does not have the
+    # shadowed files that may exist deep in the project tree.
+    #
+    #: Set[String]
+    attr_reader :shadowed_files
+    internal :shadowed_files
+
     #: Mutex
     attr_reader :mutex
     private :mutex
@@ -100,6 +111,7 @@ module Zeitwerk
       @autoloaded_dirs = []
       @to_unload       = {}
       @namespace_dirs  = Zeitwerk::Cref::Map.new
+      @shadowed_files  = Set.new
       @setup           = false
       @eager_loaded    = false
       @fs              = FileSystem.new(self)
@@ -206,6 +218,7 @@ module Zeitwerk
       autoloaded_dirs.clear
       to_unload.clear
       namespace_dirs.clear
+      shadowed_files.clear
 
       unregister_inceptions
       unregister_explicit_namespaces
@@ -355,6 +368,14 @@ module Zeitwerk
       Registry.unregister_loader(self)
     end
 
+    # The return value of this predicate is only meaningful if the loader has
+    # scanned the file. This is the case in the spots where we use it.
+    #
+    #: (String) -> bool
+    internal def shadowed_file?(file)
+      shadowed_files.member?(file)
+    end
+
     #: { () -> String } -> void
     internal def log
       return unless logger
@@ -498,12 +519,21 @@ module Zeitwerk
     private def visit_file(cref, file)
       if autoload_path = cref.autoload? || Registry.inceptions.registered?(cref)
         if @fs.rb_extension?(autoload_path)
-          raise ShadowedFileError.new(cref.path, location: autoload_path, conflicting_file: file)
+          if File.basename(autoload_path) == @nsfile && autoload_path_set_by_me_for?(cref)
+            raise Zeitwerk::ShadowedFileError.new(cref.path, location: autoload_path, conflicting_file: file)
+          end
+          shadowed_files << file
+          log { "file #{file} is ignored because #{autoload_path} has precedence" }
         else
           promote_namespace_from_implicit_to_explicit(dir: autoload_path, file: file, cref: cref)
         end
       elsif cref.defined?
-        raise ShadowedFileError.new(cref.path, location: cref.location, conflicting_file: file)
+        shadowed_files << file
+        if location = cref.location
+          log { "file #{file} is ignored because #{cref} is already defined in #{location}" }
+        else
+          log { "file #{file} is ignored because #{cref} is already defined (unknown location)" }
+        end
       else
         define_autoload(cref, file)
       end

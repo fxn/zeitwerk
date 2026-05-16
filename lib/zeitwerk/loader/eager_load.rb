@@ -107,7 +107,7 @@ module Zeitwerk::Loader::EagerLoad
 
   # Loads the given Ruby file.
   #
-  # Raises if the argument is ignored or not managed by the receiver.
+  # Raises if the argument is ignored, shadowed, or not managed by the receiver.
   #
   # The method is implemented as `constantize` for files, in a sense, to be able
   # to descend orderly and make sure the file is loadable.
@@ -147,6 +147,8 @@ module Zeitwerk::Loader::EagerLoad
 
     if file_basename == @nsfile
       namespace
+    elsif shadowed_file?(abspath)
+      raise Zeitwerk::Error.new("#{abspath} is shadowed")
     else
       cname = cname_for(file_basename.delete_suffix(".rb"), abspath)
       namespace.const_get(cname, false)
