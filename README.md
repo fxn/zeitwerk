@@ -1209,7 +1209,7 @@ loader.setup
 
 While namespaces can be spread over an arbitrary number of directories, different files must map to different constant paths.
 
-A managed file is called a _shadowed file_ if the constant path it is expected to define is already taken. Loaders raise `Zeitwerk::ShadowedFileError` if they find any.
+A managed file is called a _shadowed file_ if the constant path it is expected to define is already taken. When autoloading, eager loading, or loading individual files, loaders raise `Zeitwerk::ShadowedFileError` if they encounter one.
 
 For example, assuming `app/controllers` and `app/models` are root directories:
 
@@ -1420,7 +1420,7 @@ Directory paths do not have trailing slashes.
 
 The order of the hash entries is undefined.
 
-This method does not parse or execute file contents and does not guarantee files define the corresponding constant paths. It just says which are the _expected_ ones.
+This method does not look for shadowed files, parse file contents, or execute them, and does not guarantee files define the corresponding constant paths. It just says which are the _expected_ ones.
 
 <a id="markdown-encodings" name="encodings"></a>
 ### Encodings
