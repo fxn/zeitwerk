@@ -61,42 +61,43 @@ class Zeitwerk::Loader::FileSystem # :nodoc:
     end
   end
 
-  # If `dir` has a nsfile, returns its absolute path. Otherwise, returns `nil`.
+  # Returns the absolute path to an nsfile in `dir`, if there is exactly one. If
+  # there is none, it returns `nil`.
   #
-  # This predicate accounts for arbitrarily nested collapsed subdirectories. For
-  # example, `dir/collapsed/collapsed/ns.rb` is considered to be a nsfile in
-  # `dir` and its absolute path is returned.
+  # This method accounts for collapsed directories, which conceptually allow for
+  # multiple nsfiles. If two are found, Zeitwerk::NameConflict is raised.
   #
-  #: (String) -> String?
-  def has_a_nsfile?(dir)
+  #: (Zeitwerk::Cref, String) -> String? ! Zeitwerk::NameConflict
+  def has_exactly_one_nsfile?(cref, dir)
     return unless @loader.nsfile
 
-    # Optimistic lookup.
-    #
-    # If `dir` has no collapsed subdirectories, which is common, this is the
-    # only possible candidate. Otherwise, this is still worth checking first.
-    nsfile_abspath = File.join(dir, @loader.nsfile)
-    if File.exist?(nsfile_abspath) && !@loader.__ignored_path?(nsfile_abspath)
-      return nsfile_abspath
+    # When `dir` does not have any collapsed directories a simple lookup
+    # suffices. This is a common case worth optimizing.
+    unless @loader.__collapse_parent?(dir)
+      nsfile_abspath = File.join(dir, @loader.nsfile)
+      if File.exist?(nsfile_abspath) && !@loader.__ignored_path?(nsfile_abspath)
+        return nsfile_abspath
+      end
+      return
     end
 
-    return unless @loader.__collapse_parent?(dir)
+    nsfile = nil
 
-    # Let's see if the nsfile is in any collapsed subdirectory. We could skip
-    # scanning `dir`, since we saw above it does not have the nsfile, but we'd
-    # need more caching for that. It is an edge case, let's KISS it for now.
     to_visit = [dir]
     while (dir = to_visit.shift)
       relevant_dir_entries(dir) do |basename, abspath, ftype|
         if ftype == :file && basename == @loader.nsfile
-          return abspath
+          if nsfile
+            raise Zeitwerk::NameConflict.new(cref.path, location: nsfile, conflicting_file: abspath)
+          end
+          nsfile = abspath
         elsif ftype == :directory && @loader.__collapse?(abspath)
           to_visit << abspath
         end
       end
     end
 
-    nil
+    nsfile
   end
 
   # Encodes the documented conventions.

@@ -146,10 +146,32 @@ class TestNsfilesErrorConditions < LoaderTest
     end
   end
 
-  test "a namespace can have at most one nsfile" do
+  test "a namespace can have at most one nsfile (different root directories)" do
     with_files([["rd1/foo/ns.rb"], ["rd2/foo/ns.rb"]]) do
       loader.push_dir("rd1")
       loader.push_dir("rd2")
+
+      assert_raises(Zeitwerk::NameConflict) { loader.setup }
+    end
+  end
+
+  test "a namespace can have at most one nsfile (collapsed directories in the same root directory)" do
+    with_files([["foo/collapsed/ns.rb"], ["foo/collapsed/collapsed/ns.rb"]]) do
+      loader.collapse("foo/collapsed", "foo/collapsed/collapsed")
+      loader.push_dir(".")
+
+      assert_raises(Zeitwerk::NameConflict) { loader.setup }
+    end
+  end
+
+  test "a namespace can have at most one nsfile (collapsed directories in different root directories)" do
+    with_files([["rd1/foo/collapsed/ns.rb"], ["rd2/foo/collapsed/collapsed/ns.rb"]]) do
+      loader.push_dir("rd1")
+      loader.collapse("rd1/foo/collapsed")
+
+      loader.push_dir("rd2")
+      loader.collapse("rd2/foo/collapsed")
+      loader.collapse("rd2/foo/collapsed/collapsed")
 
       assert_raises(Zeitwerk::NameConflict) { loader.setup }
     end

@@ -516,7 +516,7 @@ module Zeitwerk
           # The namespace that corresponds to this subdirectory is defined in a
           # file, either regular or nsfile. Therefore, a nsfile would be a
           # duplication.
-          if nsfile_abspath = @fs.has_a_nsfile?(subdir)
+          if nsfile_abspath = @fs.has_exactly_one_nsfile?(cref, subdir)
             raise Zeitwerk::NameConflict.new(cref.path, location: autoload_path, conflicting_file: nsfile_abspath)
           end
           # Scanning visited a Ruby file first, and now a directory for the same
@@ -525,13 +525,13 @@ module Zeitwerk
           # The namespace may be spread over multiple directories and perhaps it
           # was already registered, but registering is idempotent, just do it.
           register_explicit_namespace(cref)
-        elsif nsfile_abspath = @fs.has_a_nsfile?(subdir)
+        elsif nsfile_abspath = @fs.has_exactly_one_nsfile?(cref, subdir)
           # Scanning found a matching directory first, and now we saw a nsfile.
           promote_namespace_from_implicit_to_explicit(dir: subdir, file: nsfile_abspath, cref: cref)
         end
         namespace_dirs.get_or_set(cref) { [] } << subdir
       elsif !cref.defined?
-        if nsfile_abspath = @fs.has_a_nsfile?(subdir)
+        if nsfile_abspath = @fs.has_exactly_one_nsfile?(cref, subdir)
           define_autoload(cref, nsfile_abspath)
           register_explicit_namespace(cref)
         else
