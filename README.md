@@ -328,9 +328,9 @@ my_component/tests/test_widget.rb
 
 Loaders with an nsfile configured also support explicit namespaces defined in ordinary files. The styles are not exclusive. Some parts of the project may be component-oriented, while in other parts ordinary files may feel more natural. That works.
 
-However, attempting to define the same namespace using an ordinary file and an nsfile is an error condition that raises `Zeitwerk::NameConflict`.
+However, attempting to define the same namespace using an ordinary file and an nsfile is an error condition that raises `Zeitwerk::ShadowedFileError`.
 
-Nsfiles in root directories raise `Zeitwerk::NameConflict` too, since the namespace in a root directory is externally defined.
+Nsfiles in root directories raise `Zeitwerk::ShadowedFileError` too, since the namespace in a root directory is externally defined.
 
 Please, note that a project file whose basename is equal to the nsfile is always considered to be an nsfile. You cannot opt out. Therefore, if we have:
 
@@ -369,30 +369,30 @@ loader.collapse("#{__dir__}/*/actions")
 <a id="markdown-different-files-different-constant-paths" name="different-files-different-constant-paths"></a>
 ### Different files, different constant paths
 
-While namespaces can be spread over an arbitrary number of directories, different files must map to different constant paths. Violations of this rule raise `Zeitwerk::NameConflict`.
+While namespaces can be spread over an arbitrary number of directories, different files must map to different constant paths. Violations of this rule raise `Zeitwerk::ShadowedFileError`.
 
 For example, assuming `app/controllers` and `app/models` are root directories:
 
-```ruby
+```
 app/controllers/foo.rb
-app/models/foo.rb # raises Zeitwerk::NameConflict
+app/models/foo.rb # raises Zeitwerk::ShadowedFileError
 ```
 
 That is an error condition because both files map to `Foo`.
 
 Another example, assuming that `collapsed` is a collapsed directory:
 
-```ruby
+```
 app/models/foo.rb
-app/models/collapsed/foo.rb # raises Zeitwerk::NameConflict
+app/models/collapsed/foo.rb # raises Zeitwerk::ShadowedFileError
 ```
 
 Again, that is an error condition because both files map to `Foo`.
 
 Same if the file maps to a constant that already exists:
 
-```ruby
-app/models/string.rb # raises Zeitwerk::NameConflict
+```
+app/models/string.rb # raises Zeitwerk::ShadowedFileError
 ```
 
 In this case, `app/models/string.rb` maps to `String`, but it cannot possibly define `String`, since that constant is already defined.

@@ -253,7 +253,7 @@ class TestEagerLoad < LoaderTest
       ["rd2/m/x.rb", "M::X = 1"]
     ]
     with_setup(files) do
-      assert_raises(Zeitwerk::NameConflict) do
+      assert_raises(Zeitwerk::ShadowedFileError) do
         loader.eager_load
       end
     end

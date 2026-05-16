@@ -479,7 +479,7 @@ module Zeitwerk
               cpath = real_mod_name(mod)
               location = Object.const_source_location(cpath)&.join(":")
               location = nil if location&.empty?
-              raise Zeitwerk::NameConflict.new(cpath, location: location, conflicting_file: abspath)
+              raise Zeitwerk::ShadowedFileError.new(cpath, location: location, conflicting_file: abspath)
             end
             next # Pass if this is a managed namespace, the nsfile was already probed when visiting the parent directory.
           end
@@ -498,12 +498,12 @@ module Zeitwerk
     private def visit_file(cref, file)
       if autoload_path = cref.autoload? || Registry.inceptions.registered?(cref)
         if @fs.rb_extension?(autoload_path)
-          raise NameConflict.new(cref.path, location: autoload_path, conflicting_file: file)
+          raise ShadowedFileError.new(cref.path, location: autoload_path, conflicting_file: file)
         else
           promote_namespace_from_implicit_to_explicit(dir: autoload_path, file: file, cref: cref)
         end
       elsif cref.defined?
-        raise NameConflict.new(cref.path, location: cref.location, conflicting_file: file)
+        raise ShadowedFileError.new(cref.path, location: cref.location, conflicting_file: file)
       else
         define_autoload(cref, file)
       end
@@ -517,7 +517,7 @@ module Zeitwerk
           # file, either regular or nsfile. Therefore, a nsfile would be a
           # duplication.
           if nsfile_abspath = @fs.has_exactly_one_nsfile?(cref, subdir)
-            raise Zeitwerk::NameConflict.new(cref.path, location: autoload_path, conflicting_file: nsfile_abspath)
+            raise Zeitwerk::ShadowedFileError.new(cref.path, location: autoload_path, conflicting_file: nsfile_abspath)
           end
           # Scanning visited a Ruby file first, and now a directory for the same
           # constant has been found. This is an explicit namespace.

@@ -59,7 +59,7 @@ class TestMultipleLoaders < LoaderTest
 
       first_loader.setup
 
-      assert_raises(Zeitwerk::NameConflict) do
+      assert_raises(Zeitwerk::ShadowedFileError) do
         second_loader.setup
       end
     end

@@ -65,9 +65,9 @@ class Zeitwerk::Loader::FileSystem # :nodoc:
   # there is none, it returns `nil`.
   #
   # This method accounts for collapsed directories, which conceptually allow for
-  # multiple nsfiles. If two are found, Zeitwerk::NameConflict is raised.
+  # multiple nsfiles. If two are found, Zeitwerk::ShadowedFileError is raised.
   #
-  #: (Zeitwerk::Cref, String) -> String? ! Zeitwerk::NameConflict
+  #: (Zeitwerk::Cref, String) -> String? ! Zeitwerk::ShadowedFileError
   def has_exactly_one_nsfile?(cref, dir)
     return unless @loader.nsfile
 
@@ -88,7 +88,7 @@ class Zeitwerk::Loader::FileSystem # :nodoc:
       relevant_dir_entries(dir) do |basename, abspath, ftype|
         if ftype == :file && basename == @loader.nsfile
           if nsfile
-            raise Zeitwerk::NameConflict.new(cref.path, location: nsfile, conflicting_file: abspath)
+            raise Zeitwerk::ShadowedFileError.new(cref.path, location: nsfile, conflicting_file: abspath)
           end
           nsfile = abspath
         elsif ftype == :directory && @loader.__collapse?(abspath)

@@ -21,7 +21,7 @@ module Zeitwerk
     end
   end
 
-  class NameConflict < Error
+  class ShadowedFileError < Error
     #: (String, location: String?, conflicting_file: String) -> void
     def initialize(name, location:, conflicting_file:)
       if location

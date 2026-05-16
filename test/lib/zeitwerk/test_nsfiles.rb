@@ -134,7 +134,7 @@ class TestNsfilesErrorConditions < LoaderTest
     with_files(["ns.rb"]) do
       loader.push_dir(".")
 
-      assert_raises(Zeitwerk::NameConflict) { loader.setup }
+      assert_raises(Zeitwerk::ShadowedFileError) { loader.setup }
     end
   end
 
@@ -142,7 +142,7 @@ class TestNsfilesErrorConditions < LoaderTest
     with_files(["test_nsfiles_error_conditions/ns.rb"]) do
       loader.push_dir(".")
 
-      assert_raises(Zeitwerk::NameConflict) { loader.setup }
+      assert_raises(Zeitwerk::ShadowedFileError) { loader.setup }
     end
   end
 
@@ -151,7 +151,7 @@ class TestNsfilesErrorConditions < LoaderTest
       loader.push_dir("rd1")
       loader.push_dir("rd2")
 
-      assert_raises(Zeitwerk::NameConflict) { loader.setup }
+      assert_raises(Zeitwerk::ShadowedFileError) { loader.setup }
     end
   end
 
@@ -160,7 +160,7 @@ class TestNsfilesErrorConditions < LoaderTest
       loader.collapse("foo/collapsed", "foo/collapsed/collapsed")
       loader.push_dir(".")
 
-      assert_raises(Zeitwerk::NameConflict) { loader.setup }
+      assert_raises(Zeitwerk::ShadowedFileError) { loader.setup }
     end
   end
 
@@ -173,7 +173,7 @@ class TestNsfilesErrorConditions < LoaderTest
       loader.collapse("rd2/foo/collapsed")
       loader.collapse("rd2/foo/collapsed/collapsed")
 
-      assert_raises(Zeitwerk::NameConflict) { loader.setup }
+      assert_raises(Zeitwerk::ShadowedFileError) { loader.setup }
     end
   end
 
@@ -182,7 +182,7 @@ class TestNsfilesErrorConditions < LoaderTest
       loader.push_dir("rd1")
       loader.push_dir("rd2")
 
-      assert_raises(Zeitwerk::NameConflict) { loader.setup }
+      assert_raises(Zeitwerk::ShadowedFileError) { loader.setup }
     end
   end
 
@@ -191,7 +191,7 @@ class TestNsfilesErrorConditions < LoaderTest
       loader.push_dir("rd1")
       loader.push_dir("rd2")
 
-      assert_raises(Zeitwerk::NameConflict) { loader.setup }
+      assert_raises(Zeitwerk::ShadowedFileError) { loader.setup }
     end
   end
 
@@ -201,7 +201,7 @@ class TestNsfilesErrorConditions < LoaderTest
       loader.push_dir("rd2")
       loader.push_dir("rd3")
 
-      assert_raises(Zeitwerk::NameConflict) { loader.setup }
+      assert_raises(Zeitwerk::ShadowedFileError) { loader.setup }
     end
   end
 
@@ -211,7 +211,7 @@ class TestNsfilesErrorConditions < LoaderTest
       loader.push_dir("rd2")
       loader.push_dir("rd3")
 
-      assert_raises(Zeitwerk::NameConflict) { loader.setup }
+      assert_raises(Zeitwerk::ShadowedFileError) { loader.setup }
     end
   end
 
@@ -221,7 +221,7 @@ class TestNsfilesErrorConditions < LoaderTest
       loader.push_dir("rd2")
       loader.push_dir("rd3")
 
-      assert_raises(Zeitwerk::NameConflict) { loader.setup }
+      assert_raises(Zeitwerk::ShadowedFileError) { loader.setup }
     end
   end
 
@@ -231,7 +231,7 @@ class TestNsfilesErrorConditions < LoaderTest
       loader.push_dir("rd2")
       loader.push_dir("rd3")
 
-      assert_raises(Zeitwerk::NameConflict) { loader.setup }
+      assert_raises(Zeitwerk::ShadowedFileError) { loader.setup }
     end
   end
 
@@ -241,7 +241,7 @@ class TestNsfilesErrorConditions < LoaderTest
       loader.push_dir("rd2")
       loader.push_dir("rd3")
 
-      assert_raises(Zeitwerk::NameConflict) { loader.setup }
+      assert_raises(Zeitwerk::ShadowedFileError) { loader.setup }
     end
   end
 
@@ -251,7 +251,7 @@ class TestNsfilesErrorConditions < LoaderTest
       loader.push_dir("rd2")
       loader.push_dir("rd3")
 
-      assert_raises(Zeitwerk::NameConflict) { loader.setup }
+      assert_raises(Zeitwerk::ShadowedFileError) { loader.setup }
     end
   end
 
