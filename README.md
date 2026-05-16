@@ -22,7 +22,6 @@
     - [Explicit namespaces defined in ordinary files](#explicit-namespaces-defined-in-ordinary-files)
     - [Explicit namespaces defined in nsfiles](#explicit-namespaces-defined-in-nsfiles)
   - [Collapsing directories](#collapsing-directories)
-  - [Different files, different constant paths](#different-files-different-constant-paths)
   - [Testing compliance](#testing-compliance)
 - [Usage](#usage)
   - [Setup](#setup)
@@ -56,6 +55,7 @@
     - [Use case: Files that do not follow the conventions](#use-case-files-that-do-not-follow-the-conventions)
     - [Use case: The adapter pattern](#use-case-the-adapter-pattern)
     - [Use case: Test files mixed with implementation files](#use-case-test-files-mixed-with-implementation-files)
+  - [Shadowed files](#shadowed-files)
   - [Beware of circular dependencies](#beware-of-circular-dependencies)
   - [Reopening third-party namespaces](#reopening-third-party-namespaces)
   - [Introspection](#introspection)
@@ -303,7 +303,7 @@ An explicit namespace must be managed by one single loader. Loaders that reopen 
 If the loader has an nsfile configured (defaults to `nil`):
 
 ```ruby
-loader.nsfile = 'ns.rb' # must be configured before setup
+loader.nsfile = 'ns.rb' # must be set before setup
 ```
 
 you can alternatively define the explicit namespace inside its directory:
@@ -313,7 +313,7 @@ my_component/ns.rb     # MyComponent
 my_component/widget.rb # MyComponent::Widget
 ```
 
-This may be handy for self-contained units for which a `my_component.rb` file in the parent directory may not feel right.
+This may be handy for self-contained units for which a `my_component.rb` file in the parent directory would feel unnatural.
 
 A loader's nsfile has to be a non-hidden basename with a `.rb` extension, as in the example above. Nsfiles are not inflected, so as long as those conditions hold, they may contain leading underscores, hyphens, etc.
 
@@ -365,37 +365,6 @@ To illustrate usage of glob patterns, if `actions` in the example above is part 
 ```ruby
 loader.collapse("#{__dir__}/*/actions")
 ```
-
-<a id="markdown-different-files-different-constant-paths" name="different-files-different-constant-paths"></a>
-### Different files, different constant paths
-
-While namespaces can be spread over an arbitrary number of directories, different files must map to different constant paths. Violations of this rule raise `Zeitwerk::ShadowedFileError`.
-
-For example, assuming `app/controllers` and `app/models` are root directories:
-
-```
-app/controllers/foo.rb
-app/models/foo.rb # raises Zeitwerk::ShadowedFileError
-```
-
-That is an error condition because both files map to `Foo`.
-
-Another example, assuming that `collapsed` is a collapsed directory:
-
-```
-app/models/foo.rb
-app/models/collapsed/foo.rb # raises Zeitwerk::ShadowedFileError
-```
-
-Again, that is an error condition because both files map to `Foo`.
-
-Same if the file maps to a constant that already exists:
-
-```
-app/models/string.rb # raises Zeitwerk::ShadowedFileError
-```
-
-In this case, `app/models/string.rb` maps to `String`, but it cannot possibly define `String`, since that constant is already defined.
 
 <a id="markdown-testing-compliance" name="testing-compliance"></a>
 ### Testing compliance
@@ -1234,6 +1203,39 @@ tests = "#{__dir__}/**/*_test.rb"
 loader.ignore(tests)
 loader.setup
 ```
+
+<a id="markdown-shadowed-files" name="shadowed-files"></a>
+### Shadowed files
+
+While namespaces can be spread over an arbitrary number of directories, different files must map to different constant paths.
+
+A managed file is called a _shadowed file_ if the constant path it is expected to define is already taken. Loaders raise `Zeitwerk::ShadowedFileError` if they find any.
+
+For example, assuming `app/controllers` and `app/models` are root directories:
+
+```
+app/controllers/foo.rb
+app/models/foo.rb # raises Zeitwerk::ShadowedFileError
+```
+
+That is an error condition because both files map to `Foo`.
+
+Another example, assuming that `collapsed` is a collapsed directory:
+
+```
+app/models/foo.rb
+app/models/collapsed/foo.rb # raises Zeitwerk::ShadowedFileError
+```
+
+Again, that is an error condition because both files map to `Foo`.
+
+Same if the file maps to a constant that already exists:
+
+```
+app/models/string.rb # raises Zeitwerk::ShadowedFileError
+```
+
+In this case, `app/models/string.rb` maps to `String`, but it cannot possibly define `String`, since that constant is already defined.
 
 <a id="markdown-beware-of-circular-dependencies" name="beware-of-circular-dependencies"></a>
 ### Beware of circular dependencies
