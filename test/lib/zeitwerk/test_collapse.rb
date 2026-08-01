@@ -123,7 +123,6 @@ class TestCollapse < LoaderTest
   end
 
   test 'collapse directories are honored when eager loading' do
-    $collapse_honored_when_eager_loading = false
     files = [['foo/collapsed/x.rb', 'Foo::X = true']]
     with_setup(files) do
       loader.eager_load
@@ -132,7 +131,6 @@ class TestCollapse < LoaderTest
   end
 
   test 'collapsed top-level directories are eager loaded too' do
-    $collapse_honored_when_eager_loading = false
     files = [['collapsed/bar/x.rb', 'Bar::X = true']]
     with_setup(files) do
       loader.eager_load
