@@ -139,7 +139,6 @@ class TestCollapse < LoaderTest
   end
 
   test 'collapsed directories are honored as eager loading exceptions (eager_load)' do
-    $collapse_honored_when_eager_loading = false
     files = [['foo/collapsed/x.rb', 'Foo::X = true']]
     with_setup(files) do
       loader.do_not_eager_load('foo/collapsed')
@@ -149,7 +148,6 @@ class TestCollapse < LoaderTest
   end
 
   test 'collapsed directories are honored as eager loading exceptions (eager_load_dir)' do
-    $collapse_honored_when_eager_loading = false
     files = [['foo/collapsed/x.rb', 'Foo::X = true']]
     with_setup(files) do
       loader.do_not_eager_load('foo/collapsed')
@@ -159,7 +157,6 @@ class TestCollapse < LoaderTest
   end
 
   test 'collapsed directories are honored as eager loading exceptions (eager_load_namespace)' do
-    $collapse_honored_when_eager_loading = false
     files = [['foo/collapsed/x.rb', 'Foo::X = true']]
     with_setup(files) do
       loader.do_not_eager_load('foo/collapsed')
