@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2.8.3 (Unreleased)
+
+* 2.8.0 introduced a regression: Collapsed directories that were also configured as eager load exclusions were eager loaded. The exclusion was not honored. This has been fixed.
+
 ## 2.8.2 (23 May 2026)
 
 * `on_load` and `on_unload` accept constant paths with leading colons. For example:

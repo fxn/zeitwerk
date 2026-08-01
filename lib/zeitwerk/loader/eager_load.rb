@@ -167,13 +167,15 @@ module Zeitwerk::Loader::EagerLoad
 
     queue = [[dir, namespace]]
     while (current_dir, namespace = queue.shift)
-      @fs.ls(current_dir) do |basename, abspath, ftype|
+      @fs.ls(current_dir, collapse: false) do |basename, abspath, ftype|
         next if honour_exclusions && eager_load_exclusions.member?(abspath)
 
         if ftype == :file
           if (cref = autoloads[abspath])
             cref.get
           end
+        elsif collapse?(abspath)
+          queue << [abspath, namespace]
         else
           cname = cname_for(basename, abspath)
           queue << [abspath, namespace.const_get(cname, false)]
