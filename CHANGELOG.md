@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 2.8.3 (Unreleased)
+## 2.8.3 (1 Aug 2026)
 
 * 2.8.0 introduced a regression: Collapsed directories that were also configured as eager load exclusions were eager loaded. The exclusion was not honored. This has been fixed.
 
