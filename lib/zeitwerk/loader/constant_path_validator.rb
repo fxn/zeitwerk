@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # @private
 class Zeitwerk::Loader::ConstantPathValidator # :nodoc
   CNAME_VALIDATOR = Module.new.freeze #: Module

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Zeitwerk::Loader::EagerLoad
   # Eager loads all files in the root directories, recursively. Files do not
   # need to be in `$LOAD_PATH`, absolute file names are used.

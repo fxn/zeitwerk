@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Zeitwerk::Registry
   # Loaders know their own inceptions, but there is a use case in which we need
   # to know if a given cpath is an inception globally. This is what this
