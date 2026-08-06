@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Zeitwerk::NullInflector
   #: (String, String) -> String
   def camelize(basename, _abspath)

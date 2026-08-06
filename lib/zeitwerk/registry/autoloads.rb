@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Zeitwerk::Registry
   class Autoloads # :nodoc:
     #: () -> void

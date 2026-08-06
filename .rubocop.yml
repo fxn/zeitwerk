@@ -24,3 +24,6 @@ Layout/EndAlignment:
 
 Style/StringLiterals:
   EnforcedStyle: single_quotes
+
+Style/FrozenStringLiteralComment:
+  Enabled: true
