@@ -44,3 +44,12 @@ Minitest::Test.class_eval do
 
   prove_it!
 end
+
+if RUBY_VERSION >= '4' && defined?(Ractor)
+  Warning[:experimental] = false
+  ractor = Ractor.new do
+    # Requiring from a Ractor prepends a module with a `require` method on Kernel:
+    # https://github.com/ruby/ruby/blob/e22f51b7800e7fc9029f6d8ce0691c210c5ddcde/ractor.rb#L567-L580
+    require 'English'
+  end.join
+end
