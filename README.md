@@ -12,7 +12,9 @@
 - [Synopsis](#synopsis)
 - [File structure](#file-structure)
   - [The idea: File paths match constant paths](#the-idea-file-paths-match-constant-paths)
-  - [Inner simple constants](#inner-simple-constants)
+  - [Nested constants](#nested-constants)
+    - [Scalars and similar simple values](#scalars-and-similar-simple-values)
+    - [Inner classes and modules](#inner-classes-and-modules)
   - [Root directories and root namespaces](#root-directories-and-root-namespaces)
     - [The default root namespace is `Object`](#the-default-root-namespace-is-object)
     - [Custom root namespaces](#custom-root-namespaces)
@@ -161,8 +163,11 @@ lib/my_gem/woo/zoo.rb -> MyGem::Woo::Zoo
 
 You can fine-tune this behavior by [collapsing directories](#collapsing-directories) or [ignoring specific parts of the project](#ignoring-parts-of-the-project), but that is the main idea.
 
-<a id="markdown-inner-simple-constants" name="inner-simple-constants"></a>
-### Inner simple constants
+<a id="markdown-nested-constants" name="nested-constants"></a>
+### Nested constants
+
+<a id="markdown-scalars-and-similar-simple-values" name="scalars-and-similar-simple-values"></a>
+#### Scalars and similar simple values
 
 While a simple constant like `HttpCrawler::MAX_RETRIES` can be defined in its own file:
 
@@ -189,6 +194,24 @@ loader.inflector.inflect('max_retries' => 'MAX_RETRIES')
 Otherwise, Zeitwerk would expect the file to define `MaxRetries`.
 
 In the second example, no custom rule is needed.
+
+<a id="markdown-inner-classes-and-modules" name="inner-classes-and-modules"></a>
+#### Inner classes and modules
+
+You can also define inner classes and modules in the same file as their parent, **provided they are self-contained**. In particular, they should not have corresponding directories in the project tree. Example:
+
+```ruby
+# my_gem/errors.rb
+module MyGem
+  module Errors
+    # OK as long as there is no my_gem/errors/my_error directory in the project.
+    class MyError < StandardError
+    end
+  end
+end
+```
+
+As a matter of style, use this approach sparingly, and only for small, simple inner classes and modules.
 
 <a id="markdown-root-directories-and-root-namespaces" name="root-directories-and-root-namespaces"></a>
 ### Root directories and root namespaces
