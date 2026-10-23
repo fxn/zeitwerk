@@ -12,8 +12,8 @@
 - [Synopsis](#synopsis)
 - [File structure](#file-structure)
   - [The idea: File paths match constant paths](#the-idea-file-paths-match-constant-paths)
-  - [Nested constants](#nested-constants)
-    - [Scalars and similar simple values](#scalars-and-similar-simple-values)
+  - [Nested constants defined in their parent's file](#nested-constants-defined-in-their-parents-file)
+    - [Constants storing simple values](#constants-storing-simple-values)
     - [Inner classes and modules](#inner-classes-and-modules)
   - [Root directories and root namespaces](#root-directories-and-root-namespaces)
     - [The default root namespace is `Object`](#the-default-root-namespace-is-object)
@@ -163,37 +163,24 @@ lib/my_gem/woo/zoo.rb -> MyGem::Woo::Zoo
 
 You can fine-tune this behavior by [collapsing directories](#collapsing-directories) or [ignoring specific parts of the project](#ignoring-parts-of-the-project), but that is the main idea.
 
-<a id="markdown-nested-constants" name="nested-constants"></a>
-### Nested constants
+<a id="markdown-nested-constants-defined-in-their-parents-file" name="nested-constants-defined-in-their-parents-file"></a>
+### Nested constants defined in their parent's file
 
-<a id="markdown-scalars-and-similar-simple-values" name="scalars-and-similar-simple-values"></a>
-#### Scalars and similar simple values
+<a id="markdown-constants-storing-simple-values" name="constants-storing-simple-values"></a>
+#### Constants storing simple values
 
-While a simple constant like `HttpCrawler::MAX_RETRIES` can be defined in its own file:
-
-```ruby
-# http_crawler/max_retries.rb
-HttpCrawler::MAX_RETRIES = 10
-```
-
-that is not required, you can also define it the regular way:
+For simple values, you can define the constant in the parent's file:
 
 ```ruby
 # http_crawler.rb
 class HttpCrawler
+  # This is fine.
+  #
+  # Defining this constant in http_crawler/max_retries.rb works
+  # too, but it is not required. You can keep it simple.
   MAX_RETRIES = 10
 end
 ```
-
-The first example needs a custom [inflection](#inflection) rule:
-
-```ruby
-loader.inflector.inflect('max_retries' => 'MAX_RETRIES')
-```
-
-Otherwise, Zeitwerk would expect the file to define `MaxRetries`.
-
-In the second example, no custom rule is needed.
 
 <a id="markdown-inner-classes-and-modules" name="inner-classes-and-modules"></a>
 #### Inner classes and modules
