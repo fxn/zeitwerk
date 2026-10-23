@@ -12,9 +12,6 @@
 - [Synopsis](#synopsis)
 - [File structure](#file-structure)
   - [The idea: File paths match constant paths](#the-idea-file-paths-match-constant-paths)
-  - [Nested constants defined in their parent's file](#nested-constants-defined-in-their-parents-file)
-    - [Constants storing simple values](#constants-storing-simple-values)
-    - [Inner classes and modules](#inner-classes-and-modules)
   - [Root directories and root namespaces](#root-directories-and-root-namespaces)
     - [The default root namespace is `Object`](#the-default-root-namespace-is-object)
     - [Custom root namespaces](#custom-root-namespaces)
@@ -23,6 +20,9 @@
   - [Explicit namespaces](#explicit-namespaces)
     - [Explicit namespaces defined in ordinary files](#explicit-namespaces-defined-in-ordinary-files)
     - [Explicit namespaces defined in nsfiles](#explicit-namespaces-defined-in-nsfiles)
+    - [Nested constants](#nested-constants)
+      - [Constants storing simple values](#constants-storing-simple-values)
+      - [Inner classes and modules](#inner-classes-and-modules)
   - [Collapsing directories](#collapsing-directories)
   - [Testing compliance](#testing-compliance)
 - [Usage](#usage)
@@ -162,43 +162,6 @@ lib/my_gem/woo/zoo.rb -> MyGem::Woo::Zoo
 ```
 
 You can fine-tune this behavior by [collapsing directories](#collapsing-directories) or [ignoring specific parts of the project](#ignoring-parts-of-the-project), but that is the main idea.
-
-<a id="markdown-nested-constants-defined-in-their-parents-file" name="nested-constants-defined-in-their-parents-file"></a>
-### Nested constants defined in their parent's file
-
-<a id="markdown-constants-storing-simple-values" name="constants-storing-simple-values"></a>
-#### Constants storing simple values
-
-For simple values, you can define the constant in the parent's file:
-
-```ruby
-# http_crawler.rb
-class HttpCrawler
-  # This is fine.
-  #
-  # Defining this constant in http_crawler/max_retries.rb works
-  # too, but it is not required. You can keep it simple.
-  MAX_RETRIES = 10
-end
-```
-
-<a id="markdown-inner-classes-and-modules" name="inner-classes-and-modules"></a>
-#### Inner classes and modules
-
-You can also define inner classes and modules in the same file as their parent, **provided they are self-contained**. In particular, they should not have corresponding directories in the project tree. Example:
-
-```ruby
-# my_gem/errors.rb
-module MyGem
-  module Errors
-    # OK as long as there is no my_gem/errors/my_error directory.
-    class MyError < StandardError
-    end
-  end
-end
-```
-
-As a matter of style, use this approach sparingly, and only for small, simple inner classes and modules.
 
 <a id="markdown-root-directories-and-root-namespaces" name="root-directories-and-root-namespaces"></a>
 ### Root directories and root namespaces
@@ -345,6 +308,43 @@ loader.nsfile = 'index.rb'
 ```
 
 there is no way `foo/index.rb` can define `Foo::Index` in any part of the project, it must define `Foo`.
+
+<a id="markdown-nested-constants" name="nested-constants"></a>
+#### Nested constants
+
+<a id="markdown-constants-storing-simple-values" name="constants-storing-simple-values"></a>
+##### Constants storing simple values
+
+For simple values, you can define the constant in the parent's file:
+
+```ruby
+# http_crawler.rb
+class HttpCrawler
+  # This is fine.
+  #
+  # Defining this constant in http_crawler/max_retries.rb works
+  # too, but it is not required. You can keep it simple.
+  MAX_RETRIES = 10
+end
+```
+
+<a id="markdown-inner-classes-and-modules" name="inner-classes-and-modules"></a>
+##### Inner classes and modules
+
+You can also define inner classes and modules in the same file as their parent, **provided they are self-contained**. In particular, they should not have corresponding directories in the project tree. Example:
+
+```ruby
+# my_gem/errors.rb
+module MyGem
+  module Errors
+    # OK as long as there is no my_gem/errors/my_error directory.
+    class MyError < StandardError
+    end
+  end
+end
+```
+
+As a matter of style, use this approach sparingly, and only for small, simple inner classes and modules.
 
 <a id="markdown-collapsing-directories" name="collapsing-directories"></a>
 ### Collapsing directories
