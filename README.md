@@ -191,7 +191,7 @@ You can also define inner classes and modules in the same file as their parent, 
 # my_gem/errors.rb
 module MyGem
   module Errors
-    # OK as long as there is no my_gem/errors/my_error directory in the project.
+    # OK as long as there is no my_gem/errors/my_error directory.
     class MyError < StandardError
     end
   end
